@@ -75,9 +75,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, TimerControllerDelegat
         menu.removeAllItems()
 
         let snapshot = store.snapshot()
-        let title = NSMenuItem(title: "🍅 本周 \(progressBar(percent: snapshot.percent, width: 10)) · 今日 \(snapshot.todayCompleted)", action: nil, keyEquivalent: "")
-        title.isEnabled = false
-        menu.addItem(title)
+        menu.addItem(progressMenuItem(snapshot: snapshot))
 
         let summary = NSMenuItem(title: "剩余 \(max(0, snapshot.target - snapshot.completed)) 个 · \(modeDescription())", action: nil, keyEquivalent: "")
         summary.isEnabled = false
@@ -131,9 +129,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, TimerControllerDelegat
         switch timerController.mode {
         case .focusing, .paused, .resting:
             button.title = "🍅 \(format(timerController.remainingSeconds))"
+            button.image = nil
         case .idle:
             let snapshot = store.snapshot()
-            button.title = "🍅 \(progressBar(percent: snapshot.percent, width: 6))"
+            button.title = "🍅"
+            button.image = progressBarImage(percent: snapshot.percent)
+            button.imagePosition = .imageTrailing
         }
     }
 
@@ -208,10 +209,47 @@ final class AppDelegate: NSObject, NSApplicationDelegate, TimerControllerDelegat
         String(format: "%02d:%02d", seconds / 60, seconds % 60)
     }
 
-    private func progressBar(percent: Int, width: Int) -> String {
+    private func progressMenuItem(snapshot: ProgressSnapshot) -> NSMenuItem {
+        let item = NSMenuItem()
+        item.isEnabled = false
+
+        let container = NSView(frame: NSRect(x: 0, y: 0, width: 230, height: 34))
+        let label = NSTextField(labelWithString: "🍅 本周进度 · 今日 \(snapshot.todayCompleted)")
+        label.frame = NSRect(x: 12, y: 15, width: 206, height: 16)
+
+        let progress = NSProgressIndicator(frame: NSRect(x: 12, y: 5, width: 206, height: 8))
+        progress.isIndeterminate = false
+        progress.minValue = 0
+        progress.maxValue = 100
+        progress.doubleValue = Double(snapshot.percent)
+        progress.controlSize = .small
+        progress.style = .bar
+
+        container.addSubview(label)
+        container.addSubview(progress)
+        item.view = container
+        return item
+    }
+
+    private func progressBarImage(percent: Int) -> NSImage {
+        let size = NSSize(width: 48, height: 10)
+        let image = NSImage(size: size)
         let clampedPercent = max(0, min(100, percent))
-        let filled = Int((Double(clampedPercent) / 100.0 * Double(width)).rounded())
-        return String(repeating: "▰", count: filled) + String(repeating: "▱", count: width - filled)
+
+        image.lockFocus()
+        let bounds = NSRect(origin: .zero, size: size)
+        NSColor.tertiaryLabelColor.setFill()
+        NSBezierPath(roundedRect: bounds, xRadius: 5, yRadius: 5).fill()
+
+        let fillWidth = bounds.width * CGFloat(clampedPercent) / 100
+        if fillWidth > 0 {
+            NSColor.controlAccentColor.setFill()
+            NSBezierPath(roundedRect: NSRect(x: 0, y: 0, width: fillWidth, height: bounds.height), xRadius: 5, yRadius: 5).fill()
+        }
+        image.unlockFocus()
+
+        image.isTemplate = false
+        return image
     }
 
     @objc private func startFocus() {
@@ -280,7 +318,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, TimerControllerDelegat
         }.joined(separator: "\n")
 
         let alert = NSAlert()
-        alert.messageText = "本周进度 \(progressBar(percent: snapshot.percent, width: 12))"
+        alert.messageText = "本周进度"
         alert.informativeText = """
         完成率：\(snapshot.percent)%
         今日完成：\(snapshot.todayCompleted)

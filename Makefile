@@ -10,8 +10,10 @@ build:
 app: build
 	rm -rf dist
 	mkdir -p "$(APP_DIR)/Contents/MacOS"
+	mkdir -p "$(APP_DIR)/Contents/Resources"
 	cp "$(BUILD_DIR)/$(APP_NAME)" "$(APP_DIR)/Contents/MacOS/$(APP_NAME)"
 	cp Info.plist "$(APP_DIR)/Contents/Info.plist"
+	cp Resources/AppIcon.icns "$(APP_DIR)/Contents/Resources/AppIcon.icns"
 
 run: app
 	open "$(APP_DIR)"
