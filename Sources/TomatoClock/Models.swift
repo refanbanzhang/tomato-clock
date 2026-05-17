@@ -1,6 +1,6 @@
 import Foundation
 
-enum StatsMode: String, Codable, CaseIterable {
+enum StatsMode: String, Codable, CaseIterable, Sendable {
     case calendarWeek
     case rollingSevenDays
 
@@ -14,7 +14,7 @@ enum StatsMode: String, Codable, CaseIterable {
     }
 }
 
-struct PomodoroSession: Codable, Identifiable {
+struct PomodoroSession: Codable, Identifiable, Sendable {
     let id: UUID
     let startDate: Date
     let endDate: Date
@@ -22,14 +22,14 @@ struct PomodoroSession: Codable, Identifiable {
     let completed: Bool
 }
 
-struct TargetChange: Codable, Identifiable {
+struct TargetChange: Codable, Identifiable, Sendable {
     let id: UUID
     let date: Date
     let oldValue: Int
     let newValue: Int
 }
 
-struct AppState: Codable {
+struct AppState: Codable, Sendable {
     var weeklyTarget: Int
     var statsMode: StatsMode
     var sessions: [PomodoroSession]
@@ -43,7 +43,7 @@ struct AppState: Codable {
     )
 }
 
-struct ProgressSnapshot {
+struct ProgressSnapshot: Sendable {
     let completed: Int
     let target: Int
     let todayCompleted: Int

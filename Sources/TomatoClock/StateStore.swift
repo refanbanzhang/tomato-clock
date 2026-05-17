@@ -1,21 +1,63 @@
 import Foundation
 
+@MainActor
 final class StateStore {
     private let fileURL: URL
+    private let supportURL: URL
+    private let syncService: SupabaseSyncService?
     private(set) var state: AppState
+    private var localUpdatedAt: Date
+    private var hasExistingLocalState: Bool
+    private var uploadTask: Task<Void, Never>?
+    private var isApplyingRemoteState = false
 
     init() {
-        let supportURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        supportURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("TomatoClock", isDirectory: true)
         try? FileManager.default.createDirectory(at: supportURL, withIntermediateDirectories: true)
         fileURL = supportURL.appendingPathComponent("state.json")
+        syncService = Self.loadSupabaseSyncService(supportURL: supportURL)
 
         if let data = try? Data(contentsOf: fileURL),
            let decoded = try? JSONDecoder().decode(AppState.self, from: data) {
             state = decoded
+            localUpdatedAt = Self.fileModificationDate(fileURL) ?? .distantPast
+            hasExistingLocalState = true
         } else {
             state = .initial
-            save()
+            localUpdatedAt = .distantPast
+            hasExistingLocalState = false
+            save(preservingUpdatedAt: localUpdatedAt, sync: false)
+        }
+    }
+
+    deinit {
+        uploadTask?.cancel()
+    }
+
+    func startSync(onRemoteUpdate: @MainActor @escaping () -> Void) {
+        guard let syncService else { return }
+
+        Task { [weak self] in
+            do {
+                guard let remote = try await syncService.fetchState() else {
+                    await self?.uploadCurrentState()
+                    return
+                }
+
+                await MainActor.run {
+                    guard let self, !self.hasExistingLocalState || remote.updatedAt > self.localUpdatedAt else { return }
+                    self.isApplyingRemoteState = true
+                    self.state = remote.state
+                    self.localUpdatedAt = remote.updatedAt
+                    self.hasExistingLocalState = true
+                    self.save(preservingUpdatedAt: remote.updatedAt, sync: false)
+                    self.isApplyingRemoteState = false
+                    onRemoteUpdate()
+                }
+            } catch {
+                NSLog("TomatoClock Supabase sync failed: \(error.localizedDescription)")
+            }
         }
     }
 
@@ -77,11 +119,75 @@ final class StateStore {
         )
     }
 
-    private func save() {
+    private func save(preservingUpdatedAt preservedUpdatedAt: Date? = nil, sync: Bool = true) {
+        if let preservedUpdatedAt {
+            localUpdatedAt = preservedUpdatedAt
+        } else {
+            localUpdatedAt = Date()
+        }
+        hasExistingLocalState = true
+
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         guard let data = try? encoder.encode(state) else { return }
         try? data.write(to: fileURL, options: .atomic)
+
+        guard sync, !isApplyingRemoteState else { return }
+        scheduleUpload()
+    }
+
+    private func scheduleUpload() {
+        guard syncService != nil else { return }
+        uploadTask?.cancel()
+        let state = state
+        let updatedAt = localUpdatedAt
+
+        uploadTask = Task { [weak self] in
+            try? await Task.sleep(for: .milliseconds(500))
+            guard !Task.isCancelled else { return }
+
+            do {
+                try await self?.syncService?.upload(state: state, updatedAt: updatedAt)
+            } catch {
+                NSLog("TomatoClock Supabase upload failed: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    private func uploadCurrentState() async {
+        guard let syncService else { return }
+        if localUpdatedAt == .distantPast {
+            localUpdatedAt = Date()
+            save(preservingUpdatedAt: localUpdatedAt, sync: false)
+        }
+        do {
+            try await syncService.upload(state: state, updatedAt: localUpdatedAt)
+        } catch {
+            NSLog("TomatoClock Supabase upload failed: \(error.localizedDescription)")
+        }
+    }
+
+    private static func loadSupabaseSyncService(supportURL: URL) -> SupabaseSyncService? {
+        if let urlString = ProcessInfo.processInfo.environment["TOMATO_CLOCK_SUPABASE_URL"],
+           let url = URL(string: urlString),
+           let anonKey = ProcessInfo.processInfo.environment["TOMATO_CLOCK_SUPABASE_ANON_KEY"] {
+            let syncID = ProcessInfo.processInfo.environment["TOMATO_CLOCK_SYNC_ID"] ?? "default"
+            return SupabaseSyncService(config: SupabaseConfig(url: url, anonKey: anonKey, syncID: syncID))
+        }
+
+        let configURL = supportURL.appendingPathComponent("supabase.json")
+        guard let data = try? Data(contentsOf: configURL),
+              let config = try? JSONDecoder().decode(SupabaseConfig.self, from: data) else {
+            return nil
+        }
+        return SupabaseSyncService(config: config)
+    }
+
+    private static func fileModificationDate(_ url: URL) -> Date? {
+        guard let attributes = try? FileManager.default.attributesOfItem(atPath: url.path) else {
+            return nil
+        }
+        return attributes[.modificationDate] as? Date
     }
 
     private func range(for mode: StatsMode, now: Date, calendar: Calendar) -> Range<Date> {

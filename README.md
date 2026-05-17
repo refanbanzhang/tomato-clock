@@ -16,6 +16,7 @@
 - 统计模式：每周一重置 / 滚动 7 天
 - 基础周报：本周、今日、上周对比、7 天柱状图
 - 本地保存数据
+- 可选 Supabase 同步
 
 ## 运行
 
@@ -39,11 +40,51 @@ swift run
 ~/Library/Application Support/TomatoClock/state.json
 ```
 
+## Supabase 同步
+
+同步是可选功能。没有配置时，应用继续只使用本地数据。
+
+在 Supabase SQL Editor 里创建表：
+
+```sql
+create table if not exists tomato_clock_state (
+  id text primary key,
+  state jsonb not null,
+  updated_at timestamptz not null default now()
+);
+```
+
+然后创建配置文件：
+
+```text
+~/Library/Application Support/TomatoClock/supabase.json
+```
+
+内容示例：
+
+```json
+{
+  "url": "https://YOUR_PROJECT.supabase.co",
+  "anonKey": "YOUR_SUPABASE_ANON_KEY",
+  "syncId": "default"
+}
+```
+
+启动时会拉取远端较新的数据；本地有新记录或设置变化时会自动上传。
+
+开发时也可以使用环境变量：
+
+```bash
+TOMATO_CLOCK_SUPABASE_URL="https://YOUR_PROJECT.supabase.co" \
+TOMATO_CLOCK_SUPABASE_ANON_KEY="YOUR_SUPABASE_ANON_KEY" \
+TOMATO_CLOCK_SYNC_ID="default" \
+swift run
+```
+
 ## MVP 外的后续功能
 
 - 干扰屏蔽
 - 任务描述与归档
-- iCloud 同步
 - CSV 导出
 - 自定义快捷键
 - 更完整的偏好设置窗口

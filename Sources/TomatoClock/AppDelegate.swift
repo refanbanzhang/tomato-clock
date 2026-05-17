@@ -28,6 +28,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, TimerControllerDelegat
         configureNotifications()
 
         configureStatusItem()
+        store.startSync { [weak self] in
+            self?.updateStatusTitle()
+            self?.rebuildMenu()
+        }
         rebuildMenu()
         updateStatusTitle()
     }
