@@ -34,6 +34,18 @@ swift run
 
 这种方式不会启用系统通知，只会在完成时播放提示音。
 
+## 打包
+
+```bash
+make package
+```
+
+生成的 DMG 文件在：
+
+```text
+dist/TomatoClock.dmg
+```
+
 ## 数据位置
 
 ```text
