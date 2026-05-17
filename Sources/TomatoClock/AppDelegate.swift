@@ -75,7 +75,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, TimerControllerDelegat
         menu.removeAllItems()
 
         let snapshot = store.snapshot()
-        let title = NSMenuItem(title: "🍅 \(snapshot.completed)/\(snapshot.target) · 今日 \(snapshot.todayCompleted)", action: nil, keyEquivalent: "")
+        let title = NSMenuItem(title: "🍅 本周 \(progressBar(percent: snapshot.percent, width: 10)) · 今日 \(snapshot.todayCompleted)", action: nil, keyEquivalent: "")
         title.isEnabled = false
         menu.addItem(title)
 
@@ -133,7 +133,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, TimerControllerDelegat
             button.title = "🍅 \(format(timerController.remainingSeconds))"
         case .idle:
             let snapshot = store.snapshot()
-            button.title = "🍅 \(snapshot.completed)/\(snapshot.target)"
+            button.title = "🍅 \(progressBar(percent: snapshot.percent, width: 6))"
         }
     }
 
@@ -208,6 +208,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, TimerControllerDelegat
         String(format: "%02d:%02d", seconds / 60, seconds % 60)
     }
 
+    private func progressBar(percent: Int, width: Int) -> String {
+        let clampedPercent = max(0, min(100, percent))
+        let filled = Int((Double(clampedPercent) / 100.0 * Double(width)).rounded())
+        return String(repeating: "▰", count: filled) + String(repeating: "▱", count: width - filled)
+    }
+
     @objc private func startFocus() {
         guard timerController.mode == .idle else { return }
         timerController.startFocus()
@@ -274,7 +280,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, TimerControllerDelegat
         }.joined(separator: "\n")
 
         let alert = NSAlert()
-        alert.messageText = "本周进度 \(snapshot.completed)/\(snapshot.target)"
+        alert.messageText = "本周进度 \(progressBar(percent: snapshot.percent, width: 12))"
         alert.informativeText = """
         完成率：\(snapshot.percent)%
         今日完成：\(snapshot.todayCompleted)
