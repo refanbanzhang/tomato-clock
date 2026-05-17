@@ -10,6 +10,12 @@ struct SupabaseConfig: Codable, Sendable {
         case anonKey
         case syncID = "syncId"
     }
+
+    static let bundled = SupabaseConfig(
+        url: URL(string: "https://bfgbjtuyojgvcvvxjlxv.supabase.co")!,
+        anonKey: "sb_publishable_Xsb5q3jdp6A15j2XBocwMQ_duzHmILh",
+        syncID: "default"
+    )
 }
 
 struct RemoteAppState: Sendable {

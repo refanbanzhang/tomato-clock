@@ -176,11 +176,12 @@ final class StateStore {
         }
 
         let configURL = supportURL.appendingPathComponent("supabase.json")
-        guard let data = try? Data(contentsOf: configURL),
-              let config = try? JSONDecoder().decode(SupabaseConfig.self, from: data) else {
-            return nil
+        if let data = try? Data(contentsOf: configURL),
+           let config = try? JSONDecoder().decode(SupabaseConfig.self, from: data) {
+            return SupabaseSyncService(config: config)
         }
-        return SupabaseSyncService(config: config)
+
+        return SupabaseSyncService(config: .bundled)
     }
 
     private static func fileModificationDate(_ url: URL) -> Date? {

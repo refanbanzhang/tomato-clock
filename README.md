@@ -42,7 +42,7 @@ swift run
 
 ## Supabase 同步
 
-同步是可选功能。没有配置时，应用继续只使用本地数据。
+程序已内置 Supabase 同步配置，直接运行即可同步到默认数据。
 
 在 Supabase SQL Editor 里创建表：
 
@@ -54,7 +54,7 @@ create table if not exists tomato_clock_state (
 );
 ```
 
-然后创建配置文件：
+如果需要改成另一个 Supabase 项目，可以创建配置文件覆盖内置配置：
 
 ```text
 ~/Library/Application Support/TomatoClock/supabase.json
