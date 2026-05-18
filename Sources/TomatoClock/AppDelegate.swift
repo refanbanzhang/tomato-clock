@@ -191,7 +191,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, TimerControllerDelegat
 
         notificationsEnabled = true
         UNUserNotificationCenter.current().delegate = self
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
+        Task {
+            _ = try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound])
+        }
     }
 
     private func item(_ title: String, _ action: Selector, key: String = "") -> NSMenuItem {
