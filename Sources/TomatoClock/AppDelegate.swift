@@ -2,7 +2,7 @@ import AppKit
 import UserNotifications
 
 @MainActor
-final class AppDelegate: NSObject, NSApplicationDelegate, TimerControllerDelegate, UNUserNotificationCenterDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate, TimerControllerDelegate, UNUserNotificationCenterDelegate, NSMenuDelegate {
     private let store = StateStore()
     private let timerController = TimerController()
     private let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -36,6 +36,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, TimerControllerDelegat
         updateStatusTitle()
     }
 
+    func applicationDidBecomeActive(_ notification: Notification) {
+        store.refreshFromRemote()
+    }
+
     func timerControllerDidUpdate(_ timerController: TimerController) {
         updateStatusTitle()
         rebuildMenu()
@@ -67,12 +71,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate, TimerControllerDelegat
     private func configureStatusItem() {
         statusItem.button?.target = self
         statusItem.button?.action = #selector(openMenu)
+        menu.delegate = self
         statusItem.menu = menu
     }
 
     @objc private func openMenu() {
+        store.refreshFromRemote()
         rebuildMenu()
         statusItem.button?.performClick(nil)
+    }
+
+    func menuWillOpen(_ menu: NSMenu) {
+        store.refreshFromRemote()
     }
 
     private func rebuildMenu() {

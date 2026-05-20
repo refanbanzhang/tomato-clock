@@ -9,7 +9,9 @@ final class StateStore {
     private var localUpdatedAt: Date
     private var hasExistingLocalState: Bool
     private var uploadTask: Task<Void, Never>?
+    private var refreshTask: Task<Void, Never>?
     private var isApplyingRemoteState = false
+    private var onRemoteUpdate: (@MainActor () -> Void)?
 
     init() {
         supportURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
@@ -33,32 +35,16 @@ final class StateStore {
 
     deinit {
         uploadTask?.cancel()
+        refreshTask?.cancel()
     }
 
     func startSync(onRemoteUpdate: @MainActor @escaping () -> Void) {
-        guard let syncService else { return }
+        self.onRemoteUpdate = onRemoteUpdate
+        refreshFromRemote(uploadIfMissing: true)
+    }
 
-        Task { [weak self] in
-            do {
-                guard let remote = try await syncService.fetchState() else {
-                    await self?.uploadCurrentState()
-                    return
-                }
-
-                await MainActor.run {
-                    guard let self, !self.hasExistingLocalState || remote.updatedAt > self.localUpdatedAt else { return }
-                    self.isApplyingRemoteState = true
-                    self.state = remote.state
-                    self.localUpdatedAt = remote.updatedAt
-                    self.hasExistingLocalState = true
-                    self.save(preservingUpdatedAt: remote.updatedAt, sync: false)
-                    self.isApplyingRemoteState = false
-                    onRemoteUpdate()
-                }
-            } catch {
-                NSLog("TomatoClock Supabase sync failed: \(error.localizedDescription)")
-            }
-        }
+    func refreshFromRemote() {
+        refreshFromRemote(uploadIfMissing: false)
     }
 
     func setWeeklyTarget(_ target: Int) {
@@ -136,6 +122,33 @@ final class StateStore {
         scheduleUpload()
     }
 
+    private func refreshFromRemote(uploadIfMissing: Bool) {
+        guard let syncService, refreshTask == nil else { return }
+
+        refreshTask = Task { [weak self] in
+            defer {
+                Task { @MainActor [weak self] in
+                    self?.refreshTask = nil
+                }
+            }
+
+            do {
+                guard let remote = try await syncService.fetchState() else {
+                    if uploadIfMissing {
+                        await self?.uploadCurrentState()
+                    }
+                    return
+                }
+
+                await MainActor.run {
+                    self?.applyRemoteStateIfNeeded(remote)
+                }
+            } catch {
+                NSLog("TomatoClock Supabase sync failed: \(error.localizedDescription)")
+            }
+        }
+    }
+
     private func scheduleUpload() {
         guard syncService != nil else { return }
         uploadTask?.cancel()
@@ -165,6 +178,17 @@ final class StateStore {
         } catch {
             NSLog("TomatoClock Supabase upload failed: \(error.localizedDescription)")
         }
+    }
+
+    private func applyRemoteStateIfNeeded(_ remote: RemoteAppState) {
+        guard !hasExistingLocalState || remote.updatedAt > localUpdatedAt else { return }
+        isApplyingRemoteState = true
+        state = remote.state
+        localUpdatedAt = remote.updatedAt
+        hasExistingLocalState = true
+        save(preservingUpdatedAt: remote.updatedAt, sync: false)
+        isApplyingRemoteState = false
+        onRemoteUpdate?()
     }
 
     private static func loadSupabaseSyncService(supportURL: URL) -> SupabaseSyncService? {

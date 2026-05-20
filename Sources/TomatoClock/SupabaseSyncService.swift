@@ -85,7 +85,10 @@ final class SupabaseSyncService: @unchecked Sendable {
         }
 
         var request = URLRequest(url: url)
+        request.cachePolicy = .reloadIgnoringLocalCacheData
         addCommonHeaders(to: &request)
+        request.setValue("no-cache", forHTTPHeaderField: "Cache-Control")
+        request.setValue("no-cache", forHTTPHeaderField: "Pragma")
 
         let (data, response) = try await session.data(for: request)
         try validate(response: response, data: data)
