@@ -1,4 +1,5 @@
 import AppKit
+import TomatoClockCore
 import UserNotifications
 
 @MainActor

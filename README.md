@@ -34,6 +34,58 @@ swift run
 
 这种方式不会启用系统通知，只会在完成时播放提示音。
 
+## iOS 版本
+
+项目现在包含 iOS 版本：
+
+```text
+TomatoClockIOS
+```
+
+在 Xcode 中打开项目目录，选择 `TomatoClockIOS` scheme，然后选择 iPhone Simulator 或真机运行。
+
+iOS 版本已包含：
+
+- 25 分钟专注计时
+- 暂停、继续、放弃、提前结束
+- 完成后计入本周进度
+- 5 分钟短休息、15 分钟长休息
+- 周目标设置
+- 统计模式切换
+- 今日、本周、上周与 7 天记录
+- 本地保存数据
+- Supabase 同步
+
+如果 Xcode 没有安装 iOS SDK，需要先在 Xcode Settings 的 Components 中安装 iOS 平台。
+
+### 生成 iOS 包
+
+先生成 iOS Xcode 工程：
+
+```bash
+make ios-project
+```
+
+没有 Apple 开发者证书时，可以生成未签名包：
+
+```bash
+make ios-unsigned-ipa
+```
+
+输出位置：
+
+```text
+dist/ios/TomatoClockIOS-unsigned.ipa
+```
+
+普通 iPhone 直接安装需要 Apple 开发者证书和描述文件。配置签名后，在 Xcode 里打开：
+
+```text
+iOS/TomatoClockIOS.xcodeproj
+```
+
+选择 `TomatoClockIOS`，连接真机后 Archive 并导出即可。
+
 ## 打包
 
 ```bash

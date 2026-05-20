@@ -1,11 +1,11 @@
 import Foundation
 
 @MainActor
-final class StateStore {
+public final class StateStore {
     private let fileURL: URL
     private let supportURL: URL
     private let syncService: SupabaseSyncService?
-    private(set) var state: AppState
+    public private(set) var state: AppState
     private var localUpdatedAt: Date
     private var hasExistingLocalState: Bool
     private var uploadTask: Task<Void, Never>?
@@ -13,7 +13,7 @@ final class StateStore {
     private var isApplyingRemoteState = false
     private var onRemoteUpdate: (@MainActor () -> Void)?
 
-    init() {
+    public init() {
         supportURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("TomatoClock", isDirectory: true)
         try? FileManager.default.createDirectory(at: supportURL, withIntermediateDirectories: true)
@@ -38,16 +38,14 @@ final class StateStore {
         refreshTask?.cancel()
     }
 
-    func startSync(onRemoteUpdate: @MainActor @escaping () -> Void) {
-        self.onRemoteUpdate = onRemoteUpdate
-        refreshFromRemote(uploadIfMissing: true)
-    }
+    public func startSync(onRemoteUpdate: @MainActor @escaping () -> Void) {
+        guard let syncService else { return }
 
     func refreshFromRemote() {
         refreshFromRemote(uploadIfMissing: false)
     }
 
-    func setWeeklyTarget(_ target: Int) {
+    public func setWeeklyTarget(_ target: Int) {
         let normalizedTarget = max(1, min(target, 999))
         guard normalizedTarget != state.weeklyTarget else { return }
         state.targetChanges.append(TargetChange(
@@ -60,12 +58,12 @@ final class StateStore {
         save()
     }
 
-    func setStatsMode(_ mode: StatsMode) {
+    public func setStatsMode(_ mode: StatsMode) {
         state.statsMode = mode
         save()
     }
 
-    func addSession(startDate: Date, endDate: Date, plannedSeconds: Int, completed: Bool) {
+    public func addSession(startDate: Date, endDate: Date, plannedSeconds: Int, completed: Bool) {
         state.sessions.append(PomodoroSession(
             id: UUID(),
             startDate: startDate,
@@ -76,7 +74,7 @@ final class StateStore {
         save()
     }
 
-    func snapshot(now: Date = Date()) -> ProgressSnapshot {
+    public func snapshot(now: Date = Date()) -> ProgressSnapshot {
         var calendar = Calendar.current
         calendar.firstWeekday = 2
 

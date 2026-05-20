@@ -1,41 +1,43 @@
 import Foundation
 
 @MainActor
-protocol TimerControllerDelegate: AnyObject {
+public protocol TimerControllerDelegate: AnyObject {
     func timerControllerDidUpdate(_ timerController: TimerController)
     func timerControllerDidCompleteFocus(_ timerController: TimerController)
 }
 
 @MainActor
-final class TimerController {
-    enum Mode: Equatable {
+public final class TimerController {
+    public enum Mode: Equatable {
         case idle
         case focusing
         case paused
         case resting(seconds: Int)
     }
 
-    static let focusSeconds = 25 * 60
-    static let shortBreakSeconds = 5 * 60
-    static let longBreakSeconds = 15 * 60
+    public static let focusSeconds = 25 * 60
+    public static let shortBreakSeconds = 5 * 60
+    public static let longBreakSeconds = 15 * 60
 
-    weak var delegate: TimerControllerDelegate?
+    public weak var delegate: TimerControllerDelegate?
 
-    private(set) var mode: Mode = .idle
-    private(set) var remainingSeconds = TimerController.focusSeconds
-    private(set) var focusStartDate: Date?
+    public private(set) var mode: Mode = .idle
+    public private(set) var remainingSeconds = TimerController.focusSeconds
+    public private(set) var focusStartDate: Date?
     private var timer: Timer?
 
-    var isRunning: Bool {
+    public init() {}
+
+    public var isRunning: Bool {
         mode == .focusing || isResting
     }
 
-    var isResting: Bool {
+    public var isResting: Bool {
         if case .resting = mode { return true }
         return false
     }
 
-    func startFocus() {
+    public func startFocus() {
         timer?.invalidate()
         focusStartDate = Date()
         remainingSeconds = Self.focusSeconds
@@ -44,7 +46,7 @@ final class TimerController {
         delegate?.timerControllerDidUpdate(self)
     }
 
-    func pause() {
+    public func pause() {
         guard mode == .focusing else { return }
         timer?.invalidate()
         timer = nil
@@ -52,26 +54,26 @@ final class TimerController {
         delegate?.timerControllerDidUpdate(self)
     }
 
-    func resume() {
+    public func resume() {
         guard mode == .paused else { return }
         mode = .focusing
         startTicker()
         delegate?.timerControllerDidUpdate(self)
     }
 
-    func abandon() -> Date? {
+    public func abandon() -> Date? {
         let startDate = focusStartDate
         reset()
         return startDate
     }
 
-    func finishEarly() -> Date? {
+    public func finishEarly() -> Date? {
         let startDate = focusStartDate
         reset()
         return startDate
     }
 
-    func startBreak(seconds: Int) {
+    public func startBreak(seconds: Int) {
         timer?.invalidate()
         focusStartDate = nil
         remainingSeconds = seconds
@@ -80,11 +82,11 @@ final class TimerController {
         delegate?.timerControllerDidUpdate(self)
     }
 
-    func stopBreak() {
+    public func stopBreak() {
         reset()
     }
 
-    func reset() {
+    public func reset() {
         timer?.invalidate()
         timer = nil
         focusStartDate = nil
