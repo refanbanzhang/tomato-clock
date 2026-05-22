@@ -39,9 +39,12 @@ public final class StateStore {
     }
 
     public func startSync(onRemoteUpdate: @MainActor @escaping () -> Void) {
-        guard let syncService else { return }
+        guard syncService != nil else { return }
+        self.onRemoteUpdate = onRemoteUpdate
+        refreshFromRemote(uploadIfMissing: true)
+    }
 
-    func refreshFromRemote() {
+    public func refreshFromRemote() {
         refreshFromRemote(uploadIfMissing: false)
     }
 
