@@ -9,65 +9,79 @@ interface TimerDisplayProps {
   totalSeconds: number;
 }
 
-export default function TimerDisplay({ mode, remainingSeconds, totalSeconds }: TimerDisplayProps) {
+const modeLabel: Record<TimerMode, string> = {
+  idle: "准备开始",
+  focusing: "专注中",
+  paused: "已暂停",
+};
+
+const modeColor: Record<TimerMode, string> = {
+  idle: "#cbd5e1",
+  focusing: "#0d9488",
+  paused: "#f59e0b",
+};
+
+export default function TimerDisplay({
+  mode,
+  remainingSeconds,
+  totalSeconds,
+}: TimerDisplayProps) {
   const progress = 1 - remainingSeconds / totalSeconds;
-  const circumference = 2 * Math.PI * 130;
+  const radius = 118;
+  const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference * (1 - progress);
-
-  const modeLabel: Record<TimerMode, string> = {
-    idle: "准备开始",
-    focusing: "专注中",
-    paused: "已暂停",
-  };
-
-  const modeColor: Record<TimerMode, string> = {
-    idle: "#e2e8f0",
-    focusing: "#ef4444",
-    paused: "#f59e0b",
-  };
+  const accent = modeColor[mode];
 
   return (
-    <div className="relative flex flex-col items-center justify-center">
-      <svg
-        width="300"
-        height="300"
-        viewBox="0 0 300 300"
-        className="transform -rotate-90"
-      >
-        <circle
-          cx="150"
-          cy="150"
-          r="130"
-          fill="none"
-          stroke="#f1f5f9"
-          strokeWidth="8"
-        />
-        <circle
-          cx="150"
-          cy="150"
-          r="130"
-          fill="none"
-          stroke={modeColor[mode]}
-          strokeWidth="8"
-          strokeLinecap="round"
-          strokeDasharray={circumference}
-          strokeDashoffset={strokeDashoffset}
-          className="transition-all duration-1000 ease-linear"
-        />
-      </svg>
-      <div className="absolute flex flex-col items-center">
-        <span className="text-6xl font-mono font-bold tabular-nums tracking-tight text-slate-800">
-          {formatTime(remainingSeconds)}
-        </span>
-        <span
-          className="mt-2 text-sm font-medium px-3 py-1 rounded-full"
-          style={{
-            backgroundColor: modeColor[mode] + "20",
-            color: modeColor[mode],
-          }}
+    <div className="card p-8 flex flex-col items-center">
+      <div className="relative flex flex-col items-center justify-center">
+        <svg
+          width="280"
+          height="280"
+          viewBox="0 0 280 280"
+          className="transform -rotate-90"
+          aria-hidden="true"
         >
-          {modeLabel[mode]}
-        </span>
+          <circle
+            cx="140"
+            cy="140"
+            r={radius}
+            fill="none"
+            stroke="#e2e8f0"
+            strokeWidth="6"
+          />
+          <circle
+            cx="140"
+            cy="140"
+            r={radius}
+            fill="none"
+            stroke={accent}
+            strokeWidth="6"
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={strokeDashoffset}
+            className="timer-ring transition-all duration-1000 ease-linear"
+          />
+        </svg>
+
+        <div className="absolute flex flex-col items-center">
+          <span
+            className="text-[3.25rem] font-mono font-bold tabular-nums tracking-tight text-teal-950 leading-none"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {formatTime(remainingSeconds)}
+          </span>
+          <span
+            className="mt-3 text-sm font-medium px-3 py-1 rounded-full"
+            style={{
+              backgroundColor: `${accent}18`,
+              color: accent,
+            }}
+          >
+            {modeLabel[mode]}
+          </span>
+        </div>
       </div>
     </div>
   );

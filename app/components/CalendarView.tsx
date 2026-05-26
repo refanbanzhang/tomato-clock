@@ -27,10 +27,10 @@ function isSameDay(a: Date, b: Date): boolean {
 
 function getIntensityClass(count: number): string {
   if (count === 0) return "";
-  if (count <= 2) return "bg-emerald-100 text-emerald-800";
-  if (count <= 5) return "bg-emerald-200 text-emerald-800";
-  if (count <= 8) return "bg-emerald-300 text-emerald-800";
-  return "bg-emerald-400 text-emerald-900";
+  if (count <= 2) return "bg-teal-100 text-teal-900";
+  if (count <= 5) return "bg-teal-200 text-teal-900";
+  if (count <= 8) return "bg-teal-300 text-teal-950";
+  return "bg-teal-500 text-white";
 }
 
 export default function CalendarView({ sessions }: CalendarViewProps) {
@@ -45,7 +45,6 @@ export default function CalendarView({ sessions }: CalendarViewProps) {
     [sessions]
   );
 
-  // Build daily counts map
   const dailyCounts = useMemo(() => {
     const map = new Map<string, { count: number; sessions: PomodoroSession[] }>();
     for (const s of completedSessions) {
@@ -59,13 +58,11 @@ export default function CalendarView({ sessions }: CalendarViewProps) {
     return map;
   }, [completedSessions]);
 
-  // Build calendar grid
   const calendarDays = useMemo(() => {
     const year = currentMonth.getFullYear();
     const month = currentMonth.getMonth();
 
     const firstDay = new Date(year, month, 1);
-    // Monday = 0 ... Sunday = 6
     let startDayOfWeek = firstDay.getDay() - 1;
     if (startDayOfWeek < 0) startDayOfWeek = 6;
 
@@ -74,7 +71,6 @@ export default function CalendarView({ sessions }: CalendarViewProps) {
 
     const days: DayData[] = [];
 
-    // Previous month trailing days
     for (let i = startDayOfWeek - 1; i >= 0; i--) {
       const d = new Date(year, month - 1, daysInPrevMonth - i);
       const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
@@ -88,7 +84,6 @@ export default function CalendarView({ sessions }: CalendarViewProps) {
       });
     }
 
-    // Current month days
     for (let day = 1; day <= daysInMonth; day++) {
       const d = new Date(year, month, day);
       const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
@@ -102,7 +97,6 @@ export default function CalendarView({ sessions }: CalendarViewProps) {
       });
     }
 
-    // Next month leading days (fill to complete last row)
     const remaining = 7 - (days.length % 7);
     if (remaining < 7) {
       for (let i = 1; i <= remaining; i++) {
@@ -151,54 +145,63 @@ export default function CalendarView({ sessions }: CalendarViewProps) {
     .reduce((sum, d) => sum + d.count, 0);
 
   return (
-    <div className="w-full max-w-md">
-      {/* Month navigation */}
-      <div className="flex items-center justify-between mb-4">
-        <button
-          onClick={goToPrevMonth}
-          className="w-9 h-9 flex items-center justify-center rounded-lg text-slate-500 hover:bg-stone-200 transition-colors"
-          aria-label="上个月"
-        >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-
-        <div className="flex items-center gap-2">
-          <h2 className="text-lg font-semibold text-slate-800">{monthLabel}</h2>
+    <div className="w-full">
+      <div className="card p-4 mb-4">
+        <div className="flex items-center justify-between">
           <button
-            onClick={goToToday}
-            className="text-xs px-2 py-0.5 rounded-md bg-stone-200 text-slate-600 hover:bg-stone-300 transition-colors"
+            onClick={goToPrevMonth}
+            className="icon-btn"
+            aria-label="上个月"
           >
-            今天
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+              aria-hidden="true"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-teal-950">{monthLabel}</h2>
+            <button onClick={goToToday} className="btn btn-muted px-2 py-0.5 text-xs">
+              今天
+            </button>
+          </div>
+
+          <button
+            onClick={goToNextMonth}
+            className="icon-btn"
+            aria-label="下个月"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+              aria-hidden="true"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
           </button>
         </div>
 
-        <button
-          onClick={goToNextMonth}
-          className="w-9 h-9 flex items-center justify-center rounded-lg text-slate-500 hover:bg-stone-200 transition-colors"
-          aria-label="下个月"
-        >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
+        <p className="subtitle text-center mt-3">
+          本月完成{" "}
+          <span className="font-semibold text-teal-600">{totalThisMonth}</span> 个番茄
+        </p>
       </div>
 
-      {/* Month total */}
-      <div className="text-center mb-4">
-        <span className="text-sm text-slate-500">
-          本月完成 <span className="font-semibold text-emerald-600">{totalThisMonth}</span> 个番茄
-        </span>
-      </div>
-
-      {/* Weekday headers */}
-      <div className="grid grid-cols-7 mb-1">
+      <div className="grid grid-cols-7 mb-1 px-1">
         {WEEKDAY_LABELS.map((label, i) => (
           <div
             key={label}
             className={`text-center text-xs font-medium py-2 ${
-              i >= 5 ? "text-amber-500" : "text-slate-400"
+              i >= 5 ? "text-orange-500" : "text-slate-400"
             }`}
           >
             {label}
@@ -206,8 +209,8 @@ export default function CalendarView({ sessions }: CalendarViewProps) {
         ))}
       </div>
 
-      {/* Calendar grid */}
-      <div className="grid grid-cols-7 rounded-xl overflow-hidden border border-stone-200 bg-white shadow-sm">
+      <div className="card overflow-hidden p-0">
+        <div className="grid grid-cols-7 gap-px bg-teal-100/80">
         {calendarDays.map((day, idx) => {
           const intensity = getIntensityClass(day.count);
           const isSelected =
@@ -218,20 +221,17 @@ export default function CalendarView({ sessions }: CalendarViewProps) {
               key={idx}
               onClick={() => setSelectedDay(day)}
               className={`
-                relative flex flex-col items-center justify-center 
-                h-14 border-r border-b border-stone-100
-                transition-colors cursor-pointer
-                ${!day.isCurrentMonth ? "text-slate-300" : "text-slate-700"}
-                ${day.isToday ? "ring-2 ring-blue-400 ring-inset rounded-sm z-10" : ""}
-                ${isSelected && day.isCurrentMonth ? "bg-blue-50" : ""}
-                ${day.isCurrentMonth ? "hover:bg-stone-50" : ""}
+                relative flex flex-col items-center justify-center
+                h-14 bg-white transition-colors cursor-pointer
+                ${!day.isCurrentMonth ? "text-slate-300" : "text-teal-950"}
+                ${day.isToday ? "z-10 shadow-[inset_0_0_0_2px_#0d9488]" : ""}
+                ${isSelected && day.isCurrentMonth ? "bg-teal-50" : ""}
+                ${day.isCurrentMonth && !day.count ? "hover:bg-teal-50/60" : ""}
+                ${day.isCurrentMonth && day.count ? "hover:brightness-[0.97]" : ""}
               `}
             >
-              {/* Background intensity for completed days */}
               {day.count > 0 && day.isCurrentMonth && (
-                <div
-                  className={`absolute inset-0.5 rounded-sm ${intensity} opacity-60`}
-                />
+                <div className={`absolute inset-0 ${intensity} opacity-70`} />
               )}
 
               <span className="relative text-sm font-medium leading-none">
@@ -249,7 +249,7 @@ export default function CalendarView({ sessions }: CalendarViewProps) {
                   {Array.from({ length: Math.min(day.count, 4) }).map((_, i) => (
                     <div
                       key={i}
-                      className="w-1 h-1 rounded-full bg-emerald-300"
+                      className="w-1 h-1 rounded-full bg-teal-300"
                     />
                   ))}
                 </div>
@@ -257,12 +257,12 @@ export default function CalendarView({ sessions }: CalendarViewProps) {
             </button>
           );
         })}
+        </div>
       </div>
 
-      {/* Selected day detail */}
       {selectedDay && (
-        <div className="mt-4 p-4 bg-white rounded-xl border border-stone-200 shadow-sm">
-          <h3 className="text-sm font-semibold text-slate-800 mb-2">
+        <div className="card mt-4 p-4">
+          <h3 className="text-sm font-semibold text-teal-950 mb-2">
             {selectedDay.date.toLocaleDateString("zh-CN", {
               month: "long",
               day: "numeric",
@@ -271,11 +271,13 @@ export default function CalendarView({ sessions }: CalendarViewProps) {
           </h3>
 
           {selectedDay.sessions.length === 0 ? (
-            <p className="text-sm text-slate-400">当天没有完成的番茄记录</p>
+            <p className="subtitle">当天没有完成的番茄记录</p>
           ) : (
             <div className="space-y-2">
-              <p className="text-sm text-slate-500">
-                完成 <span className="font-semibold text-emerald-600">{selectedDay.count}</span> 个番茄
+              <p className="subtitle">
+                完成{" "}
+                <span className="font-semibold text-teal-600">{selectedDay.count}</span>{" "}
+                个番茄
               </p>
               <div className="space-y-1.5">
                 {selectedDay.sessions.map((s) => {
@@ -287,7 +289,7 @@ export default function CalendarView({ sessions }: CalendarViewProps) {
                   return (
                     <div
                       key={s.id}
-                      className="flex items-center justify-between text-xs text-slate-500 bg-stone-50 rounded-lg px-3 py-2"
+                      className="flex items-center justify-between text-xs text-slate-500 bg-teal-50 rounded-lg px-3 py-2"
                     >
                       <span>
                         {start.toLocaleTimeString("zh-CN", {

@@ -4,7 +4,6 @@ import { TimerMode, FOCUS_SECONDS } from "@/lib/types";
 
 interface TimerControlsProps {
   mode: TimerMode;
-  remainingSeconds: number;
   onStart: () => void;
   onPause: () => void;
   onResume: () => void;
@@ -14,7 +13,6 @@ interface TimerControlsProps {
 
 export default function TimerControls({
   mode,
-  remainingSeconds,
   onStart,
   onPause,
   onResume,
@@ -23,15 +21,12 @@ export default function TimerControls({
 }: TimerControlsProps) {
   if (mode === "idle") {
     return (
-      <div className="flex flex-col items-center gap-3">
-        <button
-          onClick={onStart}
-          className="px-8 py-3 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-2xl text-lg transition-colors shadow-lg shadow-red-200"
-        >
+      <div className="flex flex-col items-center gap-3 w-full">
+        <button onClick={onStart} className="btn btn-cta w-full max-w-xs">
           开始 {FOCUS_SECONDS / 60} 分钟
         </button>
-        <p className="text-xs text-slate-400">
-          快捷键: <kbd className="px-1.5 py-0.5 bg-slate-100 rounded text-slate-500 font-mono text-[11px]">Space</kbd>
+        <p className="subtitle">
+          快捷键 <kbd className="kbd">Space</kbd>
         </p>
       </div>
     );
@@ -39,48 +34,31 @@ export default function TimerControls({
 
   if (mode === "focusing") {
     return (
-      <div className="flex items-center gap-3">
-        <button
-          onClick={onPause}
-          className="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-xl text-sm transition-colors"
-        >
+      <div className="flex flex-wrap items-center justify-center gap-2 w-full">
+        <button onClick={onPause} className="btn btn-warn">
           暂停
         </button>
-        <button
-          onClick={onFinishEarly}
-          className="px-6 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-600 font-medium rounded-xl text-sm transition-colors"
-        >
-          提前结束<small className="block text-[10px] opacity-60">不计入</small>
+        <button onClick={onFinishEarly} className="btn btn-muted">
+          提前结束
+          <span className="block text-[10px] font-normal opacity-70">不计入</span>
         </button>
-        <button
-          onClick={onAbandon}
-          className="px-6 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-400 font-medium rounded-xl text-sm transition-colors"
-        >
-          放弃<small className="block text-[10px] opacity-60">不计入</small>
+        <button onClick={onAbandon} className="btn btn-ghost">
+          放弃
+          <span className="block text-[10px] font-normal opacity-70">不计入</span>
         </button>
       </div>
     );
   }
 
-  // paused
   return (
-    <div className="flex items-center gap-3">
-      <button
-        onClick={onResume}
-        className="px-8 py-2.5 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl text-sm transition-colors"
-      >
+    <div className="flex flex-wrap items-center justify-center gap-2 w-full">
+      <button onClick={onResume} className="btn btn-cta">
         继续
       </button>
-      <button
-        onClick={onFinishEarly}
-        className="px-6 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-600 font-medium rounded-xl text-sm transition-colors"
-      >
+      <button onClick={onFinishEarly} className="btn btn-muted">
         提前结束
       </button>
-      <button
-        onClick={onAbandon}
-        className="px-6 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-400 font-medium rounded-xl text-sm transition-colors"
-      >
+      <button onClick={onAbandon} className="btn btn-ghost">
         放弃
       </button>
     </div>
