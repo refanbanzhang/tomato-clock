@@ -6,12 +6,84 @@ export interface TimerState {
   totalSeconds: number;
 }
 
+interface PersistedTimer {
+  mode: TimerMode;
+  remainingSeconds: number;
+  totalSeconds: number;
+  endAt?: number;
+}
+
+const TIMER_STORAGE_KEY = "tomato-clock-timer";
+
 export function createInitialTimerState(): TimerState {
   return {
     mode: "idle",
     remainingSeconds: FOCUS_SECONDS,
     totalSeconds: FOCUS_SECONDS,
   };
+}
+
+export function loadTimerState(): TimerState {
+  if (typeof window === "undefined") {
+    return createInitialTimerState();
+  }
+
+  try {
+    const raw = localStorage.getItem(TIMER_STORAGE_KEY);
+    if (!raw) {
+      return createInitialTimerState();
+    }
+
+    const parsed = JSON.parse(raw) as PersistedTimer;
+    if (parsed.mode === "idle") {
+      return createInitialTimerState();
+    }
+
+    if (parsed.mode === "paused") {
+      return {
+        mode: "paused",
+        remainingSeconds: parsed.remainingSeconds,
+        totalSeconds: parsed.totalSeconds,
+      };
+    }
+
+    if (parsed.mode === "focusing" && parsed.endAt) {
+      const remainingSeconds = Math.max(
+        0,
+        Math.ceil((parsed.endAt - Date.now()) / 1000)
+      );
+      return {
+        mode: "focusing",
+        remainingSeconds,
+        totalSeconds: parsed.totalSeconds,
+      };
+    }
+  } catch {
+    // corrupted data, reset
+  }
+
+  return createInitialTimerState();
+}
+
+export function saveTimerState(state: TimerState): void {
+  if (typeof window === "undefined") return;
+
+  if (state.mode === "idle") {
+    localStorage.removeItem(TIMER_STORAGE_KEY);
+    return;
+  }
+
+  const payload: PersistedTimer = {
+    mode: state.mode,
+    remainingSeconds: state.remainingSeconds,
+    totalSeconds: state.totalSeconds,
+  };
+
+  if (state.mode === "focusing") {
+    payload.endAt = Date.now() + state.remainingSeconds * 1000;
+  }
+
+  localStorage.setItem(TIMER_STORAGE_KEY, JSON.stringify(payload));
 }
 
 export function formatTime(seconds: number): string {

@@ -17,16 +17,19 @@ import {
 import { FOCUS_SECONDS, AppState } from "@/lib/types";
 import {
   createInitialTimerState,
+  loadTimerState,
+  saveTimerState,
   TimerState,
 } from "@/lib/timer-engine";
 
 export default function Home() {
   const [appState, setAppState] = useState<AppState | null>(null);
-  const [timer, setTimer] = useState<TimerState>(createInitialTimerState());
+  const [timer, setTimer] = useState<TimerState>(() => loadTimerState());
   const [showSettings, setShowSettings] = useState(false);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const appStateRef = useRef<AppState | null>(null);
+  const timerRestoredRef = useRef(false);
   const { requestPermission, notify } = useNotification();
   const { playBeep } = useAudio();
 
@@ -41,6 +44,10 @@ export default function Home() {
       saveState(appState);
     }
   }, [appState]);
+
+  useEffect(() => {
+    saveTimerState(timer);
+  }, [timer]);
 
   const { triggerUpload } = useSupabaseSync({
     onRemoteState: (remote) => {
@@ -84,12 +91,8 @@ export default function Home() {
   );
 
   const handleFocusComplete = useCallback(() => {
-    setTimer((prev) => ({
-      ...prev,
-      mode: "idle",
-      remainingSeconds: FOCUS_SECONDS,
-      totalSeconds: FOCUS_SECONDS,
-    }));
+    stopTimer();
+    setTimer(createInitialTimerState());
 
     const now = new Date();
     setAppState((prev) => {
@@ -105,7 +108,7 @@ export default function Home() {
 
     notify("番茄完成", "已记录。");
     playBeep();
-  }, [notify, playBeep]);
+  }, [notify, playBeep, stopTimer]);
 
   const handleStartFocus = useCallback(() => {
     requestPermission();
@@ -141,23 +144,27 @@ export default function Home() {
         completed: false,
       });
     });
-    setTimer((prev) => ({
-      ...prev,
-      mode: "idle",
-      remainingSeconds: FOCUS_SECONDS,
-      totalSeconds: FOCUS_SECONDS,
-    }));
+    setTimer(createInitialTimerState());
   }, [stopTimer, timer.remainingSeconds]);
 
   const handleAbandon = useCallback(() => {
     stopTimer();
-    setTimer((prev) => ({
-      ...prev,
-      mode: "idle",
-      remainingSeconds: FOCUS_SECONDS,
-      totalSeconds: FOCUS_SECONDS,
-    }));
+    setTimer(createInitialTimerState());
   }, [stopTimer]);
+
+  useEffect(() => {
+    if (!appState || timerRestoredRef.current) return;
+    timerRestoredRef.current = true;
+
+    if (timer.mode === "focusing" && timer.remainingSeconds <= 0) {
+      handleFocusComplete();
+      return;
+    }
+
+    if (timer.mode === "focusing" && timer.remainingSeconds > 0) {
+      startTick(handleFocusComplete);
+    }
+  }, [appState, timer.mode, timer.remainingSeconds, startTick, handleFocusComplete]);
 
   const handleSetTarget = useCallback((target: number) => {
     setAppState((prev) => {
