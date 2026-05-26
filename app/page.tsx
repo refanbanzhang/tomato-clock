@@ -22,6 +22,7 @@ import {
 export default function Home() {
   const [appState, setAppState] = useState<AppState | null>(null);
   const [timer, setTimer] = useState<TimerState>(createInitialTimerState());
+  const [showSettings, setShowSettings] = useState(false);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const appStateRef = useRef<AppState | null>(null);
@@ -206,10 +207,20 @@ export default function Home() {
       </nav>
 
       {/* Header */}
-      <header className="mb-8 text-center">
+      <header className="mb-8 text-center relative">
         <h1 className="text-3xl font-bold text-slate-800 flex items-center gap-2 justify-center">
           <span>🍅</span> 番茄时钟
         </h1>
+        <button
+          onClick={() => setShowSettings(true)}
+          className="absolute right-0 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-stone-200 transition-colors"
+          aria-label="设置"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        </button>
       </header>
 
       {/* Main content */}
@@ -231,13 +242,30 @@ export default function Home() {
           onFinishEarly={handleFinishEarly}
           onAbandon={handleAbandon}
         />
-
-        {/* Settings */}
-        <SettingsPanel
-          weeklyTarget={appState.weeklyTarget}
-          onSetTarget={handleSetTarget}
-        />
       </div>
+
+      {/* Settings Modal */}
+      {showSettings && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm">
+            <SettingsPanel
+              weeklyTarget={appState.weeklyTarget}
+              onSetTarget={(t) => {
+                handleSetTarget(t);
+                setShowSettings(false);
+              }}
+            />
+            <div className="px-6 pb-4">
+              <button
+                onClick={() => setShowSettings(false)}
+                className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-500 font-medium rounded-xl transition-colors text-sm"
+              >
+                关闭
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <footer className="mt-12 mb-4 text-xs text-slate-300">
