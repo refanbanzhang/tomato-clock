@@ -83,6 +83,30 @@ export default function Home() {
     [stopTimer]
   );
 
+  const handleFocusComplete = useCallback(() => {
+    setTimer((prev) => ({
+      ...prev,
+      mode: "idle",
+      remainingSeconds: FOCUS_SECONDS,
+      totalSeconds: FOCUS_SECONDS,
+    }));
+
+    const now = new Date();
+    setAppState((prev) => {
+      if (!prev) return prev;
+      return addSession(prev, {
+        id: crypto.randomUUID(),
+        startDate: new Date(now.getTime() - FOCUS_SECONDS * 1000).toISOString(),
+        endDate: now.toISOString(),
+        plannedSeconds: FOCUS_SECONDS,
+        completed: true,
+      });
+    });
+
+    notify("番茄完成", "已记录。");
+    playBeep();
+  }, [notify, playBeep]);
+
   const handleStartFocus = useCallback(() => {
     requestPermission();
     setTimer({
@@ -90,30 +114,8 @@ export default function Home() {
       remainingSeconds: FOCUS_SECONDS,
       totalSeconds: FOCUS_SECONDS,
     });
-    startTick(() => {
-      setTimer((prev) => ({
-        ...prev,
-        mode: "idle",
-        remainingSeconds: FOCUS_SECONDS,
-        totalSeconds: FOCUS_SECONDS,
-      }));
-
-      const now = new Date();
-      setAppState((prev) => {
-        if (!prev) return prev;
-        return addSession(prev, {
-          id: crypto.randomUUID(),
-          startDate: new Date(now.getTime() - FOCUS_SECONDS * 1000).toISOString(),
-          endDate: now.toISOString(),
-          plannedSeconds: FOCUS_SECONDS,
-          completed: true,
-        });
-      });
-
-      notify("番茄完成", "已记录。");
-      playBeep();
-    });
-  }, [requestPermission, startTick, notify, playBeep]);
+    startTick(handleFocusComplete);
+  }, [requestPermission, startTick, handleFocusComplete]);
 
   const handlePause = useCallback(() => {
     stopTimer();
@@ -122,8 +124,8 @@ export default function Home() {
 
   const handleResume = useCallback(() => {
     setTimer((prev) => ({ ...prev, mode: "focusing" }));
-    startTick(() => {});
-  }, [startTick]);
+    startTick(handleFocusComplete);
+  }, [startTick, handleFocusComplete]);
 
   const handleFinishEarly = useCallback(() => {
     stopTimer();

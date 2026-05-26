@@ -2,7 +2,16 @@
 
 import { useEffect, useCallback } from "react";
 
+const NOTIFY_ICON = "/icon.svg";
+
 export function useNotification() {
+  useEffect(() => {
+    if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
+    navigator.serviceWorker.register("/sw.js").catch((err) => {
+      console.warn("[notify] service worker register failed:", err);
+    });
+  }, []);
+
   const requestPermission = useCallback(async () => {
     if (typeof window === "undefined" || !("Notification" in window)) return false;
     if (Notification.permission === "granted") return true;
@@ -10,11 +19,27 @@ export function useNotification() {
     return result === "granted";
   }, []);
 
-  const notify = useCallback((title: string, body: string) => {
+  const notify = useCallback(async (title: string, body: string) => {
     if (typeof window === "undefined" || !("Notification" in window)) return;
-    if (Notification.permission === "granted") {
-      new Notification(title, { body, icon: "🍅" });
+    if (Notification.permission !== "granted") return;
+
+    const options: NotificationOptions = {
+      body,
+      icon: NOTIFY_ICON,
+      tag: "tomato-complete",
+    };
+
+    try {
+      if ("serviceWorker" in navigator) {
+        const reg = await navigator.serviceWorker.ready;
+        await reg.showNotification(title, options);
+        return;
+      }
+    } catch (err) {
+      console.warn("[notify] service worker notify failed, fallback:", err);
     }
+
+    new Notification(title, options);
   }, []);
 
   return { requestPermission, notify };
