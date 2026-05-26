@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import AppNav from "../components/AppNav";
 import CalendarView from "../components/CalendarView";
+import StatsSummary from "../components/StatsSummary";
 import { loadState, saveState } from "@/lib/store";
 import { fetchRemoteState } from "@/lib/supabase-sync";
 import type { AppState } from "@/lib/types";
@@ -74,6 +75,11 @@ export default function CalendarPage() {
       </header>
 
       <main className="page-inner w-full">
+        <StatsSummary
+          sessions={appState.sessions}
+          weeklyTarget={appState.weeklyTarget}
+        />
+
         <CalendarView sessions={appState.sessions} />
       </main>
 

@@ -2,6 +2,14 @@
 
 import { useState, useMemo } from "react";
 import type { PomodoroSession } from "@/lib/types";
+import {
+  WEEKDAY_LABELS,
+  groupByDay,
+  isSameDay,
+  getIntensityClass,
+  dateKey,
+} from "@/lib/stats";
+import DayDetailPanel from "./DayDetailPanel";
 
 interface CalendarViewProps {
   sessions: PomodoroSession[];
@@ -15,24 +23,6 @@ interface DayData {
   sessions: PomodoroSession[];
 }
 
-const WEEKDAY_LABELS = ["一", "二", "三", "四", "五", "六", "日"];
-
-function isSameDay(a: Date, b: Date): boolean {
-  return (
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate()
-  );
-}
-
-function getIntensityClass(count: number): string {
-  if (count === 0) return "";
-  if (count <= 2) return "bg-teal-100 text-teal-900";
-  if (count <= 5) return "bg-teal-200 text-teal-900";
-  if (count <= 8) return "bg-teal-300 text-teal-950";
-  return "bg-teal-500 text-white";
-}
-
 export default function CalendarView({ sessions }: CalendarViewProps) {
   const today = new Date();
   const [currentMonth, setCurrentMonth] = useState(
@@ -40,23 +30,7 @@ export default function CalendarView({ sessions }: CalendarViewProps) {
   );
   const [selectedDay, setSelectedDay] = useState<DayData | null>(null);
 
-  const completedSessions = useMemo(
-    () => sessions.filter((s) => s.completed),
-    [sessions]
-  );
-
-  const dailyCounts = useMemo(() => {
-    const map = new Map<string, { count: number; sessions: PomodoroSession[] }>();
-    for (const s of completedSessions) {
-      const d = new Date(s.endDate);
-      const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-      const entry = map.get(key) || { count: 0, sessions: [] };
-      entry.count++;
-      entry.sessions.push(s);
-      map.set(key, entry);
-    }
-    return map;
-  }, [completedSessions]);
+  const dailyCounts = useMemo(() => groupByDay(sessions), [sessions]);
 
   const calendarDays = useMemo(() => {
     const year = currentMonth.getFullYear();
@@ -73,7 +47,7 @@ export default function CalendarView({ sessions }: CalendarViewProps) {
 
     for (let i = startDayOfWeek - 1; i >= 0; i--) {
       const d = new Date(year, month - 1, daysInPrevMonth - i);
-      const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+      const key = dateKey(d);
       const entry = dailyCounts.get(key);
       days.push({
         date: d,
@@ -86,7 +60,7 @@ export default function CalendarView({ sessions }: CalendarViewProps) {
 
     for (let day = 1; day <= daysInMonth; day++) {
       const d = new Date(year, month, day);
-      const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+      const key = dateKey(d);
       const entry = dailyCounts.get(key);
       days.push({
         date: d,
@@ -101,7 +75,7 @@ export default function CalendarView({ sessions }: CalendarViewProps) {
     if (remaining < 7) {
       for (let i = 1; i <= remaining; i++) {
         const d = new Date(year, month + 1, i);
-        const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+        const key = dateKey(d);
         const entry = dailyCounts.get(key);
         days.push({
           date: d,
@@ -261,55 +235,11 @@ export default function CalendarView({ sessions }: CalendarViewProps) {
       </div>
 
       {selectedDay && (
-        <div className="card mt-4 p-4">
-          <h3 className="text-sm font-semibold text-teal-950 mb-2">
-            {selectedDay.date.toLocaleDateString("zh-CN", {
-              month: "long",
-              day: "numeric",
-              weekday: "long",
-            })}
-          </h3>
-
-          {selectedDay.sessions.length === 0 ? (
-            <p className="subtitle">当天没有完成的番茄记录</p>
-          ) : (
-            <div className="space-y-2">
-              <p className="subtitle">
-                完成{" "}
-                <span className="font-semibold text-teal-600">{selectedDay.count}</span>{" "}
-                个番茄
-              </p>
-              <div className="space-y-1.5">
-                {selectedDay.sessions.map((s) => {
-                  const start = new Date(s.startDate);
-                  const end = new Date(s.endDate);
-                  const durationMin = Math.round(
-                    (end.getTime() - start.getTime()) / 60000
-                  );
-                  return (
-                    <div
-                      key={s.id}
-                      className="flex items-center justify-between text-xs text-slate-500 bg-teal-50 rounded-lg px-3 py-2"
-                    >
-                      <span>
-                        {start.toLocaleTimeString("zh-CN", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}{" "}
-                        -{" "}
-                        {end.toLocaleTimeString("zh-CN", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </span>
-                      <span className="text-slate-400">{durationMin} 分钟</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
+        <DayDetailPanel
+          date={selectedDay.date}
+          count={selectedDay.count}
+          sessions={selectedDay.sessions}
+        />
       )}
     </div>
   );
