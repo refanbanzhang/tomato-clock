@@ -4,6 +4,23 @@ export interface TimerState {
   mode: TimerMode;
   remainingSeconds: number;
   totalSeconds: number;
+  /** 专注中的绝对结束时间（毫秒），暂停时清除 */
+  endAt?: number;
+}
+
+export function getRemainingSeconds(endAt: number): number {
+  return Math.max(0, Math.ceil((endAt - Date.now()) / 1000));
+}
+
+/** 按墙钟校准剩余时间（切回前台、从 localStorage 恢复后使用） */
+export function syncTimerFromWallClock(state: TimerState): TimerState {
+  if (state.mode !== "focusing" || state.endAt == null) {
+    return state;
+  }
+  return {
+    ...state,
+    remainingSeconds: getRemainingSeconds(state.endAt),
+  };
 }
 
 interface PersistedTimer {
@@ -48,14 +65,11 @@ export function loadTimerState(): TimerState {
     }
 
     if (parsed.mode === "focusing" && parsed.endAt) {
-      const remainingSeconds = Math.max(
-        0,
-        Math.ceil((parsed.endAt - Date.now()) / 1000)
-      );
       return {
         mode: "focusing",
-        remainingSeconds,
+        remainingSeconds: getRemainingSeconds(parsed.endAt),
         totalSeconds: parsed.totalSeconds,
+        endAt: parsed.endAt,
       };
     }
   } catch {
@@ -79,8 +93,8 @@ export function saveTimerState(state: TimerState): void {
     totalSeconds: state.totalSeconds,
   };
 
-  if (state.mode === "focusing") {
-    payload.endAt = Date.now() + state.remainingSeconds * 1000;
+  if (state.mode === "focusing" && state.endAt != null) {
+    payload.endAt = state.endAt;
   }
 
   localStorage.setItem(TIMER_STORAGE_KEY, JSON.stringify(payload));

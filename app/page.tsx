@@ -17,8 +17,10 @@ import {
 import { FOCUS_SECONDS, AppState } from "@/lib/types";
 import {
   createInitialTimerState,
+  getRemainingSeconds,
   loadTimerState,
   saveTimerState,
+  syncTimerFromWallClock,
   TimerState,
 } from "@/lib/timer-engine";
 
@@ -78,12 +80,16 @@ export default function Home() {
       stopTimer();
       timerRef.current = setInterval(() => {
         setTimer((prev) => {
-          if (prev.remainingSeconds <= 1) {
+          if (prev.mode !== "focusing" || prev.endAt == null) {
+            return prev;
+          }
+          const remainingSeconds = getRemainingSeconds(prev.endAt);
+          if (remainingSeconds <= 0) {
             stopTimer();
             setTimeout(onComplete, 0);
             return { ...prev, remainingSeconds: 0 };
           }
-          return { ...prev, remainingSeconds: prev.remainingSeconds - 1 };
+          return { ...prev, remainingSeconds };
         });
       }, 1000);
     },
@@ -112,21 +118,35 @@ export default function Home() {
 
   const handleStartFocus = useCallback(() => {
     requestPermission();
+    const endAt = Date.now() + FOCUS_SECONDS * 1000;
     setTimer({
       mode: "focusing",
       remainingSeconds: FOCUS_SECONDS,
       totalSeconds: FOCUS_SECONDS,
+      endAt,
     });
     startTick(handleFocusComplete);
   }, [requestPermission, startTick, handleFocusComplete]);
 
   const handlePause = useCallback(() => {
     stopTimer();
-    setTimer((prev) => ({ ...prev, mode: "paused" }));
+    setTimer((prev) => {
+      if (prev.mode !== "focusing" || prev.endAt == null) {
+        return { ...prev, mode: "paused" };
+      }
+      return {
+        mode: "paused",
+        remainingSeconds: getRemainingSeconds(prev.endAt),
+        totalSeconds: prev.totalSeconds,
+      };
+    });
   }, [stopTimer]);
 
   const handleResume = useCallback(() => {
-    setTimer((prev) => ({ ...prev, mode: "focusing" }));
+    setTimer((prev) => {
+      const endAt = Date.now() + prev.remainingSeconds * 1000;
+      return { ...prev, mode: "focusing", endAt };
+    });
     startTick(handleFocusComplete);
   }, [startTick, handleFocusComplete]);
 
@@ -165,6 +185,24 @@ export default function Home() {
       startTick(handleFocusComplete);
     }
   }, [appState, timer.mode, timer.remainingSeconds, startTick, handleFocusComplete]);
+
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState !== "visible") return;
+      setTimer((prev) => {
+        const synced = syncTimerFromWallClock(prev);
+        if (synced.mode === "focusing" && synced.remainingSeconds <= 0) {
+          setTimeout(handleFocusComplete, 0);
+          return { ...synced, remainingSeconds: 0 };
+        }
+        return synced;
+      });
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, [handleFocusComplete]);
+
+  useEffect(() => () => stopTimer(), [stopTimer]);
 
   const handleSetTarget = useCallback((target: number) => {
     setAppState((prev) => {
