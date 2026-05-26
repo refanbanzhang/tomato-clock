@@ -1,42 +1,30 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import Link from "next/link";
 import TimerDisplay from "./components/TimerDisplay";
 import TimerControls from "./components/TimerControls";
-import StatsPanel from "./components/StatsPanel";
 import SettingsPanel from "./components/SettingsPanel";
-import CompletionDialog from "./components/CompletionDialog";
 import { useNotification, useAudio, useKeyboardShortcut } from "./components/hooks";
+import { useSupabaseSync } from "./components/useSupabaseSync";
 import {
   loadState,
   saveState,
-  computeProgress,
   addSession,
   setWeeklyTarget,
-  setStatsMode,
 } from "@/lib/store";
-import {
-  FOCUS_SECONDS,
-  AppState,
-  ProgressSnapshot,
-  BreakType,
-  StatsMode,
-} from "@/lib/types";
+import { FOCUS_SECONDS, AppState } from "@/lib/types";
 import {
   createInitialTimerState,
-  getBreakType,
-  getBreakSeconds,
   TimerState,
 } from "@/lib/timer-engine";
 
 export default function Home() {
   const [appState, setAppState] = useState<AppState | null>(null);
   const [timer, setTimer] = useState<TimerState>(createInitialTimerState());
-  const [progress, setProgress] = useState<ProgressSnapshot | null>(null);
-  const [showCompletion, setShowCompletion] = useState(false);
-  const [completedBreakType, setCompletedBreakType] = useState<BreakType>("short");
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const appStateRef = useRef<AppState | null>(null);
   const { requestPermission, notify } = useNotification();
   const { playBeep } = useAudio();
 
@@ -44,22 +32,34 @@ export default function Home() {
   useEffect(() => {
     const state = loadState();
     setAppState(state);
-    setProgress(computeProgress(state, new Date()));
   }, []);
 
   // Save state on change
   useEffect(() => {
-    if (appState) saveState(appState);
+    if (appState) {
+      appStateRef.current = appState;
+      saveState(appState);
+    }
   }, [appState]);
 
-  // Recompute progress periodically
+  // Supabase sync
+  const { triggerUpload } = useSupabaseSync({
+    onRemoteState: (remote) => {
+      setAppState(remote);
+    },
+    getCurrentState: () => appStateRef.current!,
+  });
+
+  // Upload to Supabase when state changes (after initial load)
+  const initialLoadDone = useRef(false);
   useEffect(() => {
-    if (!appState) return;
-    const id = setInterval(() => {
-      setProgress(computeProgress(appState, new Date()));
-    }, 10000);
-    return () => clearInterval(id);
-  }, [appState]);
+    if (appState && initialLoadDone.current) {
+      triggerUpload();
+    }
+    if (appState && !initialLoadDone.current) {
+      initialLoadDone.current = true;
+    }
+  }, [appState, triggerUpload]);
 
   const stopTimer = useCallback(() => {
     if (timerRef.current) {
@@ -91,18 +91,14 @@ export default function Home() {
       mode: "focusing",
       remainingSeconds: FOCUS_SECONDS,
       totalSeconds: FOCUS_SECONDS,
-      completedInStreak: timer.completedInStreak,
     });
     startTick(() => {
-      // focus completed naturally
-      const bt = getBreakType(timer.completedInStreak);
-      const newStreak = timer.completedInStreak + 1;
+      // focus completed
       setTimer((prev) => ({
         ...prev,
         mode: "idle",
         remainingSeconds: FOCUS_SECONDS,
         totalSeconds: FOCUS_SECONDS,
-        completedInStreak: newStreak,
       }));
 
       // Record session
@@ -118,14 +114,10 @@ export default function Home() {
         });
       });
 
-      notify("番茄完成", "已计入本周进度。");
+      notify("番茄完成", "已记录。");
       playBeep();
-
-      // Show completion dialog
-      setCompletedBreakType(bt);
-      setShowCompletion(true);
     });
-  }, [requestPermission, timer.completedInStreak, startTick, notify, playBeep]);
+  }, [requestPermission, startTick, notify, playBeep]);
 
   const handlePause = useCallback(() => {
     stopTimer();
@@ -134,9 +126,7 @@ export default function Home() {
 
   const handleResume = useCallback(() => {
     setTimer((prev) => ({ ...prev, mode: "focusing" }));
-    startTick(() => {
-      // shouldn't happen on resume, but handle anyway
-    });
+    startTick(() => {});
   }, [startTick]);
 
   const handleFinishEarly = useCallback(() => {
@@ -171,50 +161,10 @@ export default function Home() {
     }));
   }, [stopTimer]);
 
-  const handleStartBreak = useCallback(() => {
-    setShowCompletion(false);
-    const seconds = getBreakSeconds(completedBreakType);
-    setTimer({
-      mode: "resting",
-      remainingSeconds: seconds,
-      totalSeconds: seconds,
-      completedInStreak: 0,
-    });
-    startTick(() => {
-      setTimer((prev) => ({
-        ...prev,
-        mode: "idle",
-        remainingSeconds: FOCUS_SECONDS,
-        totalSeconds: FOCUS_SECONDS,
-      }));
-    });
-  }, [completedBreakType, startTick]);
-
-  const handleLater = useCallback(() => {
-    setShowCompletion(false);
-  }, []);
-
-  const handleStopBreak = useCallback(() => {
-    stopTimer();
-    setTimer((prev) => ({
-      ...prev,
-      mode: "idle",
-      remainingSeconds: FOCUS_SECONDS,
-      totalSeconds: FOCUS_SECONDS,
-    }));
-  }, [stopTimer]);
-
   const handleSetTarget = useCallback((target: number) => {
     setAppState((prev) => {
       if (!prev) return prev;
       return setWeeklyTarget(prev, target);
-    });
-  }, []);
-
-  const handleStatsModeChange = useCallback((mode: StatsMode) => {
-    setAppState((prev) => {
-      if (!prev) return prev;
-      return setStatsMode(prev, mode);
     });
   }, []);
 
@@ -227,7 +177,7 @@ export default function Home() {
 
   useKeyboardShortcut(" ", handleSpaceShortcut, true);
 
-  if (!appState || !progress) {
+  if (!appState) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-stone-50">
         <div className="text-slate-400 text-lg">加载中...</div>
@@ -237,6 +187,24 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-stone-50 flex flex-col items-center py-8 px-4">
+      {/* Navigation */}
+      <nav className="w-full max-w-md mb-8">
+        <div className="flex rounded-xl bg-white border border-stone-200 p-1 shadow-sm">
+          <Link
+            href="/"
+            className="flex-1 text-center py-2 text-sm font-medium rounded-lg bg-stone-800 text-white shadow-sm"
+          >
+            计时器
+          </Link>
+          <Link
+            href="/calendar"
+            className="flex-1 text-center py-2 text-sm font-medium rounded-lg text-slate-500 hover:text-slate-700 hover:bg-stone-50 transition-colors"
+          >
+            日历
+          </Link>
+        </div>
+      </nav>
+
       {/* Header */}
       <header className="mb-8 text-center">
         <h1 className="text-3xl font-bold text-slate-800 flex items-center gap-2 justify-center">
@@ -256,22 +224,12 @@ export default function Home() {
         {/* Controls */}
         <TimerControls
           mode={timer.mode}
-          completedInStreak={timer.completedInStreak}
           remainingSeconds={timer.remainingSeconds}
           onStart={handleStartFocus}
           onPause={handlePause}
           onResume={handleResume}
           onFinishEarly={handleFinishEarly}
           onAbandon={handleAbandon}
-          onStartBreak={handleStartBreak}
-          onStopBreak={handleStopBreak}
-        />
-
-        {/* Stats */}
-        <StatsPanel
-          progress={progress}
-          statsMode={appState.statsMode}
-          onStatsModeChange={handleStatsModeChange}
         />
 
         {/* Settings */}
@@ -280,14 +238,6 @@ export default function Home() {
           onSetTarget={handleSetTarget}
         />
       </div>
-
-      {/* Completion Dialog */}
-      <CompletionDialog
-        show={showCompletion}
-        breakType={completedBreakType}
-        onStartBreak={handleStartBreak}
-        onLater={handleLater}
-      />
 
       {/* Footer */}
       <footer className="mt-12 mb-4 text-xs text-slate-300">

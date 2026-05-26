@@ -18,14 +18,12 @@ export default function TimerDisplay({ mode, remainingSeconds, totalSeconds }: T
     idle: "准备开始",
     focusing: "专注中",
     paused: "已暂停",
-    resting: "休息中",
   };
 
   const modeColor: Record<TimerMode, string> = {
     idle: "#e2e8f0",
     focusing: "#ef4444",
     paused: "#f59e0b",
-    resting: "#22c55e",
   };
 
   return (

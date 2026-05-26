@@ -68,8 +68,7 @@ export default function SettingsPanel({ weeklyTarget, onSetTarget }: SettingsPan
 
       <div className="mt-4 pt-4 border-t border-slate-100">
         <div className="text-xs text-slate-400 space-y-1">
-          <p>🍅 专注: 25 分钟 | ☕ 短休息: 5 分钟 | 🛌 长休息: 15 分钟</p>
-          <p>每 4 个番茄后建议长休息</p>
+          <p>🍅 专注: 25 分钟</p>
           <p>快捷键 <kbd className="px-1 py-0.5 bg-slate-100 rounded font-mono">Space</kbd> 开始/暂停</p>
         </div>
       </div>
