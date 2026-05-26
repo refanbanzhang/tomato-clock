@@ -7,3 +7,8 @@ dist/
 *.xcuserstate
 xcuserdata/
 DerivedData/
+
+# Next.js
+web/node_modules/
+web/.next/
+web/out/
