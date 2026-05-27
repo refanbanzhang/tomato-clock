@@ -13,33 +13,59 @@ export function useNotification() {
   }, []);
 
   const requestPermission = useCallback(async () => {
-    if (typeof window === "undefined" || !("Notification" in window)) return false;
+    if (typeof window === "undefined" || !("Notification" in window)) {
+      console.log("[notify] Notification API not available");
+      return false;
+    }
     if (Notification.permission === "granted") return true;
-    const result = await Notification.requestPermission();
-    return result === "granted";
+    try {
+      const result = await Notification.requestPermission();
+      console.log("[notify] permission result:", result);
+      return result === "granted";
+    } catch (err) {
+      console.error("[notify] permission request failed:", err);
+      return false;
+    }
   }, []);
 
-  const notify = useCallback(async (title: string, body: string) => {
-    if (typeof window === "undefined" || !("Notification" in window)) return;
-    if (Notification.permission !== "granted") return;
+  const notify = useCallback(async (title: string, body: string): Promise<boolean> => {
+    if (typeof window === "undefined" || !("Notification" in window)) {
+      console.log("[notify] Notification API not available");
+      return false;
+    }
+    if (Notification.permission !== "granted") {
+      console.log("[notify] permission not granted, current:", Notification.permission);
+      return false;
+    }
 
     const options: NotificationOptions = {
       body,
       icon: NOTIFY_ICON,
       tag: "tomato-complete",
+      requireInteraction: true,
     };
 
-    try {
-      if ("serviceWorker" in navigator) {
+    // 优先通过 Service Worker 发送（后台标签页也能弹出）
+    if ("serviceWorker" in navigator) {
+      try {
         const reg = await navigator.serviceWorker.ready;
         await reg.showNotification(title, options);
-        return;
+        console.log("[notify] sent via service worker");
+        return true;
+      } catch (err) {
+        console.warn("[notify] service worker failed, trying fallback:", err);
       }
-    } catch (err) {
-      console.warn("[notify] service worker notify failed, fallback:", err);
     }
 
-    new Notification(title, options);
+    // 降级：直接 new Notification
+    try {
+      new Notification(title, options);
+      console.log("[notify] sent via new Notification()");
+      return true;
+    } catch (err) {
+      console.error("[notify] all notification methods failed:", err);
+      return false;
+    }
   }, []);
 
   return { requestPermission, notify };

@@ -6,6 +6,7 @@ import TomatoIcon from "./components/TomatoIcon";
 import TimerDisplay from "./components/TimerDisplay";
 import TimerControls from "./components/TimerControls";
 import SettingsPanel from "./components/SettingsPanel";
+import Toast from "./components/Toast";
 import { useNotification, useAudio, useKeyboardShortcut } from "./components/hooks";
 import { useSupabaseSync } from "./components/useSupabaseSync";
 import {
@@ -34,6 +35,7 @@ export default function Home() {
   const timerRestoredRef = useRef(false);
   const { requestPermission, notify } = useNotification();
   const { playBeep } = useAudio();
+  const [toast, setToast] = useState<{ message: string; sub?: string } | null>(null);
 
   useEffect(() => {
     const state = loadState();
@@ -114,6 +116,9 @@ export default function Home() {
 
     notify("番茄完成", "已记录。");
     playBeep();
+
+    // 始终显示应用内 toast 作为兜底通知
+    setToast({ message: "番茄完成！", sub: "已记录，继续保持节奏 🍅" });
   }, [notify, playBeep, stopTimer]);
 
   const handleStartFocus = useCallback(() => {
@@ -313,6 +318,14 @@ export default function Home() {
       )}
 
       <footer className="footer">Tomato Clock v0.1.0</footer>
+
+      {toast && (
+        <Toast
+          message={toast.message}
+          sub={toast.sub}
+          onDismiss={() => setToast(null)}
+        />
+      )}
     </div>
   );
 }

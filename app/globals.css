@@ -241,6 +241,53 @@ body {
   }
 }
 
+.toast-overlay {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  cursor: pointer;
+}
+
+.toast-card {
+  background: var(--color-teal-950);
+  color: white;
+  padding: 1rem 1.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 8px 30px rgba(19, 78, 74, 0.3);
+  opacity: 0;
+  transform: translateY(12px) scale(0.96);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.toast-enter {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.toast-exit {
+  opacity: 0;
+  transform: translateY(8px) scale(0.96);
+}
+
+.toast-icon {
+  font-size: 1.375rem;
+  line-height: 1;
+}
+
+.toast-message {
+  font-weight: 600;
+  font-size: 0.9375rem;
+  line-height: 1.4;
+}
+
+.toast-sub {
+  font-size: 0.8125rem;
+  opacity: 0.7;
+  margin-top: 0.125rem;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .loader {
     animation: none;
