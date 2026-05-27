@@ -125,11 +125,11 @@ export default function SettingsPanel({
       <div className="mt-5 pt-5 border-t border-teal-50 dark:border-slate-700/50">
         <p className="text-sm font-medium text-teal-950 dark:text-slate-200">{t("dataSection")}</p>
         <p className="subtitle mt-1">{t("dataSectionHint")}</p>
-        <div className="flex gap-2 mt-3">
-          <button onClick={handleExport} className="btn btn-muted flex-1 py-2 text-sm">
+        <div className="data-actions">
+          <button onClick={handleExport} className="btn btn-muted py-2 text-sm">
             {t("exportData")}
           </button>
-          <button onClick={handleImportClick} className="btn btn-muted flex-1 py-2 text-sm">
+          <button onClick={handleImportClick} className="btn btn-muted py-2 text-sm">
             {t("importData")}
           </button>
           <input
