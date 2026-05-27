@@ -137,3 +137,12 @@ export async function uploadState(
     throw new Error(`Supabase upload failed (${res.status}): ${text}`);
   }
 }
+
+export async function clearRemoteState(): Promise<void> {
+  const empty: AppState = {
+    sessions: [],
+    weeklyTarget: 40,
+    targetChanges: [],
+  };
+  await uploadState(empty, new Date());
+}

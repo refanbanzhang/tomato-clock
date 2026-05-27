@@ -16,6 +16,7 @@ import {
   setWeeklyTarget,
 } from "@/lib/store";
 import { FOCUS_SECONDS, AppState } from "@/lib/types";
+import { uploadState, clearRemoteState } from "@/lib/supabase-sync";
 import {
   createInitialTimerState,
   getRemainingSeconds,
@@ -33,6 +34,7 @@ export default function Home() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const appStateRef = useRef<AppState | null>(null);
   const timerRestoredRef = useRef(false);
+  const skipNextSync = useRef(false);
   const { requestPermission, notify } = useNotification();
   const { playBeep } = useAudio();
   const [toast, setToast] = useState<{ message: string; sub?: string } | null>(null);
@@ -63,6 +65,10 @@ export default function Home() {
   const initialLoadDone = useRef(false);
   useEffect(() => {
     if (appState && initialLoadDone.current) {
+      if (skipNextSync.current) {
+        skipNextSync.current = false;
+        return;
+      }
       triggerUpload();
     }
     if (appState && !initialLoadDone.current) {
@@ -216,6 +222,41 @@ export default function Home() {
     });
   }, []);
 
+  const handleClearToday = useCallback(async () => {
+    const state = loadState();
+    if (!state) return;
+
+    const today = new Date().toISOString().slice(0, 10);
+    const filtered = state.sessions.filter(
+      (s) => !s.endDate.startsWith(today)
+    );
+
+    const cleaned: AppState = { ...state, sessions: filtered };
+    setAppState(cleaned);
+
+    try {
+      await uploadState(cleaned, new Date());
+    } catch (e) {
+      console.warn("远程同步失败:", e);
+    }
+  }, []);
+
+  const handleClearAll = useCallback(async () => {
+    localStorage.removeItem("tomato-clock-state");
+    localStorage.removeItem("tomato-clock-timer");
+    try {
+      await clearRemoteState();
+    } catch (e) {
+      console.warn("远程清除失败:", e);
+    }
+    window.location.reload();
+  }, []);
+
+  const handleTestComplete = useCallback(() => {
+    skipNextSync.current = true;
+    handleFocusComplete();
+  }, [handleFocusComplete]);
+
   const handleSpaceShortcut = useCallback(() => {
     if (timer.mode === "idle") handleStartFocus();
     else if (timer.mode === "focusing") handlePause();
@@ -282,7 +323,7 @@ export default function Home() {
           onResume={handleResume}
           onFinishEarly={handleFinishEarly}
           onAbandon={handleAbandon}
-          onTestComplete={handleFocusComplete}
+          onTestComplete={handleTestComplete}
         />
       </main>
 
@@ -305,6 +346,8 @@ export default function Home() {
                 handleSetTarget(t);
                 setShowSettings(false);
               }}
+              onClearData={handleClearToday}
+              onClearAll={handleClearAll}
             />
             <div className="px-6 pb-5">
               <button

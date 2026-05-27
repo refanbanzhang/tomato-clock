@@ -5,9 +5,11 @@ import { useState } from "react";
 interface SettingsPanelProps {
   weeklyTarget: number;
   onSetTarget: (target: number) => void;
+  onClearData?: () => void;
+  onClearAll?: () => void;
 }
 
-export default function SettingsPanel({ weeklyTarget, onSetTarget }: SettingsPanelProps) {
+export default function SettingsPanel({ weeklyTarget, onSetTarget, onClearData, onClearAll }: SettingsPanelProps) {
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(weeklyTarget);
 
@@ -85,6 +87,24 @@ export default function SettingsPanel({ weeklyTarget, onSetTarget }: SettingsPan
             快捷键 <kbd className="kbd">Space</kbd> 开始 / 暂停
           </p>
         </div>
+        {onClearData && (
+          <div className="mt-4 flex gap-2">
+            <button
+              onClick={onClearData}
+              className="flex-1 py-2 text-xs text-amber-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer"
+            >
+              清除今天
+            </button>
+            {onClearAll && (
+              <button
+                onClick={onClearAll}
+                className="flex-1 py-2 text-xs text-red-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+              >
+                清除所有
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
