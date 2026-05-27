@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev -p 3002",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "publish": "next build && rsync -avz --delete -e \"ssh\" out/ ubuntu@1.14.248.175:/var/www/tomato-clock/"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.3.0",
