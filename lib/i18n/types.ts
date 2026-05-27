@@ -57,6 +57,10 @@ export interface Translations {
   notificationBody: string;
   toastTitle: string;
   toastSubtitle: string;
+  weeklyCompleteTitle: string;
+  weeklyCompleteSub: string;
+  weeklyCompleteBtn: string;
+  testFireworks: string;
 
   // Notification errors
   browserNoSupport: string;

@@ -11,6 +11,7 @@ interface SettingsPanelProps {
   onSetTarget: (target: number) => void;
   onImport: (state: AppState) => void;
   onImportError: (message: string) => void;
+  onTestFireworks?: () => void;
 }
 
 export default function SettingsPanel({
@@ -19,6 +20,7 @@ export default function SettingsPanel({
   onSetTarget,
   onImport,
   onImportError,
+  onTestFireworks,
 }: SettingsPanelProps) {
   const { t } = useLocale();
   const [editing, setEditing] = useState(false);
@@ -149,6 +151,15 @@ export default function SettingsPanel({
             {t("shortcutStartPause")} <kbd className="kbd">Space</kbd>
           </p>
         </div>
+        {onTestFireworks && (
+          <button
+            type="button"
+            onClick={onTestFireworks}
+            className="btn btn-muted w-full py-2 text-sm mt-3"
+          >
+            {t("testFireworks")}
+          </button>
+        )}
       </div>
     </div>
   );

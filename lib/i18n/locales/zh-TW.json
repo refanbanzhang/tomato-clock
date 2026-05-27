@@ -47,6 +47,10 @@
   "notificationBody": "已記錄。",
   "toastTitle": "番茄完成！",
   "toastSubtitle": "已記錄，繼續保持節奏",
+  "weeklyCompleteTitle": "本週目標達成！",
+  "weeklyCompleteSub": "恭喜你完成了本週目標",
+  "weeklyCompleteBtn": "太棒了",
+  "testFireworks": "測試慶祝效果",
 
   "browserNoSupport": "瀏覽器不支援通知",
   "notificationNeedHttps": "通知需要 HTTPS 環境，目前為非安全連線",

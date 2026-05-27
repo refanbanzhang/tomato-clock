@@ -7,6 +7,8 @@ import TimerDisplay from "./components/TimerDisplay";
 import TimerControls from "./components/TimerControls";
 import SettingsPanel from "./components/SettingsPanel";
 import Toast from "./components/Toast";
+import Fireworks from "./components/Fireworks";
+import WeeklyCompleteModal from "./components/WeeklyCompleteModal";
 import PageTools from "./components/PageTools";
 import { useNotification, useAudio, useKeyboardShortcut } from "./components/hooks";
 import { useSupabaseSync } from "./components/useSupabaseSync";
@@ -18,6 +20,8 @@ import {
   setWeeklyTarget,
 } from "@/lib/store";
 import { FOCUS_SECONDS, AppState } from "@/lib/types";
+import { willReachWeeklyTarget } from "@/lib/weekly-target";
+import { countInWeek } from "@/lib/stats";
 import {
   createInitialTimerState,
   getRemainingSeconds,
@@ -50,6 +54,18 @@ export default function Home() {
   const { requestPermission, notify } = useNotification();
   const { playBeep } = useAudio();
   const [toast, setToast] = useState<{ message: string; sub?: string } | null>(null);
+  const [fireworksKey, setFireworksKey] = useState(0);
+  const [showWeeklyComplete, setShowWeeklyComplete] = useState(false);
+
+  const triggerFireworks = useCallback(() => {
+    setFireworksKey((key) => key + 1);
+  }, []);
+
+  const celebrateWeeklyComplete = useCallback(() => {
+    console.info("[tomato-clock] celebrate weekly complete");
+    triggerFireworks();
+    setShowWeeklyComplete(true);
+  }, [triggerFireworks]);
 
   useEffect(() => {
     const state = loadState();
@@ -121,23 +137,44 @@ export default function Home() {
     setTimer(createInitialTimerState());
 
     const now = new Date();
-    setAppState((prev) => {
-      if (!prev) return prev;
-      return addSession(prev, {
+    const currentState = appStateRef.current;
+    if (!currentState) {
+      console.warn("[tomato-clock] focus complete skipped: app state not ready");
+      return;
+    }
+
+    const weekCountBefore = countInWeek(currentState.sessions);
+    const hitWeeklyTarget = willReachWeeklyTarget(
+      currentState.sessions,
+      currentState.weeklyTarget
+    );
+
+    setAppState(
+      addSession(currentState, {
         id: crypto.randomUUID(),
         startDate: new Date(now.getTime() - FOCUS_SECONDS * 1000).toISOString(),
         endDate: now.toISOString(),
         plannedSeconds: FOCUS_SECONDS,
         completed: true,
-      });
-    });
+      })
+    );
 
     notify(t("notificationTitle"), t("notificationBody"));
     playBeep();
 
-    // 始终显示应用内 toast 作为兜底通知
+    console.info("[tomato-clock] focus complete", {
+      hitWeeklyTarget,
+      weekCountBefore,
+      weeklyTarget: currentState.weeklyTarget,
+    });
+
+    if (hitWeeklyTarget) {
+      celebrateWeeklyComplete();
+      return;
+    }
+
     setToast({ message: t("toastTitle"), sub: t("toastSubtitle") + " \uD83C\uDF45" });
-  }, [notify, playBeep, stopTimer]);
+  }, [notify, playBeep, stopTimer, t, celebrateWeeklyComplete]);
 
   const handleStartFocus = useCallback(() => {
     requestPermission();
@@ -343,6 +380,7 @@ export default function Home() {
               }}
               onImport={handleImport}
               onImportError={handleImportError}
+              onTestFireworks={celebrateWeeklyComplete}
             />
             <div className="px-6 pb-5">
               <button
@@ -363,6 +401,22 @@ export default function Home() {
           message={toast.message}
           sub={toast.sub}
           onDismiss={() => setToast(null)}
+        />
+      )}
+
+      {fireworksKey > 0 && (
+        <Fireworks
+          key={fireworksKey}
+          onDone={() => setFireworksKey(0)}
+        />
+      )}
+
+      {showWeeklyComplete && (
+        <WeeklyCompleteModal
+          title={t("weeklyCompleteTitle")}
+          message={t("weeklyCompleteSub")}
+          buttonLabel={t("weeklyCompleteBtn")}
+          onClose={() => setShowWeeklyComplete(false)}
         />
       )}
     </div>

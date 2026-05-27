@@ -47,6 +47,10 @@
   "notificationBody": "Recorded.",
   "toastTitle": "Pomodoro Complete!",
   "toastSubtitle": "Recorded, keep up the rhythm",
+  "weeklyCompleteTitle": "Weekly goal reached!",
+  "weeklyCompleteSub": "Congratulations, you completed this week's goal",
+  "weeklyCompleteBtn": "Awesome",
+  "testFireworks": "Test celebration",
 
   "browserNoSupport": "Browser does not support notifications",
   "notificationNeedHttps": "Notifications require HTTPS, current connection is insecure",
