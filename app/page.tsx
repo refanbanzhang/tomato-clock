@@ -282,6 +282,7 @@ export default function Home() {
           onResume={handleResume}
           onFinishEarly={handleFinishEarly}
           onAbandon={handleAbandon}
+          onTestComplete={handleFocusComplete}
         />
       </main>
 

@@ -9,6 +9,7 @@ interface TimerControlsProps {
   onResume: () => void;
   onFinishEarly: () => void;
   onAbandon: () => void;
+  onTestComplete?: () => void;
 }
 
 export default function TimerControls({
@@ -18,6 +19,7 @@ export default function TimerControls({
   onResume,
   onFinishEarly,
   onAbandon,
+  onTestComplete,
 }: TimerControlsProps) {
   if (mode === "idle") {
     return (
@@ -46,6 +48,12 @@ export default function TimerControls({
           放弃
           <span className="block text-[10px] font-normal opacity-70">不计入</span>
         </button>
+        {onTestComplete && (
+          <button onClick={onTestComplete} className="btn btn-ghost text-teal-500 text-xs">
+            测试完成
+            <span className="block text-[10px] font-normal opacity-70">计入·通知</span>
+          </button>
+        )}
       </div>
     );
   }
