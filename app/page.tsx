@@ -380,7 +380,6 @@ export default function Home() {
               }}
               onImport={handleImport}
               onImportError={handleImportError}
-              onTestFireworks={celebrateWeeklyComplete}
             />
             <div className="px-6 pb-5">
               <button

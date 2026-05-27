@@ -60,7 +60,6 @@ export interface Translations {
   weeklyCompleteTitle: string;
   weeklyCompleteSub: string;
   weeklyCompleteBtn: string;
-  testFireworks: string;
 
   // Notification errors
   browserNoSupport: string;

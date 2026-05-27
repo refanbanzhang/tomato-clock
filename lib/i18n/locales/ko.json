@@ -50,7 +50,6 @@
   "weeklyCompleteTitle": "주간 목표 달성!",
   "weeklyCompleteSub": "축하합니다, 이번 주 목표를 달성했습니다",
   "weeklyCompleteBtn": "좋아요",
-  "testFireworks": "축하 효과 테스트",
 
   "browserNoSupport": "브라우저가 알림을 지원하지 않습니다",
   "notificationNeedHttps": "알림에는 HTTPS 환경이 필요합니다. 현재 안전하지 않은 연결입니다",

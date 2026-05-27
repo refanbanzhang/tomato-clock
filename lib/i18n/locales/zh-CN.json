@@ -50,7 +50,6 @@
   "weeklyCompleteTitle": "本周目标达成！",
   "weeklyCompleteSub": "恭喜你完成了本周目标",
   "weeklyCompleteBtn": "太棒了",
-  "testFireworks": "测试庆祝效果",
 
   "browserNoSupport": "浏览器不支持通知",
   "notificationNeedHttps": "通知需要 HTTPS 环境，当前为非安全连接",
