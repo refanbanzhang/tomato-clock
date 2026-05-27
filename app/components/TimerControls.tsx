@@ -1,6 +1,7 @@
 "use client";
 
 import { TimerMode, FOCUS_SECONDS } from "@/lib/types";
+import { useLocale } from "@/lib/i18n";
 
 interface TimerControlsProps {
   mode: TimerMode;
@@ -19,14 +20,16 @@ export default function TimerControls({
   onFinishEarly,
   onAbandon,
 }: TimerControlsProps) {
+  const { t } = useLocale();
+
   if (mode === "idle") {
     return (
       <div className="flex flex-col items-center gap-3 w-full">
         <button onClick={onStart} className="btn btn-cta w-full max-w-xs">
-          开始 {FOCUS_SECONDS / 60} 分钟
+          {t("startFocus", { minutes: FOCUS_SECONDS / 60 })}
         </button>
         <p className="subtitle">
-          快捷键 <kbd className="kbd">Space</kbd>
+          {t("shortcut")} <kbd className="kbd">Space</kbd>
         </p>
       </div>
     );
@@ -36,15 +39,15 @@ export default function TimerControls({
     return (
       <div className="flex flex-wrap items-center justify-center gap-2 w-full">
         <button onClick={onPause} className="btn btn-warn">
-          暂停
+          {t("pause")}
         </button>
         <button onClick={onFinishEarly} className="btn btn-muted">
-          提前结束
-          <span className="block text-[10px] font-normal opacity-70">不计入</span>
+          {t("finishEarly")}
+          <span className="block text-[10px] font-normal opacity-70">{t("notCounted")}</span>
         </button>
           <button onClick={onAbandon} className="btn btn-ghost">
-            放弃
-            <span className="block text-[10px] font-normal opacity-70">不计入</span>
+            {t("giveUp")}
+            <span className="block text-[10px] font-normal opacity-70">{t("notCounted")}</span>
           </button>
       </div>
     );
@@ -53,13 +56,13 @@ export default function TimerControls({
   return (
     <div className="flex flex-wrap items-center justify-center gap-2 w-full">
       <button onClick={onResume} className="btn btn-cta">
-        继续
+        {t("resume")}
       </button>
       <button onClick={onFinishEarly} className="btn btn-muted">
-        提前结束
+        {t("finishEarly")}
       </button>
       <button onClick={onAbandon} className="btn btn-ghost">
-        放弃
+        {t("giveUp")}
       </button>
     </div>
   );

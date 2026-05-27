@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useCallback, useState } from "react";
+import { useLocale } from "@/lib/i18n";
 
 const NOTIFY_ICON = "/icon.svg";
 
@@ -20,7 +21,8 @@ function getSwPath(): string {
 }
 
 export function useNotification() {
-  const [secureError, setSecureError] = useState<string | null>(null);
+  const { t } = useLocale();
+  const [secureErrorKey, setSecureErrorKey] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
@@ -34,38 +36,40 @@ export function useNotification() {
   const requestPermission = useCallback(async () => {
     if (typeof window === "undefined" || !("Notification" in window)) {
       console.log("[notify] Notification API not available");
-      setSecureError("浏览器不支持通知");
+      setSecureErrorKey("browserNoSupport");
       return false;
     }
     // 检查是否在安全上下文中（HTTPS 或 localhost）
     if (!window.isSecureContext) {
       console.warn("[notify] not in secure context, Notification requires HTTPS");
-      setSecureError("通知需要 HTTPS 环境，当前为非安全连接");
+      setSecureErrorKey("notificationNeedHttps");
       return false;
     }
     if (Notification.permission === "granted") {
-      setSecureError(null);
+      setSecureErrorKey(null);
       return true;
     }
     if (Notification.permission === "denied") {
-      setSecureError("通知权限已被拒绝，请在浏览器设置中重新允许");
+      setSecureErrorKey("notificationDenied");
       return false;
     }
     try {
       const result = await Notification.requestPermission();
       console.log("[notify] permission result:", result);
       if (result === "granted") {
-        setSecureError(null);
+        setSecureErrorKey(null);
         return true;
       }
-      setSecureError("通知权限请求被拒绝");
+      setSecureErrorKey("notificationRequestDenied");
       return false;
     } catch (err) {
       console.error("[notify] permission request failed:", err);
-      setSecureError("通知权限请求失败");
+      setSecureErrorKey("notificationRequestFailed");
       return false;
     }
-  }, []);
+  }, [t]);
+
+  const secureError = secureErrorKey ? t(secureErrorKey as any) : null;
 
   const notify = useCallback(async (title: string, body: string): Promise<boolean> => {
     if (typeof window === "undefined" || !("Notification" in window)) {

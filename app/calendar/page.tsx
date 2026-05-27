@@ -4,11 +4,14 @@ import { useState, useEffect } from "react";
 import AppNav from "../components/AppNav";
 import CalendarView from "../components/CalendarView";
 import StatsSummary from "../components/StatsSummary";
+import PageTools from "../components/PageTools";
 import { loadState, saveState } from "@/lib/store";
 import { fetchRemoteState } from "@/lib/supabase-sync";
+import { useLocale } from "@/lib/i18n";
 import type { AppState } from "@/lib/types";
 
 export default function CalendarPage() {
+  const { t } = useLocale();
   const [appState, setAppState] = useState<AppState | null>(null);
 
   useEffect(() => {
@@ -60,18 +63,20 @@ export default function CalendarPage() {
   if (!appState) {
     return (
       <div className="page items-center justify-center">
-        <div className="loader" role="status" aria-label="加载中" />
+        <div className="loader" role="status" aria-label={t("loading")} />
       </div>
     );
   }
 
   return (
     <div className="page">
+      <PageTools />
+
       <AppNav />
 
       <header className="page-inner mb-6 text-center">
-        <h1 className="title">专注日历</h1>
-        <p className="subtitle mt-1.5">追踪每日番茄完成情况</p>
+        <h1 className="title">{t("calendarTitle")}</h1>
+        <p className="subtitle mt-1.5">{t("calendarSubtitle")}</p>
       </header>
 
       <main className="page-inner w-full">
@@ -83,7 +88,7 @@ export default function CalendarPage() {
         <CalendarView sessions={appState.sessions} />
       </main>
 
-      <footer className="footer">Tomato Clock v0.1.0</footer>
+      <footer className="footer">{t("footer")}</footer>
     </div>
   );
 }

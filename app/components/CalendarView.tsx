@@ -3,12 +3,12 @@
 import { useState, useMemo } from "react";
 import type { PomodoroSession } from "@/lib/types";
 import {
-  WEEKDAY_LABELS,
   groupByDay,
   isSameDay,
   getIntensityClass,
   dateKey,
 } from "@/lib/stats";
+import { useLocale, formatDate } from "@/lib/i18n";
 import DayDetailPanel from "./DayDetailPanel";
 
 interface CalendarViewProps {
@@ -25,12 +25,21 @@ interface DayData {
 
 export default function CalendarView({ sessions }: CalendarViewProps) {
   const today = new Date();
+  const { t, locale } = useLocale();
   const [currentMonth, setCurrentMonth] = useState(
     new Date(today.getFullYear(), today.getMonth(), 1)
   );
   const [selectedDay, setSelectedDay] = useState<DayData | null>(null);
 
   const dailyCounts = useMemo(() => groupByDay(sessions), [sessions]);
+
+  const weekdayLabels = useMemo(
+    () => [
+      t("weekday_mon"), t("weekday_tue"), t("weekday_wed"),
+      t("weekday_thu"), t("weekday_fri"), t("weekday_sat"), t("weekday_sun"),
+    ],
+    [t]
+  );
 
   const calendarDays = useMemo(() => {
     const year = currentMonth.getFullYear();
@@ -109,7 +118,7 @@ export default function CalendarView({ sessions }: CalendarViewProps) {
     setSelectedDay(null);
   };
 
-  const monthLabel = currentMonth.toLocaleDateString("zh-CN", {
+  const monthLabel = formatDate(locale, currentMonth, {
     year: "numeric",
     month: "long",
   });
@@ -125,7 +134,7 @@ export default function CalendarView({ sessions }: CalendarViewProps) {
           <button
             onClick={goToPrevMonth}
             className="icon-btn"
-            aria-label="上个月"
+            aria-label={t("prevMonth")}
           >
             <svg
               className="w-5 h-5"
@@ -140,16 +149,16 @@ export default function CalendarView({ sessions }: CalendarViewProps) {
           </button>
 
           <div className="flex items-center gap-2">
-            <h2 className="text-lg font-semibold text-teal-950">{monthLabel}</h2>
+            <h2 className="text-lg font-semibold text-teal-950 dark:text-slate-100">{monthLabel}</h2>
             <button onClick={goToToday} className="btn btn-muted px-2 py-0.5 text-xs">
-              今天
+              {t("today")}
             </button>
           </div>
 
           <button
             onClick={goToNextMonth}
             className="icon-btn"
-            aria-label="下个月"
+            aria-label={t("nextMonth")}
           >
             <svg
               className="w-5 h-5"
@@ -165,17 +174,16 @@ export default function CalendarView({ sessions }: CalendarViewProps) {
         </div>
 
         <p className="subtitle text-center mt-3">
-          本月完成{" "}
-          <span className="font-semibold text-teal-600">{totalThisMonth}</span> 个番茄
+          {t("completedThisMonth", { n: totalThisMonth })}
         </p>
       </div>
 
       <div className="grid grid-cols-7 mb-1 px-1">
-        {WEEKDAY_LABELS.map((label, i) => (
+        {weekdayLabels.map((label, i) => (
           <div
             key={label}
             className={`text-center text-xs font-medium py-2 ${
-              i >= 5 ? "text-orange-500" : "text-slate-400"
+              i >= 5 ? "text-orange-500 dark:text-orange-400" : "text-slate-400 dark:text-slate-500"
             }`}
           >
             {label}
@@ -184,7 +192,7 @@ export default function CalendarView({ sessions }: CalendarViewProps) {
       </div>
 
       <div className="card overflow-hidden p-0">
-        <div className="grid grid-cols-7 gap-px bg-teal-100/80">
+        <div className="grid grid-cols-7 gap-px bg-teal-100/80 dark:bg-slate-600/80">
         {calendarDays.map((day, idx) => {
           const intensity = getIntensityClass(day.count);
           const isSelected =
@@ -196,16 +204,16 @@ export default function CalendarView({ sessions }: CalendarViewProps) {
               onClick={() => setSelectedDay(day)}
               className={`
                 relative flex flex-col items-center justify-center
-                h-14 bg-white transition-colors cursor-pointer
-                ${!day.isCurrentMonth ? "text-slate-300" : "text-teal-950"}
+                h-14 bg-white dark:bg-slate-800 transition-colors cursor-pointer
+                ${!day.isCurrentMonth ? "text-slate-300 dark:text-slate-600" : "text-teal-950 dark:text-slate-200"}
                 ${day.isToday ? "z-10 shadow-[inset_0_0_0_2px_#0d9488]" : ""}
-                ${isSelected && day.isCurrentMonth ? "bg-teal-50" : ""}
-                ${day.isCurrentMonth && !day.count ? "hover:bg-teal-50/60" : ""}
-                ${day.isCurrentMonth && day.count ? "hover:brightness-[0.97]" : ""}
+                ${isSelected && day.isCurrentMonth ? "bg-teal-50 dark:bg-slate-700" : ""}
+                ${day.isCurrentMonth && !day.count ? "hover:bg-teal-50/60 dark:hover:bg-slate-700/60" : ""}
+                ${day.isCurrentMonth && day.count ? "hover:brightness-[0.97] dark:hover:brightness-110" : ""}
               `}
             >
               {day.count > 0 && day.isCurrentMonth && (
-                <div className={`absolute inset-0 ${intensity} opacity-70`} />
+                <div className={`absolute inset-0 ${intensity} dark:opacity-50 opacity-70`} />
               )}
 
               <span className="relative text-sm font-medium leading-none">
@@ -223,7 +231,7 @@ export default function CalendarView({ sessions }: CalendarViewProps) {
                   {Array.from({ length: Math.min(day.count, 4) }).map((_, i) => (
                     <div
                       key={i}
-                      className="w-1 h-1 rounded-full bg-teal-300"
+                      className="w-1 h-1 rounded-full bg-teal-300 dark:bg-teal-600"
                     />
                   ))}
                 </div>

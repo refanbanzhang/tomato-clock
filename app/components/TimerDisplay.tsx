@@ -2,18 +2,13 @@
 
 import { formatTime } from "@/lib/timer-engine";
 import { TimerMode } from "@/lib/types";
+import { useLocale } from "@/lib/i18n";
 
 interface TimerDisplayProps {
   mode: TimerMode;
   remainingSeconds: number;
   totalSeconds: number;
 }
-
-const modeLabel: Record<TimerMode, string> = {
-  idle: "准备开始",
-  focusing: "专注中",
-  paused: "已暂停",
-};
 
 const modeColor: Record<TimerMode, string> = {
   idle: "#cbd5e1",
@@ -26,6 +21,12 @@ export default function TimerDisplay({
   remainingSeconds,
   totalSeconds,
 }: TimerDisplayProps) {
+  const { t } = useLocale();
+  const modeLabel: Record<TimerMode, string> = {
+    idle: t("readyToStart"),
+    focusing: t("focusing"),
+    paused: t("paused"),
+  };
   const progress = 1 - remainingSeconds / totalSeconds;
   const radius = 118;
   const circumference = 2 * Math.PI * radius;
@@ -42,6 +43,7 @@ export default function TimerDisplay({
           className="transform -rotate-90"
           aria-hidden="true"
         >
+          {/* Light mode ring background */}
           <circle
             cx="140"
             cy="140"
@@ -49,6 +51,17 @@ export default function TimerDisplay({
             fill="none"
             stroke="#e2e8f0"
             strokeWidth="6"
+            className="dark:hidden"
+          />
+          {/* Dark mode ring background */}
+          <circle
+            cx="140"
+            cy="140"
+            r={radius}
+            fill="none"
+            stroke="#334155"
+            strokeWidth="6"
+            className="hidden dark:block"
           />
           <circle
             cx="140"
@@ -66,7 +79,7 @@ export default function TimerDisplay({
 
         <div className="absolute flex flex-col items-center">
           <span
-            className="text-[3.25rem] font-mono font-bold tabular-nums tracking-tight text-teal-950 leading-none"
+            className="text-[3.25rem] font-mono font-bold tabular-nums tracking-tight text-teal-950 dark:text-slate-100 leading-none"
             aria-live="polite"
             aria-atomic="true"
           >

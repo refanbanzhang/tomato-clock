@@ -1,10 +1,13 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-teal-950: #134e4a;
   --color-teal-900: #0f766e;
   --color-teal-600: #0d9488;
   --color-teal-500: #14b8a6;
+  --color-teal-400: #2dd4bf;
   --color-teal-100: #ccfbf1;
   --color-teal-50: #f0fdfa;
   --color-orange-500: #f97316;
@@ -14,6 +17,7 @@
   --font-body: var(--font-raleway), "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 
+/* ===== Base ===== */
 body {
   font-family: var(--font-body);
   color: var(--color-teal-950);
@@ -22,6 +26,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+:where(.dark) body {
+  color: #e2e8f0;
+  background: #0f172a;
+}
+
+/* ===== Page Layout ===== */
 .page {
   min-height: 100vh;
   display: flex;
@@ -33,11 +43,28 @@ body {
     var(--color-teal-50);
 }
 
+:where(.dark) .page {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(20, 184, 166, 0.08), transparent),
+    #0f172a;
+}
+
 .page-inner {
   width: 100%;
   max-width: 28rem;
 }
 
+.page-tools {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* ===== Card ===== */
 .card {
   background: rgba(255, 255, 255, 0.92);
   border: 1px solid rgba(13, 148, 136, 0.12);
@@ -45,6 +72,13 @@ body {
   box-shadow: 0 1px 3px rgba(19, 78, 74, 0.06);
 }
 
+:where(.dark) .card {
+  background: rgba(30, 41, 59, 0.85);
+  border: 1px solid rgba(45, 212, 191, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* ===== Navigation ===== */
 .nav {
   display: flex;
   gap: 0.25rem;
@@ -64,9 +98,18 @@ body {
   transition: color 0.2s ease, background-color 0.2s ease;
 }
 
+:where(.dark) .nav-link {
+  color: #64748b;
+}
+
 .nav-link:hover {
   color: var(--color-teal-950);
   background: rgba(240, 253, 250, 0.8);
+}
+
+:where(.dark) .nav-link:hover {
+  color: #cbd5e1;
+  background: rgba(30, 41, 59, 0.8);
 }
 
 .nav-link-active {
@@ -75,11 +118,16 @@ body {
   box-shadow: 0 1px 2px rgba(13, 148, 136, 0.25);
 }
 
+:where(.dark) .nav-link-active {
+  box-shadow: 0 1px 2px rgba(13, 148, 136, 0.4);
+}
+
 .nav-link-active:hover {
   color: white;
   background: var(--color-teal-900);
 }
 
+/* ===== Buttons ===== */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -102,6 +150,10 @@ body {
   color: white;
   background: var(--color-orange-500);
   box-shadow: 0 4px 14px rgba(249, 115, 22, 0.28);
+}
+
+:where(.dark) .btn-cta {
+  box-shadow: 0 4px 14px rgba(249, 115, 22, 0.35);
 }
 
 .btn-cta:hover {
@@ -137,9 +189,19 @@ body {
   background: #f1f5f9;
 }
 
+:where(.dark) .btn-muted {
+  color: #94a3b8;
+  background: #1e293b;
+}
+
 .btn-muted:hover {
   background: #e2e8f0;
   color: var(--color-teal-950);
+}
+
+:where(.dark) .btn-muted:hover {
+  background: #334155;
+  color: #cbd5e1;
 }
 
 .btn-ghost {
@@ -149,11 +211,21 @@ body {
   background: transparent;
 }
 
+:where(.dark) .btn-ghost {
+  color: #64748b;
+}
+
 .btn-ghost:hover {
   background: #f1f5f9;
   color: #64748b;
 }
 
+:where(.dark) .btn-ghost:hover {
+  background: #1e293b;
+  color: #94a3b8;
+}
+
+/* ===== Icon Button ===== */
 .icon-btn {
   display: flex;
   align-items: center;
@@ -166,9 +238,18 @@ body {
   transition: color 0.2s ease, background-color 0.2s ease;
 }
 
+:where(.dark) .icon-btn {
+  color: #64748b;
+}
+
 .icon-btn:hover {
   color: var(--color-teal-900);
   background: rgba(204, 251, 241, 0.6);
+}
+
+:where(.dark) .icon-btn:hover {
+  color: var(--color-teal-400);
+  background: rgba(45, 212, 191, 0.08);
 }
 
 .icon-btn:focus-visible {
@@ -176,6 +257,7 @@ body {
   outline-offset: 2px;
 }
 
+/* ===== Keyboard Shortcut Badge ===== */
 .kbd {
   padding: 0.125rem 0.375rem;
   font-family: ui-monospace, monospace;
@@ -186,6 +268,13 @@ body {
   border-radius: 0.25rem;
 }
 
+:where(.dark) .kbd {
+  color: #94a3b8;
+  background: #1e293b;
+  border: 1px solid #334155;
+}
+
+/* ===== Modal ===== */
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -198,6 +287,10 @@ body {
   backdrop-filter: blur(4px);
 }
 
+:where(.dark) .modal-backdrop {
+  background: rgba(0, 0, 0, 0.5);
+}
+
 .modal {
   width: 100%;
   max-width: 22rem;
@@ -206,6 +299,11 @@ body {
   box-shadow: 0 20px 40px rgba(19, 78, 74, 0.15);
 }
 
+:where(.dark) .modal {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+/* ===== Typography ===== */
 .title {
   font-family: var(--font-display);
   font-size: 1.75rem;
@@ -214,8 +312,16 @@ body {
   letter-spacing: -0.02em;
 }
 
+:where(.dark) .title {
+  color: #e2e8f0;
+}
+
 .subtitle {
   font-size: 0.875rem;
+  color: #64748b;
+}
+
+:where(.dark) .subtitle {
   color: #64748b;
 }
 
@@ -226,6 +332,11 @@ body {
   color: #cbd5e1;
 }
 
+:where(.dark) .footer {
+  color: #475569;
+}
+
+/* ===== Loader ===== */
 .loader {
   width: 2rem;
   height: 2rem;
@@ -235,12 +346,18 @@ body {
   animation: spin 0.7s linear infinite;
 }
 
+:where(.dark) .loader {
+  border: 2px solid #1e293b;
+  border-top-color: var(--color-teal-500);
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);
   }
 }
 
+/* ===== Toast ===== */
 .toast-overlay {
   position: fixed;
   bottom: 1.5rem;
@@ -259,6 +376,12 @@ body {
   opacity: 0;
   transform: translateY(12px) scale(0.96);
   transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+:where(.dark) .toast-card {
+  background: #1e293b;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(45, 212, 191, 0.15);
 }
 
 .toast-enter {
@@ -288,6 +411,7 @@ body {
   margin-top: 0.125rem;
 }
 
+/* ===== Accessibility ===== */
 @media (prefers-reduced-motion: reduce) {
   .loader {
     animation: none;

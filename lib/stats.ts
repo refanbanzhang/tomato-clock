@@ -1,5 +1,9 @@
 import type { PomodoroSession } from "./types";
 
+/**
+ * @deprecated Use translations from useLocale() instead.
+ * Kept for backward compatibility.
+ */
 export const WEEKDAY_LABELS = ["一", "二", "三", "四", "五", "六", "日"];
 
 export interface DayAggregate {

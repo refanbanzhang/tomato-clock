@@ -7,8 +7,10 @@ import TimerDisplay from "./components/TimerDisplay";
 import TimerControls from "./components/TimerControls";
 import SettingsPanel from "./components/SettingsPanel";
 import Toast from "./components/Toast";
+import PageTools from "./components/PageTools";
 import { useNotification, useAudio, useKeyboardShortcut } from "./components/hooks";
 import { useSupabaseSync } from "./components/useSupabaseSync";
+import { useLocale } from "@/lib/i18n";
 import {
   loadState,
   saveState,
@@ -26,6 +28,7 @@ import {
 } from "@/lib/timer-engine";
 
 export default function Home() {
+  const { t } = useLocale();
   const [appState, setAppState] = useState<AppState | null>(null);
   const [timer, setTimer] = useState<TimerState>(() => loadTimerState());
   const [showSettings, setShowSettings] = useState(false);
@@ -129,11 +132,11 @@ export default function Home() {
       });
     });
 
-    notify("番茄完成", "已记录。");
+    notify(t("notificationTitle"), t("notificationBody"));
     playBeep();
 
     // 始终显示应用内 toast 作为兜底通知
-    setToast({ message: "番茄完成！", sub: "已记录，继续保持节奏 🍅" });
+    setToast({ message: t("toastTitle"), sub: t("toastSubtitle") + " \uD83C\uDF45" });
   }, [notify, playBeep, stopTimer]);
 
   const handleStartFocus = useCallback(() => {
@@ -230,6 +233,22 @@ export default function Home() {
     });
   }, []);
 
+  const handleImport = useCallback(
+    (imported: AppState) => {
+      setAppState(imported);
+      setShowSettings(false);
+      setToast({
+        message: t("importSuccess"),
+        sub: t("importSuccessSub", { n: imported.sessions.length }),
+      });
+    },
+    [t]
+  );
+
+  const handleImportError = useCallback((message: string) => {
+    setToast({ message });
+  }, []);
+
   const handleSpaceShortcut = useCallback(() => {
     if (timer.mode === "idle") handleStartFocus();
     else if (timer.mode === "focusing") handlePause();
@@ -241,25 +260,18 @@ export default function Home() {
   if (!appState) {
     return (
       <div className="page items-center justify-center">
-        <div className="loader" role="status" aria-label="加载中" />
+        <div className="loader" role="status" aria-label={t("loading")} />
       </div>
     );
   }
 
   return (
     <div className="page">
-      <AppNav />
-
-      <header className="page-inner mb-8 text-center relative">
-        <div className="flex items-center justify-center gap-2.5">
-          <TomatoIcon />
-          <h1 className="title">番茄时钟</h1>
-        </div>
-        <p className="subtitle mt-1.5">专注 25 分钟，记录每一个番茄</p>
+      <PageTools>
         <button
           onClick={() => setShowSettings(true)}
-          className="icon-btn absolute right-0 top-1/2 -translate-y-1/2"
-          aria-label="设置"
+          className="icon-btn"
+          aria-label={t("settings")}
         >
           <svg
             className="w-5 h-5"
@@ -281,6 +293,16 @@ export default function Home() {
             />
           </svg>
         </button>
+      </PageTools>
+
+      <AppNav />
+
+      <header className="page-inner mb-8 text-center">
+        <div className="flex items-center justify-center gap-2.5">
+          <TomatoIcon />
+          <h1 className="title">{t("timerTitle")}</h1>
+        </div>
+        <p className="subtitle mt-1.5">{t("timerSubtitle")}</p>
       </header>
 
       <main className="page-inner flex flex-col items-center gap-6 w-full">
@@ -314,24 +336,27 @@ export default function Home() {
           >
             <SettingsPanel
               weeklyTarget={appState.weeklyTarget}
+              appState={appState}
               onSetTarget={(t) => {
                 handleSetTarget(t);
                 setShowSettings(false);
               }}
+              onImport={handleImport}
+              onImportError={handleImportError}
             />
             <div className="px-6 pb-5">
               <button
                 onClick={() => setShowSettings(false)}
                 className="btn btn-muted w-full py-2.5 text-sm"
               >
-                关闭
+                {t("close")}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      <footer className="footer">Tomato Clock v0.1.0</footer>
+      <footer className="footer">{t("footer")}</footer>
 
       {toast && (
         <Toast

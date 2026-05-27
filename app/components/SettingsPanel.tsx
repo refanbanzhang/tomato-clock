@@ -1,15 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useLocale } from "@/lib/i18n";
+import { DataImportError, downloadStateExport, parseImportData } from "@/lib/data-transfer";
+import type { AppState } from "@/lib/types";
 
 interface SettingsPanelProps {
   weeklyTarget: number;
+  appState: AppState;
   onSetTarget: (target: number) => void;
+  onImport: (state: AppState) => void;
+  onImportError: (message: string) => void;
 }
 
-export default function SettingsPanel({ weeklyTarget, onSetTarget }: SettingsPanelProps) {
+export default function SettingsPanel({
+  weeklyTarget,
+  appState,
+  onSetTarget,
+  onImport,
+  onImportError,
+}: SettingsPanelProps) {
+  const { t } = useLocale();
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(weeklyTarget);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSave = () => {
     const v = Math.max(1, Math.min(999, value));
@@ -17,18 +31,48 @@ export default function SettingsPanel({ weeklyTarget, onSetTarget }: SettingsPan
     setEditing(false);
   };
 
+  const handleExport = () => {
+    downloadStateExport(appState);
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+
+    if (!window.confirm(t("importConfirm"))) return;
+
+    try {
+      const text = await file.text();
+      const imported = parseImportData(text);
+      onImport(imported);
+    } catch (err) {
+      if (err instanceof DataImportError) {
+        const key =
+          err.code === "invalidJson" ? "importErrorInvalidJson" : "importErrorInvalidFormat";
+        onImportError(t(key));
+        return;
+      }
+      onImportError(t("importErrorInvalidFormat"));
+    }
+  };
+
   return (
     <div className="p-6">
-      <h2 className="text-xs font-semibold text-teal-600 uppercase tracking-wider mb-5">
-        设置
+      <h2 className="text-xs font-semibold text-teal-600 dark:text-teal-400 uppercase tracking-wider mb-5">
+        {t("settingsTitle")}
       </h2>
 
       <div className="flex items-center justify-between gap-4">
-        <span className="text-sm font-medium text-teal-950">周目标</span>
+        <span className="text-sm font-medium text-teal-950 dark:text-slate-200">{t("weeklyTarget")}</span>
         {editing ? (
           <div className="flex items-center gap-2">
             <label htmlFor="weekly-target" className="sr-only">
-              周目标数量
+              {t("weeklyTargetLabel")}
             </label>
             <input
               id="weekly-target"
@@ -37,7 +81,7 @@ export default function SettingsPanel({ weeklyTarget, onSetTarget }: SettingsPan
               onChange={(e) => setValue(Number(e.target.value))}
               min={1}
               max={999}
-              className="w-20 px-3 py-1.5 text-sm text-center border border-teal-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="w-20 px-3 py-1.5 text-sm text-center border border-teal-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
               autoFocus
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleSave();
@@ -48,7 +92,7 @@ export default function SettingsPanel({ weeklyTarget, onSetTarget }: SettingsPan
               }}
             />
             <button onClick={handleSave} className="btn btn-primary px-3 py-1.5 text-xs">
-              确定
+              {t("confirm")}
             </button>
           </div>
         ) : (
@@ -57,11 +101,11 @@ export default function SettingsPanel({ weeklyTarget, onSetTarget }: SettingsPan
               setValue(weeklyTarget);
               setEditing(true);
             }}
-            className="flex items-center gap-2 text-sm font-semibold text-teal-950 hover:text-teal-600 transition-colors cursor-pointer"
+            className="flex items-center gap-2 text-sm font-semibold text-teal-950 dark:text-slate-200 hover:text-teal-600 dark:hover:text-teal-400 transition-colors cursor-pointer"
           >
-            {weeklyTarget} 个
+            {weeklyTarget} {t("unitPieces")}
             <svg
-              className="w-3.5 h-3.5 text-slate-400"
+              className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -78,11 +122,31 @@ export default function SettingsPanel({ weeklyTarget, onSetTarget }: SettingsPan
         )}
       </div>
 
-      <div className="mt-5 pt-5 border-t border-teal-50">
+      <div className="mt-5 pt-5 border-t border-teal-50 dark:border-slate-700/50">
+        <p className="text-sm font-medium text-teal-950 dark:text-slate-200">{t("dataSection")}</p>
+        <p className="subtitle mt-1">{t("dataSectionHint")}</p>
+        <div className="flex gap-2 mt-3">
+          <button onClick={handleExport} className="btn btn-muted flex-1 py-2 text-sm">
+            {t("exportData")}
+          </button>
+          <button onClick={handleImportClick} className="btn btn-muted flex-1 py-2 text-sm">
+            {t("importData")}
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".json,application/json"
+            className="hidden"
+            onChange={handleFileChange}
+          />
+        </div>
+      </div>
+
+      <div className="mt-5 pt-5 border-t border-teal-50 dark:border-slate-700/50">
         <div className="subtitle space-y-1.5">
-          <p>专注时长 25 分钟</p>
+          <p>{t("focusDuration")}</p>
           <p>
-            快捷键 <kbd className="kbd">Space</kbd> 开始 / 暂停
+            {t("shortcutStartPause")} <kbd className="kbd">Space</kbd>
           </p>
         </div>
       </div>

@@ -2,14 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
-const links = [
-  { href: "/", label: "计时器" },
-  { href: "/calendar", label: "日历" },
-];
+import { useLocale } from "@/lib/i18n";
 
 export default function AppNav() {
   const pathname = usePathname();
+  const { t } = useLocale();
+
+  const links = [
+    { href: "/", label: t("navTimer") },
+    { href: "/calendar", label: t("navCalendar") },
+  ];
 
   return (
     <nav className="page-inner mb-8">
