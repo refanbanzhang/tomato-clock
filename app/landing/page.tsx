@@ -94,7 +94,7 @@ export default function LandingPage() {
           <div className="mt-12 grid gap-6 sm:grid-cols-2 max-w-[840px] mx-auto">
             <div className="landing-card p-4">
               <div className="landing-demo-frame h-[200px] flex items-center justify-center text-slate-300 dark:text-slate-600 text-sm">
-                &#x1f5bc; Screenshot placeholder
+                {t("landing_demo_timer_label")}
               </div>
               <p className="mt-3 text-xs text-slate-500 dark:text-slate-400 text-center">
                 {t("landing_demo_timer_label")}
@@ -102,7 +102,7 @@ export default function LandingPage() {
             </div>
             <div className="landing-card p-4">
               <div className="landing-demo-frame h-[200px] flex items-center justify-center text-slate-300 dark:text-slate-600 text-sm">
-                &#x1f5bc; Screenshot placeholder
+                {t("landing_demo_timer_label")}
               </div>
               <p className="mt-3 text-xs text-slate-500 dark:text-slate-400 text-center">
                 {t("landing_demo_calendar_label")}
