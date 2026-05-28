@@ -9,7 +9,6 @@ import { useLocale } from "@/lib/i18n";
 export default function LandingPage() {
   const { t } = useLocale();
 
-  // Update document title on mount
   useEffect(() => {
     document.title = t("landing_title");
     const meta = document.querySelector('meta[name="description"]');
@@ -17,13 +16,13 @@ export default function LandingPage() {
   }, [t]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-teal-50 dark:bg-slate-900 text-teal-950 dark:text-slate-100 antialiased">
-      {/* ========== Nav ========== */}
-      <nav className="sticky top-0 z-40 bg-teal-50/95 dark:bg-slate-900/95 backdrop-blur-sm border-b border-teal-100/60 dark:border-slate-700/60">
+    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 antialiased">
+      {/* ========== 1. Nav ========== */}
+      <nav className="sticky top-0 z-40 bg-slate-50/95 dark:bg-slate-900/95 backdrop-blur-xl border-b border-slate-100 dark:border-slate-700/60">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-2.5 flex items-center justify-between">
           <Link
             href="/"
-            className="flex items-center gap-2 font-display text-lg font-semibold tracking-tight text-teal-950 dark:text-slate-100 no-underline hover:text-teal-900 dark:hover:text-teal-400 transition-colors duration-200 cursor-pointer"
+            className="flex items-center gap-2 font-display text-lg font-semibold tracking-tight text-slate-900 dark:text-slate-100 no-underline hover:text-slate-700 dark:hover:text-slate-300 transition-colors duration-200 cursor-pointer"
           >
             <TomatoIcon className="w-7 h-7 flex-shrink-0" />
             {t("landing_brand")}
@@ -32,7 +31,7 @@ export default function LandingPage() {
             <LanguageSwitcher />
             <Link
               href="/"
-              className="btn btn-cta text-sm py-2.5 px-5 rounded-lg"
+              className="inline-flex items-center justify-center gap-1.5 font-semibold text-sm py-2.5 px-5 rounded-[10px] bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors duration-200"
             >
               {t("landing_cta_start")}
             </Link>
@@ -40,49 +39,95 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* ========== Hero ========== */}
-      <section className="relative overflow-hidden">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 pt-20 pb-24 sm:pt-28 sm:pb-32 text-center">
-          <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight text-teal-950 dark:text-slate-100 leading-tight">
-            {t("landing_hero_line1")}
+      {/* ========== 2. Hero ========== */}
+      <section className="relative overflow-hidden bg-slate-50 dark:bg-slate-900">
+        {/* Decorative circles */}
+        <div className="absolute top-[-40px] right-[-30px] w-[180px] h-[180px] rounded-full bg-teal-50 dark:bg-teal-900/20 pointer-events-none" />
+        <div className="absolute bottom-[-20px] left-[-20px] w-[100px] h-[100px] rounded-full bg-amber-50 dark:bg-amber-900/10 pointer-events-none" />
+
+        <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 pt-20 pb-24 sm:pt-28 sm:pb-32 text-center">
+          <span className="inline-block px-4 py-1.5 mb-6 text-[11px] font-semibold tracking-wider uppercase text-teal-600 dark:text-teal-400 bg-teal-600/10 dark:bg-teal-400/10 rounded-full">
+            {t("landing_hero_label")}
+          </span>
+
+          <h1 className="font-display text-4xl sm:text-5xl lg:text-[44px] font-bold tracking-tight text-slate-900 dark:text-slate-100 leading-tight">
+            {t("landing_hero_line1")}{" "}
             <span className="text-teal-600 dark:text-teal-400">{t("landing_hero_highlight")}</span>
-            {t("landing_hero_line3")}
+            {t("landing_hero_line3") && <> {t("landing_hero_line3")}</>}
           </h1>
-          <p className="mt-5 max-w-xl mx-auto text-base sm:text-lg text-teal-900/70 dark:text-slate-300/70 leading-relaxed">
-            {t("landing_hero_desc1")}
-            <br className="hidden sm:block" />
-            {t("landing_hero_desc2")}
+
+          <p className="mt-5 max-w-xl mx-auto text-[15px] text-slate-500 dark:text-slate-400 leading-relaxed">
+            {t("landing_hero_desc1")} {t("landing_hero_desc2")}
           </p>
+
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
               href="/"
-              className="btn btn-cta text-base px-8 py-3.5 rounded-xl"
+              className="inline-flex items-center justify-center font-semibold text-base px-8 py-3.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors duration-200"
             >
               {t("landing_hero_btn")}
             </Link>
-            <p className="text-xs text-teal-900/40 dark:text-slate-400/40">
-              {t("landing_hero_sub")}
-            </p>
+            <a
+              href="#features"
+              className="inline-flex items-center justify-center font-semibold text-base px-8 py-3.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors duration-200"
+            >
+              {t("landing_hero_learn")}
+            </a>
+          </div>
+
+          <p className="mt-4 text-xs text-slate-400 dark:text-slate-500">
+            {t("landing_hero_sub")}
+          </p>
+        </div>
+      </section>
+
+      {/* ========== 3. Demo (NEW) ========== */}
+      <section className="bg-white dark:bg-slate-800/50 border-y border-slate-100 dark:border-slate-700/40">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-20 sm:py-24">
+          <h2 className="font-display text-[22px] font-bold tracking-tight text-center text-slate-900 dark:text-slate-100">
+            {t("landing_demo_title")}
+          </h2>
+          <p className="mt-3 text-center text-[13px] text-slate-400 dark:text-slate-500 max-w-md mx-auto">
+            {t("landing_demo_sub")}
+          </p>
+
+          <div className="mt-12 grid gap-6 sm:grid-cols-2 max-w-[840px] mx-auto">
+            <div className="landing-card p-4">
+              <div className="landing-demo-frame h-[200px] flex items-center justify-center text-slate-300 dark:text-slate-600 text-sm">
+                &#x1f5bc; Screenshot placeholder
+              </div>
+              <p className="mt-3 text-xs text-slate-500 dark:text-slate-400 text-center">
+                {t("landing_demo_timer_label")}
+              </p>
+            </div>
+            <div className="landing-card p-4">
+              <div className="landing-demo-frame h-[200px] flex items-center justify-center text-slate-300 dark:text-slate-600 text-sm">
+                &#x1f5bc; Screenshot placeholder
+              </div>
+              <p className="mt-3 text-xs text-slate-500 dark:text-slate-400 text-center">
+                {t("landing_demo_calendar_label")}
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ========== Features ========== */}
-      <section className="bg-white dark:bg-slate-800/50 border-y border-teal-100/40 dark:border-slate-700/40">
+      {/* ========== 4. Features ========== */}
+      <section id="features" className="bg-slate-50 dark:bg-slate-900">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-20 sm:py-24">
-          <h2 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight text-center text-teal-950 dark:text-slate-100">
+          <h2 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight text-center text-slate-900 dark:text-slate-100">
             {t("landing_why_title")}
           </h2>
-          <p className="mt-3 text-center text-sm text-teal-900/50 dark:text-slate-400/50 max-w-md mx-auto">
+          <p className="mt-3 text-center text-sm text-slate-400 dark:text-slate-500 max-w-md mx-auto">
             {t("landing_why_sub")}
           </p>
 
-          <div className="mt-12 grid gap-6 sm:grid-cols-3">
-            {/* Feature 1 */}
-            <div className="group rounded-2xl border border-teal-100/50 dark:border-slate-700/50 bg-teal-50/40 dark:bg-slate-800/40 p-6 sm:p-8 cursor-pointer transition-colors duration-200 hover:border-teal-500 dark:hover:border-teal-500/50 hover:bg-teal-50 dark:hover:bg-slate-700/50">
-              <div className="w-11 h-11 rounded-xl bg-teal-100 dark:bg-teal-900/40 flex items-center justify-center mb-5 transition-colors duration-200 group-hover:bg-teal-500/30 dark:group-hover:bg-teal-500/20">
+          <div className="mt-12 grid gap-6 sm:grid-cols-3 max-w-[880px] mx-auto">
+            {/* Feature 1: Clock */}
+            <div className="landing-card group cursor-pointer transition-shadow hover:shadow-md p-6 sm:p-8 text-center">
+              <div className="landing-icon-box mx-auto mb-5 text-teal-600 dark:text-teal-400">
                 <svg
-                  className="w-6 h-6 text-teal-600 dark:text-teal-400"
+                  className="w-5 h-5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -96,19 +141,19 @@ export default function LandingPage() {
                   />
                 </svg>
               </div>
-              <h3 className="font-display text-lg font-semibold text-teal-950 dark:text-slate-100">
+              <h3 className="font-display text-[15px] font-bold text-slate-900 dark:text-slate-100">
                 {t("landing_card1_title")}
               </h3>
-              <p className="mt-2 text-sm text-teal-900/60 dark:text-slate-400/60 leading-relaxed">
+              <p className="mt-2 text-xs text-slate-400 dark:text-slate-500 leading-relaxed">
                 {t("landing_card1_desc")}
               </p>
             </div>
 
-            {/* Feature 2 */}
-            <div className="group rounded-2xl border border-teal-100/50 dark:border-slate-700/50 bg-teal-50/40 dark:bg-slate-800/40 p-6 sm:p-8 cursor-pointer transition-colors duration-200 hover:border-teal-500 dark:hover:border-teal-500/50 hover:bg-teal-50 dark:hover:bg-slate-700/50">
-              <div className="w-11 h-11 rounded-xl bg-teal-100 dark:bg-teal-900/40 flex items-center justify-center mb-5 transition-colors duration-200 group-hover:bg-teal-500/30 dark:group-hover:bg-teal-500/20">
+            {/* Feature 2: Lightning */}
+            <div className="landing-card group cursor-pointer transition-shadow hover:shadow-md p-6 sm:p-8 text-center">
+              <div className="landing-icon-box mx-auto mb-5 text-teal-600 dark:text-teal-400">
                 <svg
-                  className="w-6 h-6 text-teal-600 dark:text-teal-400"
+                  className="w-5 h-5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -122,19 +167,19 @@ export default function LandingPage() {
                   />
                 </svg>
               </div>
-              <h3 className="font-display text-lg font-semibold text-teal-950 dark:text-slate-100">
+              <h3 className="font-display text-[15px] font-bold text-slate-900 dark:text-slate-100">
                 {t("landing_card2_title")}
               </h3>
-              <p className="mt-2 text-sm text-teal-900/60 dark:text-slate-400/60 leading-relaxed">
+              <p className="mt-2 text-xs text-slate-400 dark:text-slate-500 leading-relaxed">
                 {t("landing_card2_desc")}
               </p>
             </div>
 
-            {/* Feature 3 */}
-            <div className="group rounded-2xl border border-teal-100/50 dark:border-slate-700/50 bg-teal-50/40 dark:bg-slate-800/40 p-6 sm:p-8 cursor-pointer transition-colors duration-200 hover:border-teal-500 dark:hover:border-teal-500/50 hover:bg-teal-50 dark:hover:bg-slate-700/50">
-              <div className="w-11 h-11 rounded-xl bg-teal-100 dark:bg-teal-900/40 flex items-center justify-center mb-5 transition-colors duration-200 group-hover:bg-teal-500/30 dark:group-hover:bg-teal-500/20">
+            {/* Feature 3: Chart */}
+            <div className="landing-card group cursor-pointer transition-shadow hover:shadow-md p-6 sm:p-8 text-center">
+              <div className="landing-icon-box mx-auto mb-5 text-teal-600 dark:text-teal-400">
                 <svg
-                  className="w-6 h-6 text-teal-600 dark:text-teal-400"
+                  className="w-5 h-5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -148,10 +193,10 @@ export default function LandingPage() {
                   />
                 </svg>
               </div>
-              <h3 className="font-display text-lg font-semibold text-teal-950 dark:text-slate-100">
+              <h3 className="font-display text-[15px] font-bold text-slate-900 dark:text-slate-100">
                 {t("landing_card3_title")}
               </h3>
-              <p className="mt-2 text-sm text-teal-900/60 dark:text-slate-400/60 leading-relaxed">
+              <p className="mt-2 text-xs text-slate-400 dark:text-slate-500 leading-relaxed">
                 {t("landing_card3_desc")}
               </p>
             </div>
@@ -159,52 +204,52 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ========== How it works ========== */}
-      <section>
+      {/* ========== 5. How it works ========== */}
+      <section className="bg-white dark:bg-slate-800/50">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-20 sm:py-24">
-          <h2 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight text-center text-teal-950 dark:text-slate-100">
+          <h2 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight text-center text-slate-900 dark:text-slate-100">
             {t("landing_steps_title")}
           </h2>
-          <p className="mt-3 text-center text-sm text-teal-900/50 dark:text-slate-400/50 max-w-md mx-auto">
+          <p className="mt-3 text-center text-sm text-slate-400 dark:text-slate-500 max-w-md mx-auto">
             {t("landing_steps_sub")}
           </p>
 
-          <div className="mt-12 grid gap-8 sm:grid-cols-3">
+          <div className="mt-12 grid gap-8 sm:grid-cols-3 max-w-[780px] mx-auto text-center">
             {/* Step 1 */}
-            <div className="text-center">
-              <div className="w-14 h-14 mx-auto rounded-full bg-teal-600 dark:bg-teal-500 flex items-center justify-center">
-                <span className="text-white font-display text-xl font-bold">1</span>
+            <div>
+              <div className="w-[52px] h-[52px] mx-auto rounded-full bg-slate-900 dark:bg-white shadow-sm flex items-center justify-center">
+                <span className="text-white dark:text-slate-900 font-display text-xl font-bold">1</span>
               </div>
-              <h3 className="mt-5 font-display text-lg font-semibold text-teal-950 dark:text-slate-100">
+              <h3 className="mt-5 font-display text-[15px] font-bold text-slate-900 dark:text-slate-100">
                 {t("landing_step1_title")}
               </h3>
-              <p className="mt-2 text-sm text-teal-900/60 dark:text-slate-400/60 leading-relaxed">
+              <p className="mt-2 text-xs text-slate-400 dark:text-slate-500 leading-relaxed">
                 {t("landing_step1_desc")}
               </p>
             </div>
 
             {/* Step 2 */}
-            <div className="text-center">
-              <div className="w-14 h-14 mx-auto rounded-full bg-teal-600 dark:bg-teal-500 flex items-center justify-center">
-                <span className="text-white font-display text-xl font-bold">2</span>
+            <div>
+              <div className="w-[52px] h-[52px] mx-auto rounded-full bg-slate-900 dark:bg-white shadow-sm flex items-center justify-center">
+                <span className="text-white dark:text-slate-900 font-display text-xl font-bold">2</span>
               </div>
-              <h3 className="mt-5 font-display text-lg font-semibold text-teal-950 dark:text-slate-100">
+              <h3 className="mt-5 font-display text-[15px] font-bold text-slate-900 dark:text-slate-100">
                 {t("landing_step2_title")}
               </h3>
-              <p className="mt-2 text-sm text-teal-900/60 dark:text-slate-400/60 leading-relaxed">
+              <p className="mt-2 text-xs text-slate-400 dark:text-slate-500 leading-relaxed">
                 {t("landing_step2_desc")}
               </p>
             </div>
 
             {/* Step 3 */}
-            <div className="text-center">
-              <div className="w-14 h-14 mx-auto rounded-full bg-teal-600 dark:bg-teal-500 flex items-center justify-center">
-                <span className="text-white font-display text-xl font-bold">3</span>
+            <div>
+              <div className="w-[52px] h-[52px] mx-auto rounded-full bg-slate-900 dark:bg-white shadow-sm flex items-center justify-center">
+                <span className="text-white dark:text-slate-900 font-display text-xl font-bold">3</span>
               </div>
-              <h3 className="mt-5 font-display text-lg font-semibold text-teal-950 dark:text-slate-100">
+              <h3 className="mt-5 font-display text-[15px] font-bold text-slate-900 dark:text-slate-100">
                 {t("landing_step3_title")}
               </h3>
-              <p className="mt-2 text-sm text-teal-900/60 dark:text-slate-400/60 leading-relaxed">
+              <p className="mt-2 text-xs text-slate-400 dark:text-slate-500 leading-relaxed">
                 {t("landing_step3_desc")}
               </p>
             </div>
@@ -212,70 +257,70 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ========== Stats ========== */}
-      <section className="bg-teal-600 dark:bg-teal-800">
+      {/* ========== 6. Stats ========== */}
+      <section className="bg-slate-900 dark:bg-slate-950">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-16 sm:py-20">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 text-center">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 text-center max-w-[760px] mx-auto">
             <div>
-              <p className="font-display text-3xl sm:text-4xl font-bold text-white">
-                25<span className="text-teal-100 dark:text-teal-200 text-xl ml-0.5">min</span>
+              <p className="font-display text-3xl sm:text-[32px] font-bold text-white">
+                25<span className="text-teal-400 dark:text-teal-400 text-xl ml-0.5">min</span>
               </p>
-              <p className="mt-2 text-sm text-teal-100/70 dark:text-teal-200/70">{t("landing_stat_time")}</p>
+              <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">{t("landing_stat_time")}</p>
             </div>
             <div>
-              <p className="font-display text-3xl sm:text-4xl font-bold text-white">
-                100%<span className="text-teal-100 dark:text-teal-200 text-xl ml-0.5">free</span>
+              <p className="font-display text-3xl sm:text-[32px] font-bold text-white">
+                100%<span className="text-teal-400 dark:text-teal-400 text-xl ml-0.5">free</span>
               </p>
-              <p className="mt-2 text-sm text-teal-100/70 dark:text-teal-200/70">{t("landing_stat_free")}</p>
+              <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">{t("landing_stat_free")}</p>
             </div>
             <div>
-              <p className="font-display text-3xl sm:text-4xl font-bold text-white">
+              <p className="font-display text-3xl sm:text-[32px] font-bold text-white">
                 {t("landing_stat_platform")}
               </p>
-              <p className="mt-2 text-sm text-teal-100/70 dark:text-teal-200/70">{t("landing_stat_platform_val")}</p>
+              <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">{t("landing_stat_platform_val")}</p>
             </div>
             <div>
-              <p className="font-display text-3xl sm:text-4xl font-bold text-white">
-                {t("landing_stat_sync")}<span className="text-teal-100 dark:text-teal-200 text-xl ml-0.5">{t("landing_stat_sync_val")}</span>
+              <p className="font-display text-3xl sm:text-[32px] font-bold text-white">
+                {t("landing_stat_sync")}<span className="text-teal-400 dark:text-teal-400 text-xl ml-0.5">{t("landing_stat_sync_val")}</span>
               </p>
-              <p className="mt-2 text-sm text-teal-100/70 dark:text-teal-200/70">{t("landing_stat_sync_label")}</p>
+              <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">{t("landing_stat_sync_label")}</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ========== CTA ========== */}
-      <section>
+      {/* ========== 7. CTA + Footer ========== */}
+      <section className="bg-slate-50 dark:bg-slate-900">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-20 sm:py-24 text-center">
-          <h2 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight text-teal-950 dark:text-slate-100">
+          <h2 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
             {t("landing_cta_title")}
           </h2>
-          <p className="mt-3 text-sm text-teal-900/50 dark:text-slate-400/50 max-w-md mx-auto">
+          <p className="mt-3 text-sm text-slate-400 dark:text-slate-500 max-w-md mx-auto">
             {t("landing_cta_sub")}
           </p>
           <div className="mt-8">
             <Link
               href="/"
-              className="btn btn-cta text-base px-8 py-3.5 rounded-xl inline-flex"
+              className="inline-flex items-center justify-center font-semibold text-base px-8 py-3.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors duration-200"
             >
               {t("landing_cta_btn")}
             </Link>
           </div>
         </div>
-      </section>
 
-      {/* ========== Footer ========== */}
-      <footer className="mt-auto border-t border-teal-100/40 dark:border-slate-700/40 bg-white dark:bg-slate-800/50">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-sm text-teal-900/40 dark:text-slate-400/40">
-            <TomatoIcon className="w-5 h-5" />
-            <span>{t("landing_footer_brand")}</span>
+        {/* Footer */}
+        <footer className="border-t border-slate-100 dark:border-slate-700/40">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2 text-sm text-slate-400 dark:text-slate-500">
+              <TomatoIcon className="w-5 h-5" />
+              <span>{t("landing_brand")}</span>
+            </div>
+            <p className="text-xs text-slate-300 dark:text-slate-600">
+              {t("landing_footer")}
+            </p>
           </div>
-          <p className="text-xs text-teal-900/30 dark:text-slate-500/30">
-            {t("landing_footer")}
-          </p>
-        </div>
-      </footer>
+        </footer>
+      </section>
     </div>
   );
 }

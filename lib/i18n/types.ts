@@ -111,6 +111,12 @@ export interface Translations {
   landing_hero_desc2: string;
   landing_hero_btn: string;
   landing_hero_sub: string;
+  landing_hero_label: string;
+  landing_hero_learn: string;
+  landing_demo_title: string;
+  landing_demo_sub: string;
+  landing_demo_timer_label: string;
+  landing_demo_calendar_label: string;
   landing_why_title: string;
   landing_why_sub: string;
   landing_card1_title: string;
