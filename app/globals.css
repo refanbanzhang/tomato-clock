@@ -13,8 +13,57 @@
   --color-orange-500: #f97316;
   --color-orange-600: #ea580c;
   --color-amber-500: #f59e0b;
+  --color-slate-50: #f8fafc;
+  --color-slate-100: #f1f5f9;
+  --color-slate-200: #e2e8f0;
+  --color-slate-300: #cbd5e1;
+  --color-slate-400: #94a3b8;
+  --color-slate-500: #64748b;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1e293b;
+  --color-slate-900: #0f172a;
   --font-display: var(--font-lora), "PingFang SC", "Microsoft YaHei", serif;
   --font-body: var(--font-raleway), "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+/* ===== Landing Card ===== */
+.landing-card {
+  background: white;
+  border: 1px solid var(--color-slate-100);
+  border-radius: 1.375rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.03);
+}
+
+:where(.dark) .landing-card {
+  background: var(--color-slate-800);
+  border: 1px solid var(--color-slate-700);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+}
+
+.landing-icon-box {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.8125rem;
+  background: var(--color-teal-50);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+:where(.dark) .landing-icon-box {
+  background: rgba(20, 184, 166, 0.12);
+}
+
+.landing-demo-frame {
+  background: var(--color-slate-50);
+  border: 2px dashed var(--color-teal-100);
+  border-radius: 0.75rem;
+}
+
+:where(.dark) .landing-demo-frame {
+  background: var(--color-slate-800);
+  border-color: rgba(20, 184, 166, 0.15);
 }
 
 /* ===== Base ===== */
