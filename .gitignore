@@ -8,3 +8,6 @@ out/
 # misc
 .DS_Store
 *.tsbuildinfo
+
+# brainstorming visual companion
+.superpowers/
