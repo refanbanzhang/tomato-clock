@@ -81,46 +81,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ========== 3. Demo (NEW) ========== */}
-      <section className="bg-white dark:bg-slate-800/50 border-y border-slate-100 dark:border-slate-700/40">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-20 sm:py-24">
-          <h2 className="font-display text-[22px] font-bold tracking-tight text-center text-slate-900 dark:text-slate-100">
-            {t("landing_demo_title")}
-          </h2>
-          <p className="mt-3 text-center text-[13px] text-slate-400 dark:text-slate-500 max-w-md mx-auto">
-            {t("landing_demo_sub")}
-          </p>
-
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 max-w-[840px] mx-auto">
-            <div className="landing-card p-4">
-              <div className="landing-demo-frame overflow-hidden">
-                <img
-                  src="/landing-demo-timer.png"
-                  alt={t("landing_demo_timer_label")}
-                  className="w-full h-auto"
-                />
-              </div>
-              <p className="mt-3 text-xs text-slate-500 dark:text-slate-400 text-center">
-                {t("landing_demo_timer_label")}
-              </p>
-            </div>
-            <div className="landing-card p-4">
-              <div className="landing-demo-frame overflow-hidden">
-                <img
-                  src="/landing-demo-calendar.png"
-                  alt={t("landing_demo_calendar_label")}
-                  className="w-full h-auto"
-                />
-              </div>
-              <p className="mt-3 text-xs text-slate-500 dark:text-slate-400 text-center">
-                {t("landing_demo_calendar_label")}
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ========== 4. Features ========== */}
+      {/* ========== 3. Features ========== */}
       <section id="features" className="bg-slate-50 dark:bg-slate-900">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-20 sm:py-24">
           <h2 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight text-center text-slate-900 dark:text-slate-100">
@@ -212,7 +173,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ========== 5. How it works ========== */}
+      {/* ========== 4. How it works ========== */}
       <section className="bg-white dark:bg-slate-800/50">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-20 sm:py-24">
           <h2 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight text-center text-slate-900 dark:text-slate-100">
@@ -265,7 +226,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ========== 6. Stats ========== */}
+      {/* ========== 5. Stats ========== */}
       <section className="bg-slate-900 dark:bg-slate-950">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-16 sm:py-20">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 text-center max-w-[760px] mx-auto">
@@ -297,7 +258,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ========== 7. CTA + Footer ========== */}
+      {/* ========== 6. CTA + Footer ========== */}
       <section className="bg-slate-50 dark:bg-slate-900">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-20 sm:py-24 text-center">
           <h2 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
