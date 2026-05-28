@@ -66,36 +66,40 @@
   border-color: rgba(20, 184, 166, 0.15);
 }
 
+html,
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
 /* ===== Base ===== */
 body {
   font-family: var(--font-body);
   color: var(--color-teal-950);
-  background: var(--color-teal-50);
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(20, 184, 166, 0.12), transparent),
+    var(--color-teal-50);
+  background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 :where(.dark) body {
   color: #e2e8f0;
-  background: #0f172a;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(20, 184, 166, 0.08), transparent),
+    #0f172a;
+  background-attachment: fixed;
 }
 
 /* ===== Page Layout ===== */
 .page {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 2rem 1rem 1.5rem;
-  background:
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(20, 184, 166, 0.12), transparent),
-    var(--color-teal-50);
-}
-
-:where(.dark) .page {
-  background:
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(20, 184, 166, 0.08), transparent),
-    #0f172a;
+  padding: 0.5rem 1rem 1.5rem;
 }
 
 .page-inner {
@@ -117,7 +121,7 @@ body {
 @media (min-width: 640px) {
   .page-tools {
     position: fixed;
-    top: 1rem;
+    top: calc(1rem + env(safe-area-inset-top));
     right: 1rem;
     z-index: 40;
     width: auto;

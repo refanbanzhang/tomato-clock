@@ -1,0 +1,22 @@
+{
+  "name": "Tomato Clock - 番茄时钟",
+  "short_name": "Tomato Clock",
+  "description": "一个简洁高效的番茄工作法计时器",
+  "start_url": "/tomato-clock/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#F97316",
+  "icons": [
+    {
+      "src": "/tomato-clock/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/tomato-clock/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

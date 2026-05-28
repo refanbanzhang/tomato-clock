@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Lora, Raleway } from "next/font/google";
 import { ThemeProvider } from "./components/ThemeProvider";
 import LocaleWrapper from "./components/LocaleWrapper";
@@ -16,9 +16,21 @@ const raleway = Raleway({
   display: "swap",
 });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#F97316",
+};
+
 export const metadata: Metadata = {
   title: "Tomato Clock - 番茄时钟",
   description: "一个简洁高效的番茄工作法计时器 — A simple and efficient Pomodoro timer",
+  appleWebApp: {
+    capable: true,
+    title: "Tomato Clock",
+    statusBarStyle: "black-translucent",
+  },
+  manifest: "/tomato-clock/manifest.json",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

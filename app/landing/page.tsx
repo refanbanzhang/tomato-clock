@@ -2,9 +2,14 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import TomatoIcon from "@/app/components/TomatoIcon";
 import LanguageSwitcher from "@/app/components/LanguageSwitcher";
 import { useLocale } from "@/lib/i18n";
+
+const ThemeToggle = dynamic(() => import("@/app/components/ThemeToggle"), {
+  ssr: false,
+});
 
 export default function LandingPage() {
   const { t } = useLocale();
@@ -28,6 +33,7 @@ export default function LandingPage() {
             {t("landing_brand")}
           </Link>
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             <LanguageSwitcher />
             <Link
               href="/"

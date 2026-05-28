@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <!-- Background for clarity on any theme -->
+  <rect width="48" height="48" rx="12" fill="#F97316" />
+  <!-- Centered tomato icon -->
+  <g transform="translate(4, 2)">
+    <path d="M15.5 9.5C14.2 6.8 11.2 6.2 12.8 10.8C13.4 12.2 14.8 11.8 15.5 9.5Z" fill="#14B8A6"/>
+    <path d="M24.5 9.5C25.8 6.8 28.8 6.2 27.2 10.8C26.6 12.2 25.2 11.8 24.5 9.5Z" fill="#0D9488"/>
+    <circle cx="20" cy="27" r="14" fill="#E85D04"/>
+    <circle cx="15.2" cy="23.2" r="1.8" fill="#FDBA74" fill-opacity="0.75"/>
+    <circle cx="17.6" cy="26.2" r="1.2" fill="#FED7AA" fill-opacity="0.6"/>
+  </g>
+</svg>
