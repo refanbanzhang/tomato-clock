@@ -20,7 +20,7 @@
 - **CTA 次按钮**: 白色底 + `border: #e2e8f0`
 - **卡片圆角**: `rounded-3xl`（22px）
 - **卡片阴影**: `box-shadow: 0 4px 24px rgba(0,0,0,0.03)`
-- **暗色模式**: 全局兼容 `dark:` 变体
+- **图标**: 沿用项目原有内联 SVG 图标（非 emoji），保持风格统一
 
 ## 页面结构（7 个 Section）
 
@@ -50,7 +50,7 @@
 - 标题："为什么需要番茄工作法？"
 - 3 列 grid，每张卡片：
   - 白色底 + `shadow` + `rounded-3xl` + `border`
-  - 图标（emoji）居中，放在 teal-50 小圆角框内
+  - 图标（沿用原有内联 SVG：时钟/闪电/柱状图），放在 teal-50 小圆角框内
   - 标题（15px，font-bold）+ 描述文字（12px，text-slate-400）
 
 ### 5. How it works（流程步骤）
