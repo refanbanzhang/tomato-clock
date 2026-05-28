@@ -102,7 +102,7 @@ export default function LandingPage() {
             </div>
             <div className="landing-card p-4">
               <div className="landing-demo-frame h-[200px] flex items-center justify-center text-slate-300 dark:text-slate-600 text-sm">
-                {t("landing_demo_timer_label")}
+                {t("landing_demo_calendar_label")}
               </div>
               <p className="mt-3 text-xs text-slate-500 dark:text-slate-400 text-center">
                 {t("landing_demo_calendar_label")}
@@ -313,7 +313,7 @@ export default function LandingPage() {
           <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2 text-sm text-slate-400 dark:text-slate-500">
               <TomatoIcon className="w-5 h-5" />
-              <span>{t("landing_brand")}</span>
+              <span>{t("landing_footer_brand")}</span>
             </div>
             <p className="text-xs text-slate-300 dark:text-slate-600">
               {t("landing_footer")}
