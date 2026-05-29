@@ -12,6 +12,8 @@ import WeeklyCompleteModal from "./components/WeeklyCompleteModal";
 import PageTools from "./components/PageTools";
 import { useNotification, useAudio, useKeyboardShortcut } from "./components/hooks";
 import { useSupabaseSync } from "./components/useSupabaseSync";
+import { useAuth } from "@/lib/auth/AuthProvider";
+import { createSyncAuth } from "@/lib/supabase-sync";
 import { useLocale } from "@/lib/i18n";
 import {
   loadState,
@@ -33,6 +35,10 @@ import {
 
 export default function Home() {
   const { t } = useLocale();
+  const { session } = useAuth();
+  const syncAuth = session
+    ? createSyncAuth(session.user.id, session.access_token)
+    : null;
   const [appState, setAppState] = useState<AppState | null>(null);
   const [timer, setTimer] = useState<TimerState>(() => loadTimerState());
   const [showSettings, setShowSettings] = useState(false);
@@ -84,6 +90,7 @@ export default function Home() {
   }, [timer]);
 
   const { triggerUpload } = useSupabaseSync({
+    auth: syncAuth,
     onRemoteState: (remote) => {
       setAppState(remote);
     },
@@ -380,6 +387,7 @@ export default function Home() {
               }}
               onImport={handleImport}
               onImportError={handleImportError}
+              onAccountMessage={(message) => setToast({ message })}
             />
             <div className="px-6 pb-5">
               <button

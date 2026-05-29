@@ -9,6 +9,7 @@
     "publish": "next build && rsync -avz --delete -e \"ssh\" out/ ubuntu@1.14.248.175:/var/www/tomato-clock/"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.106.2",
     "@tailwindcss/postcss": "^4.3.0",
     "next": "^15.1.0",
     "react": "^19.0.0",

@@ -145,6 +145,57 @@ export interface Translations {
   landing_cta_btn: string;
   landing_footer: string;
   landing_footer_brand: string;
+
+  // Auth
+  authAccount: string;
+  authAccountHint: string;
+  authLoginTitle: string;
+  authLoginSub: string;
+  authRegisterTitle: string;
+  authRegisterSub: string;
+  authForgotTitle: string;
+  authForgotSub: string;
+  authResetTitle: string;
+  authResetSub: string;
+  authResetWaiting: string;
+  authEmail: string;
+  authPassword: string;
+  authNewPassword: string;
+  authConfirmPassword: string;
+  authLoginBtn: string;
+  authRegisterBtn: string;
+  authSendResetBtn: string;
+  authResetBtn: string;
+  authChangePassword: string;
+  authChangePasswordBtn: string;
+  authSignOut: string;
+  authForgotLink: string;
+  authLoginLink: string;
+  authRegisterLink: string;
+  authBackHome: string;
+  authLoading: string;
+  authPasswordMismatch: string;
+  authErrorGeneric: string;
+  authRegisterCheckEmail: string;
+  authResetEmailSent: string;
+  authPasswordChanged: string;
+  authSignedOut: string;
+  authInvalidCredentials: string;
+  authEmailNotConfirmed: string;
+  authCallbackTitle: string;
+  authCallbackSub: string;
+  authCallbackFailed: string;
+  authCallbackFailedSub: string;
+  authCallbackNoSession: string;
+  authModePassword: string;
+  authModeMagicLink: string;
+  authSendMagicLink: string;
+  authMagicLinkSent: string;
+  authInvalidCredentialsHint: string;
+  authEmailRateLimit: string;
+  authEmailRateLimitHint: string;
+  authEmailSendFailed: string;
+  authEmailSendFailedHint: string;
 }
 
 // Helper: typed translation function

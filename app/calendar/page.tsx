@@ -6,19 +6,24 @@ import CalendarView from "../components/CalendarView";
 import StatsSummary from "../components/StatsSummary";
 import PageTools from "../components/PageTools";
 import { loadState, saveState } from "@/lib/store";
-import { fetchRemoteState } from "@/lib/supabase-sync";
+import { fetchRemoteState, createSyncAuth } from "@/lib/supabase-sync";
+import { useAuth } from "@/lib/auth/AuthProvider";
 import { useLocale } from "@/lib/i18n";
 import type { AppState } from "@/lib/types";
 
 export default function CalendarPage() {
   const { t } = useLocale();
+  const { session } = useAuth();
   const [appState, setAppState] = useState<AppState | null>(null);
 
   useEffect(() => {
     const local = loadState();
     setAppState(local);
 
-    fetchRemoteState()
+    if (!session) return;
+
+    const auth = createSyncAuth(session.user.id, session.access_token);
+    fetchRemoteState(auth)
       .then((remote) => {
         if (remote) {
           saveState(remote.state);
@@ -28,7 +33,7 @@ export default function CalendarPage() {
       .catch((e) => {
         console.warn("Supabase pull failed on calendar page:", e);
       });
-  }, []);
+  }, [session]);
 
   useEffect(() => {
     const handleStorage = (e: StorageEvent) => {
@@ -44,9 +49,13 @@ export default function CalendarPage() {
   }, []);
 
   useEffect(() => {
+    if (!session) return;
+
+    const auth = createSyncAuth(session.user.id, session.access_token);
+
     const handleVisibility = () => {
       if (document.visibilityState === "visible") {
-        fetchRemoteState()
+        fetchRemoteState(auth)
           .then((remote) => {
             if (remote) {
               saveState(remote.state);
@@ -58,7 +67,7 @@ export default function CalendarPage() {
     };
     document.addEventListener("visibilitychange", handleVisibility);
     return () => document.removeEventListener("visibilitychange", handleVisibility);
-  }, []);
+  }, [session]);
 
   if (!appState) {
     return (

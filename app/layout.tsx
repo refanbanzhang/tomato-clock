@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Lora, Raleway } from "next/font/google";
 import { ThemeProvider } from "./components/ThemeProvider";
+import { AuthProvider } from "@/lib/auth/AuthProvider";
 import LocaleWrapper from "./components/LocaleWrapper";
 import "./globals.css";
 
@@ -55,7 +56,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <ThemeProvider>
-          <LocaleWrapper>{children}</LocaleWrapper>
+          <AuthProvider>
+            <LocaleWrapper>{children}</LocaleWrapper>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

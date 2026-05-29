@@ -2,65 +2,68 @@
 
 import { useEffect, useRef, useCallback } from "react";
 import { AppState } from "@/lib/types";
-import { fetchRemoteState, uploadState } from "@/lib/supabase-sync";
+import { fetchRemoteState, uploadState, type SyncAuth } from "@/lib/supabase-sync";
 
 interface SyncCallbacks {
+  auth: SyncAuth | null;
   onRemoteState: (state: AppState) => void;
   getCurrentState: () => AppState;
 }
 
-/**
- * Sync local state with Supabase remote.
- * - On mount: fetch remote, merge if newer (via lastUploadedAt tracking)
- * - On local change (via triggerUpload): debounced upload after 500ms
- * - On cross-tab storage event: re-fetch from remote
- */
-export function useSupabaseSync({ onRemoteState, getCurrentState }: SyncCallbacks) {
+export function useSupabaseSync({ auth, onRemoteState, getCurrentState }: SyncCallbacks) {
   const lastUploadedAt = useRef<Date>(new Date(0));
   const uploadTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isSyncing = useRef(false);
   const initialSyncDone = useRef(false);
+  const authKey = auth ? `${auth.syncId}:${auth.accessToken.slice(0, 8)}` : null;
 
-  // Pull from remote
   const syncFromRemote = useCallback(async () => {
-    if (isSyncing.current) return;
+    if (!auth || isSyncing.current) return;
     isSyncing.current = true;
     try {
-      const remote = await fetchRemoteState();
+      const remote = await fetchRemoteState(auth);
       if (remote && remote.updatedAt > lastUploadedAt.current) {
         onRemoteState(remote.state);
         lastUploadedAt.current = remote.updatedAt;
+      } else if (!remote) {
+        const now = new Date();
+        await uploadState(auth, getCurrentState(), now);
+        lastUploadedAt.current = now;
       }
     } catch (e) {
       console.warn("Supabase pull failed:", e);
     } finally {
       isSyncing.current = false;
     }
-  }, [onRemoteState]);
+  }, [auth, onRemoteState]);
 
-  // Push to remote (debounced)
   const triggerUpload = useCallback(() => {
+    if (!auth) return;
     if (uploadTimer.current) clearTimeout(uploadTimer.current);
     uploadTimer.current = setTimeout(async () => {
       const now = new Date();
       try {
-        await uploadState(getCurrentState(), now);
+        await uploadState(auth, getCurrentState(), now);
         lastUploadedAt.current = now;
       } catch (e) {
         console.warn("Supabase upload failed:", e);
       }
     }, 500);
-  }, [getCurrentState]);
+  }, [auth, getCurrentState]);
 
-  // Initial sync on mount
   useEffect(() => {
-    if (initialSyncDone.current) return;
+    initialSyncDone.current = false;
+    lastUploadedAt.current = new Date(0);
+  }, [authKey]);
+
+  useEffect(() => {
+    if (!auth || initialSyncDone.current) return;
     initialSyncDone.current = true;
     syncFromRemote();
-  }, [syncFromRemote]);
+  }, [auth, authKey, syncFromRemote]);
 
-  // Cross-tab sync: when another tab writes to localStorage, re-fetch from remote
   useEffect(() => {
+    if (!auth) return;
     const handleStorage = (e: StorageEvent) => {
       if (e.key === "tomato-clock-state" && e.newValue) {
         syncFromRemote();
@@ -68,9 +71,8 @@ export function useSupabaseSync({ onRemoteState, getCurrentState }: SyncCallback
     };
     window.addEventListener("storage", handleStorage);
     return () => window.removeEventListener("storage", handleStorage);
-  }, [syncFromRemote]);
+  }, [auth, syncFromRemote]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (uploadTimer.current) clearTimeout(uploadTimer.current);

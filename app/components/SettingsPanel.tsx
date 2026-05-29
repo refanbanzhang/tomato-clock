@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { useLocale } from "@/lib/i18n";
 import { DataImportError, downloadStateExport, parseImportData } from "@/lib/data-transfer";
 import type { AppState } from "@/lib/types";
+import AccountSection from "./AccountSection";
 
 interface SettingsPanelProps {
   weeklyTarget: number;
@@ -11,6 +12,7 @@ interface SettingsPanelProps {
   onSetTarget: (target: number) => void;
   onImport: (state: AppState) => void;
   onImportError: (message: string) => void;
+  onAccountMessage?: (message: string) => void;
 }
 
 export default function SettingsPanel({
@@ -19,6 +21,7 @@ export default function SettingsPanel({
   onSetTarget,
   onImport,
   onImportError,
+  onAccountMessage,
 }: SettingsPanelProps) {
   const { t } = useLocale();
   const [editing, setEditing] = useState(false);
@@ -141,6 +144,8 @@ export default function SettingsPanel({
           />
         </div>
       </div>
+
+      <AccountSection onMessage={onAccountMessage} onError={onImportError} />
 
       <div className="mt-5 pt-5 border-t border-teal-50 dark:border-slate-700/50">
         <div className="subtitle space-y-1.5">

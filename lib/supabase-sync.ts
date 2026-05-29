@@ -1,10 +1,12 @@
 import { AppState } from "./types";
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from "./supabase/config";
 
-const SUPABASE_URL = "https://bfgbjtuyojgvcvvxjlxv.supabase.co";
-const SUPABASE_ANON_KEY =
-  "sb_publishable_Xsb5q3jdp6A15j2XBocwMQ_duzHmILh";
-const SYNC_ID = "default";
 const TABLE = "tomato_clock_state";
+
+export interface SyncAuth {
+  syncId: string;
+  accessToken: string;
+}
 
 interface RemoteRow {
   state: AppState;
@@ -17,11 +19,9 @@ interface RemoteAppState {
 }
 
 function parseSupabaseTimestamp(value: string): Date {
-  // Try ISO 8601 with fractional seconds first
   const d = new Date(value);
   if (!isNaN(d.getTime())) return d;
 
-  // Fallback: try without fractional seconds
   const d2 = new Date(value.replace(/\.\d+Z$/, "Z"));
   if (!isNaN(d2.getTime())) return d2;
 
@@ -32,19 +32,14 @@ function restURL(path: string): string {
   return `${SUPABASE_URL}/rest/v1/${path}`;
 }
 
-function authHeaders(): Record<string, string> {
+function authHeaders(auth: SyncAuth): Record<string, string> {
   return {
     apikey: SUPABASE_ANON_KEY,
-    Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+    Authorization: `Bearer ${auth.accessToken}`,
   };
 }
 
-/**
- * Swift stores Date as TimeInterval (seconds since 2001-01-01 UTC),
- * which JSON-encodes as a number. Web expects ISO 8601 strings.
- * Convert numeric dates to ISO strings when pulling from Supabase.
- */
-const SWIFT_EPOCH_OFFSET = 978307200; // seconds between 1970-01-01 and 2001-01-01
+const SWIFT_EPOCH_OFFSET = 978307200;
 
 function swiftTimeIntervalToISO(value: number): string {
   const unixMs = (value + SWIFT_EPOCH_OFFSET) * 1000;
@@ -52,14 +47,12 @@ function swiftTimeIntervalToISO(value: number): string {
 }
 
 function isSwiftTimeInterval(value: unknown): value is number {
-  // Swift TimeIntervals are typically > 600_000_000 (year ~2000+)
   return typeof value === "number" && value > 600_000_000;
 }
 
 function normalizeStateForWeb(raw: unknown): AppState {
   const state = raw as Record<string, unknown>;
 
-  // Normalize sessions: convert numeric dates to ISO strings
   if (Array.isArray(state.sessions)) {
     state.sessions = state.sessions.map((s: Record<string, unknown>) => {
       if (isSwiftTimeInterval(s.startDate)) {
@@ -72,7 +65,6 @@ function normalizeStateForWeb(raw: unknown): AppState {
     });
   }
 
-  // Normalize targetChanges: convert numeric dates to ISO strings
   if (Array.isArray(state.targetChanges)) {
     state.targetChanges = (state.targetChanges as Record<string, unknown>[]).map((tc) => {
       if (isSwiftTimeInterval(tc.date)) {
@@ -85,12 +77,12 @@ function normalizeStateForWeb(raw: unknown): AppState {
   return state as unknown as AppState;
 }
 
-export async function fetchRemoteState(): Promise<RemoteAppState | null> {
-  const url = `${restURL(TABLE)}?id=eq.${encodeURIComponent(SYNC_ID)}&select=state,updated_at&limit=1`;
+export async function fetchRemoteState(auth: SyncAuth): Promise<RemoteAppState | null> {
+  const url = `${restURL(TABLE)}?id=eq.${encodeURIComponent(auth.syncId)}&select=state,updated_at&limit=1`;
 
   const res = await fetch(url, {
     headers: {
-      ...authHeaders(),
+      ...authHeaders(auth),
       "Cache-Control": "no-cache",
       Pragma: "no-cache",
     },
@@ -113,11 +105,12 @@ export async function fetchRemoteState(): Promise<RemoteAppState | null> {
 }
 
 export async function uploadState(
+  auth: SyncAuth,
   state: AppState,
   updatedAt: Date
 ): Promise<void> {
   const body = {
-    id: SYNC_ID,
+    id: auth.syncId,
     state,
     updated_at: updatedAt.toISOString(),
   };
@@ -125,7 +118,7 @@ export async function uploadState(
   const res = await fetch(restURL(TABLE), {
     method: "POST",
     headers: {
-      ...authHeaders(),
+      ...authHeaders(auth),
       "Content-Type": "application/json",
       Prefer: "resolution=merge-duplicates",
     },
@@ -138,11 +131,15 @@ export async function uploadState(
   }
 }
 
-export async function clearRemoteState(): Promise<void> {
+export async function clearRemoteState(auth: SyncAuth): Promise<void> {
   const empty: AppState = {
     sessions: [],
     weeklyTarget: 40,
     targetChanges: [],
   };
-  await uploadState(empty, new Date());
+  await uploadState(auth, empty, new Date());
+}
+
+export function createSyncAuth(userId: string, accessToken: string): SyncAuth {
+  return { syncId: userId, accessToken };
 }
