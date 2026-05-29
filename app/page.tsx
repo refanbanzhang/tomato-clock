@@ -5,7 +5,7 @@ import AppNav from "./components/AppNav";
 import TomatoIcon from "./components/TomatoIcon";
 import TimerDisplay from "./components/TimerDisplay";
 import TimerControls from "./components/TimerControls";
-import SettingsPanel from "./components/SettingsPanel";
+import SettingsModal from "./components/SettingsModal";
 import Toast from "./components/Toast";
 import Fireworks from "./components/Fireworks";
 import WeeklyCompleteModal from "./components/WeeklyCompleteModal";
@@ -36,6 +36,7 @@ import {
 export default function Home() {
   const { t } = useLocale();
   const { session } = useAuth();
+  const userId = session?.user.id;
   const syncAuth = session
     ? createSyncAuth(session.user.id, session.access_token)
     : null;
@@ -43,20 +44,11 @@ export default function Home() {
   const [timer, setTimer] = useState<TimerState>(() => loadTimerState());
   const [showSettings, setShowSettings] = useState(false);
 
-  // ESC to close settings modal
-  useEffect(() => {
-    if (!showSettings) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setShowSettings(false);
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [showSettings]);
-
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const appStateRef = useRef<AppState | null>(null);
   const timerRestoredRef = useRef(false);
   const skipNextSync = useRef(false);
+  const initialLoadDone = useRef(false);
   const { requestPermission, notify } = useNotification();
   const { playBeep } = useAudio();
   const [toast, setToast] = useState<{ message: string; sub?: string } | null>(null);
@@ -74,16 +66,17 @@ export default function Home() {
   }, [triggerFireworks]);
 
   useEffect(() => {
-    const state = loadState();
-    setAppState(state);
-  }, []);
+    if (!userId) return;
+    setAppState(loadState(userId));
+    initialLoadDone.current = false;
+  }, [userId]);
 
   useEffect(() => {
-    if (appState) {
+    if (appState && userId) {
       appStateRef.current = appState;
-      saveState(appState);
+      saveState(appState, userId);
     }
-  }, [appState]);
+  }, [appState, userId]);
 
   useEffect(() => {
     saveTimerState(timer);
@@ -97,7 +90,6 @@ export default function Home() {
     getCurrentState: () => appStateRef.current!,
   });
 
-  const initialLoadDone = useRef(false);
   useEffect(() => {
     if (appState && initialLoadDone.current) {
       if (skipNextSync.current) {
@@ -303,41 +295,19 @@ export default function Home() {
 
   if (!appState) {
     return (
-      <div className="page items-center justify-center">
-        <div className="loader" role="status" aria-label={t("loading")} />
+      <div className="page">
+        <PageTools onSettingsClick={() => setShowSettings(true)} />
+        <AppNav />
+        <div className="flex flex-1 items-center justify-center">
+          <div className="loader" role="status" aria-label={t("loading")} />
+        </div>
       </div>
     );
   }
 
   return (
     <div className="page">
-      <PageTools>
-        <button
-          onClick={() => setShowSettings(true)}
-          className="icon-btn"
-          aria-label={t("settings")}
-        >
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            strokeWidth={2}
-            aria-hidden="true"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-            />
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-            />
-          </svg>
-        </button>
-      </PageTools>
+      <PageTools onSettingsClick={() => setShowSettings(true)} />
 
       <AppNav />
 
@@ -366,39 +336,15 @@ export default function Home() {
       </main>
 
       {showSettings && (
-        <div
-          className="modal-backdrop"
-          onClick={() => setShowSettings(false)}
-          role="presentation"
-        >
-          <div
-            className="modal card"
-            onClick={(e) => e.stopPropagation()}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="settings-title"
-          >
-            <SettingsPanel
-              weeklyTarget={appState.weeklyTarget}
-              appState={appState}
-              onSetTarget={(t) => {
-                handleSetTarget(t);
-                setShowSettings(false);
-              }}
-              onImport={handleImport}
-              onImportError={handleImportError}
-              onAccountMessage={(message) => setToast({ message })}
-            />
-            <div className="px-6 pb-5">
-              <button
-                onClick={() => setShowSettings(false)}
-                className="btn btn-muted w-full py-2.5 text-sm"
-              >
-                {t("close")}
-              </button>
-            </div>
-          </div>
-        </div>
+        <SettingsModal
+          open={showSettings}
+          onClose={() => setShowSettings(false)}
+          appState={appState}
+          onSetTarget={handleSetTarget}
+          onImport={handleImport}
+          onImportError={handleImportError}
+          onAccountMessage={(message) => setToast({ message })}
+        />
       )}
 
       <footer className="footer">{t("footer")}</footer>

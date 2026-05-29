@@ -4,29 +4,13 @@ import {
   DEFAULT_WEEKLY_TARGET,
 } from "./types";
 
-const STORAGE_KEY = "tomato-clock-state";
+const STORAGE_PREFIX = "tomato-clock-state";
 
-export function loadState(): AppState {
-  if (typeof window === "undefined") {
-    return {
-      weeklyTarget: DEFAULT_WEEKLY_TARGET,
-      sessions: [],
-      targetChanges: [],
-    };
-  }
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      return {
-        weeklyTarget: parsed.weeklyTarget ?? DEFAULT_WEEKLY_TARGET,
-        sessions: parsed.sessions ?? [],
-        targetChanges: parsed.targetChanges ?? [],
-      };
-    }
-  } catch {
-    // corrupted data, reset
-  }
+export function stateStorageKey(userId: string): string {
+  return `${STORAGE_PREFIX}:${userId}`;
+}
+
+function emptyState(): AppState {
   return {
     weeklyTarget: DEFAULT_WEEKLY_TARGET,
     sessions: [],
@@ -34,9 +18,31 @@ export function loadState(): AppState {
   };
 }
 
-export function saveState(state: AppState): void {
+function parseStoredState(raw: string): AppState {
+  const parsed = JSON.parse(raw);
+  return {
+    weeklyTarget: parsed.weeklyTarget ?? DEFAULT_WEEKLY_TARGET,
+    sessions: parsed.sessions ?? [],
+    targetChanges: parsed.targetChanges ?? [],
+  };
+}
+
+export function loadState(userId: string): AppState {
+  if (typeof window === "undefined") {
+    return emptyState();
+  }
+  try {
+    const raw = localStorage.getItem(stateStorageKey(userId));
+    if (raw) return parseStoredState(raw);
+  } catch {
+    // corrupted data, reset
+  }
+  return emptyState();
+}
+
+export function saveState(state: AppState, userId: string): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  localStorage.setItem(stateStorageKey(userId), JSON.stringify(state));
 }
 
 export function addSession(state: AppState, session: PomodoroSession): AppState {

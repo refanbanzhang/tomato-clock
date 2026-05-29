@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useCallback } from "react";
 import { AppState } from "@/lib/types";
+import { stateStorageKey } from "@/lib/store";
 import { fetchRemoteState, uploadState, type SyncAuth } from "@/lib/supabase-sync";
 
 interface SyncCallbacks {
@@ -64,8 +65,9 @@ export function useSupabaseSync({ auth, onRemoteState, getCurrentState }: SyncCa
 
   useEffect(() => {
     if (!auth) return;
+    const key = stateStorageKey(auth.syncId);
     const handleStorage = (e: StorageEvent) => {
-      if (e.key === "tomato-clock-state" && e.newValue) {
+      if (e.key === key && e.newValue) {
         syncFromRemote();
       }
     };

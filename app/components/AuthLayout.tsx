@@ -24,7 +24,7 @@ export default function AuthLayout({ title, subtitle, children }: AuthLayoutProp
           </header>
           {children}
           <p className="auth-back">
-            <Link href="/" className="auth-link">
+            <Link href="/landing/" className="auth-link">
               {t("authBackHome")}
             </Link>
           </p>

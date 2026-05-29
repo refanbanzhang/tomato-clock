@@ -1,12 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import AppNav from "../components/AppNav";
 import CalendarView from "../components/CalendarView";
 import StatsSummary from "../components/StatsSummary";
 import PageTools from "../components/PageTools";
-import { loadState, saveState } from "@/lib/store";
-import { fetchRemoteState, createSyncAuth } from "@/lib/supabase-sync";
+import SettingsModal from "../components/SettingsModal";
+import Toast from "../components/Toast";
+import { useSupabaseSync } from "../components/useSupabaseSync";
+import { loadState, saveState, setWeeklyTarget, stateStorageKey } from "@/lib/store";
+import { createSyncAuth } from "@/lib/supabase-sync";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { useLocale } from "@/lib/i18n";
 import type { AppState } from "@/lib/types";
@@ -14,30 +17,51 @@ import type { AppState } from "@/lib/types";
 export default function CalendarPage() {
   const { t } = useLocale();
   const { session } = useAuth();
+  const userId = session?.user.id;
+  const syncAuth = session
+    ? createSyncAuth(session.user.id, session.access_token)
+    : null;
   const [appState, setAppState] = useState<AppState | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
+  const [toast, setToast] = useState<{ message: string; sub?: string } | null>(null);
+  const appStateRef = useRef<AppState | null>(null);
+  const initialLoadDone = useRef(false);
 
   useEffect(() => {
-    const local = loadState();
-    setAppState(local);
-
-    if (!session) return;
-
-    const auth = createSyncAuth(session.user.id, session.access_token);
-    fetchRemoteState(auth)
-      .then((remote) => {
-        if (remote) {
-          saveState(remote.state);
-          setAppState(remote.state);
-        }
-      })
-      .catch((e) => {
-        console.warn("Supabase pull failed on calendar page:", e);
-      });
-  }, [session]);
+    if (!userId) return;
+    setAppState(loadState(userId));
+    initialLoadDone.current = false;
+  }, [userId]);
 
   useEffect(() => {
+    if (appState && userId) {
+      appStateRef.current = appState;
+      saveState(appState, userId);
+    }
+  }, [appState, userId]);
+
+  const { triggerUpload } = useSupabaseSync({
+    auth: syncAuth,
+    onRemoteState: (remote) => {
+      setAppState(remote);
+    },
+    getCurrentState: () => appStateRef.current!,
+  });
+
+  useEffect(() => {
+    if (appState && initialLoadDone.current) {
+      triggerUpload();
+    }
+    if (appState && !initialLoadDone.current) {
+      initialLoadDone.current = true;
+    }
+  }, [appState, triggerUpload]);
+
+  useEffect(() => {
+    if (!userId) return;
+    const key = stateStorageKey(userId);
     const handleStorage = (e: StorageEvent) => {
-      if (e.key === "tomato-clock-state" && e.newValue) {
+      if (e.key === key && e.newValue) {
         try {
           const parsed = JSON.parse(e.newValue);
           setAppState(parsed);
@@ -46,40 +70,46 @@ export default function CalendarPage() {
     };
     window.addEventListener("storage", handleStorage);
     return () => window.removeEventListener("storage", handleStorage);
+  }, [userId]);
+
+  const handleSetTarget = useCallback((target: number) => {
+    setAppState((prev) => {
+      if (!prev) return prev;
+      return setWeeklyTarget(prev, target);
+    });
   }, []);
 
-  useEffect(() => {
-    if (!session) return;
+  const handleImport = useCallback(
+    (imported: AppState) => {
+      setAppState(imported);
+      setShowSettings(false);
+      setToast({
+        message: t("importSuccess"),
+        sub: t("importSuccessSub", { n: imported.sessions.length }),
+      });
+    },
+    [t]
+  );
 
-    const auth = createSyncAuth(session.user.id, session.access_token);
-
-    const handleVisibility = () => {
-      if (document.visibilityState === "visible") {
-        fetchRemoteState(auth)
-          .then((remote) => {
-            if (remote) {
-              saveState(remote.state);
-              setAppState(remote.state);
-            }
-          })
-          .catch(() => {});
-      }
-    };
-    document.addEventListener("visibilitychange", handleVisibility);
-    return () => document.removeEventListener("visibilitychange", handleVisibility);
-  }, [session]);
+  const handleImportError = useCallback((message: string) => {
+    setToast({ message });
+  }, []);
 
   if (!appState) {
     return (
-      <div className="page items-center justify-center">
-        <div className="loader" role="status" aria-label={t("loading")} />
+      <div className="page">
+        <PageTools onSettingsClick={() => setShowSettings(true)} />
+        <AppNav />
+        <div className="flex flex-1 items-center justify-center">
+          <div className="loader" role="status" aria-label={t("loading")} />
+        </div>
       </div>
     );
   }
 
   return (
     <div className="page">
-      <PageTools />
+      <PageTools onSettingsClick={() => setShowSettings(true)} />
 
       <AppNav />
 
@@ -98,6 +128,26 @@ export default function CalendarPage() {
       </main>
 
       <footer className="footer">{t("footer")}</footer>
+
+      {showSettings && (
+        <SettingsModal
+          open={showSettings}
+          onClose={() => setShowSettings(false)}
+          appState={appState}
+          onSetTarget={handleSetTarget}
+          onImport={handleImport}
+          onImportError={handleImportError}
+          onAccountMessage={(message) => setToast({ message })}
+        />
+      )}
+
+      {toast && (
+        <Toast
+          message={toast.message}
+          sub={toast.sub}
+          onDismiss={() => setToast(null)}
+        />
+      )}
     </div>
   );
 }

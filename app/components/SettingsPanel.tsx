@@ -12,7 +12,6 @@ interface SettingsPanelProps {
   onSetTarget: (target: number) => void;
   onImport: (state: AppState) => void;
   onImportError: (message: string) => void;
-  onAccountMessage?: (message: string) => void;
 }
 
 export default function SettingsPanel({
@@ -21,7 +20,6 @@ export default function SettingsPanel({
   onSetTarget,
   onImport,
   onImportError,
-  onAccountMessage,
 }: SettingsPanelProps) {
   const { t } = useLocale();
   const [editing, setEditing] = useState(false);
@@ -66,7 +64,10 @@ export default function SettingsPanel({
 
   return (
     <div className="p-6">
-      <h2 className="text-xs font-semibold text-teal-600 dark:text-teal-400 uppercase tracking-wider mb-5">
+      <h2
+        id="settings-title"
+        className="text-xs font-semibold text-teal-600 dark:text-teal-400 uppercase tracking-wider mb-5 pr-8"
+      >
         {t("settingsTitle")}
       </h2>
 
@@ -145,16 +146,7 @@ export default function SettingsPanel({
         </div>
       </div>
 
-      <AccountSection onMessage={onAccountMessage} onError={onImportError} />
-
-      <div className="mt-5 pt-5 border-t border-teal-50 dark:border-slate-700/50">
-        <div className="subtitle space-y-1.5">
-          <p>{t("focusDuration")}</p>
-          <p>
-            {t("shortcutStartPause")} <kbd className="kbd">Space</kbd>
-          </p>
-        </div>
-      </div>
+      <AccountSection />
     </div>
   );
 }

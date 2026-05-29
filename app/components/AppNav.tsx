@@ -2,11 +2,17 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/lib/auth/AuthProvider";
 import { useLocale } from "@/lib/i18n";
 
 export default function AppNav() {
   const pathname = usePathname();
   const { t } = useLocale();
+  const { session, loading } = useAuth();
+
+  if (loading || !session) {
+    return null;
+  }
 
   const links = [
     { href: "/", label: t("navTimer") },

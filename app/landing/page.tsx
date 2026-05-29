@@ -26,7 +26,7 @@ export default function LandingPage() {
       <nav className="sticky top-0 z-40 bg-slate-50/95 dark:bg-slate-900/95 backdrop-blur-xl border-b border-slate-100 dark:border-slate-700/60">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-2.5 flex items-center justify-between">
           <Link
-            href="/"
+            href="/landing/"
             className="flex items-center gap-2 font-display text-lg font-semibold tracking-tight text-slate-900 dark:text-slate-100 no-underline hover:text-slate-700 dark:hover:text-slate-300 transition-colors duration-200 cursor-pointer"
           >
             <TomatoIcon className="w-7 h-7 flex-shrink-0" />
@@ -36,7 +36,7 @@ export default function LandingPage() {
             <ThemeToggle />
             <LanguageSwitcher />
             <Link
-              href="/"
+              href="/auth/login/"
               className="inline-flex items-center justify-center gap-1.5 font-semibold text-sm py-2.5 px-5 rounded-[10px] bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors duration-200"
             >
               {t("landing_cta_start")}
@@ -68,7 +68,7 @@ export default function LandingPage() {
 
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
-              href="/"
+              href="/auth/login/"
               className="inline-flex items-center justify-center font-semibold text-base px-8 py-3.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors duration-200"
             >
               {t("landing_hero_btn")}
@@ -275,7 +275,7 @@ export default function LandingPage() {
           </p>
           <div className="mt-8">
             <Link
-              href="/"
+              href="/auth/login/"
               className="inline-flex items-center justify-center font-semibold text-base px-8 py-3.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors duration-200"
             >
               {t("landing_cta_btn")}
