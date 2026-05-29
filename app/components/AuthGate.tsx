@@ -3,7 +3,6 @@
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/AuthProvider";
-import { appPath } from "@/lib/base-path";
 import { isPublicPath } from "@/lib/auth/public-paths";
 
 export default function AuthGate({ children }: { children: React.ReactNode }) {
@@ -14,7 +13,7 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (loading || session || allowed) return;
-    router.replace(appPath("/landing/"));
+    router.replace("/landing/");
   }, [loading, session, allowed, router]);
 
   if (!allowed && (loading || !session)) {
