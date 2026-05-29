@@ -187,10 +187,6 @@ export interface Translations {
   authCallbackFailed: string;
   authCallbackFailedSub: string;
   authCallbackNoSession: string;
-  authModePassword: string;
-  authModeMagicLink: string;
-  authSendMagicLink: string;
-  authMagicLinkSent: string;
   authInvalidCredentialsHint: string;
   authEmailRateLimit: string;
   authEmailRateLimitHint: string;

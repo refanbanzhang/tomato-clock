@@ -7,16 +7,12 @@ import AuthLayout from "@/app/components/AuthLayout";
 import { handleAuthCallback } from "@/lib/auth/callback";
 import { mapAuthError } from "@/lib/auth/errors";
 import { authErrorMessage } from "@/lib/auth/messages";
-import { getAuthRedirectUrl } from "@/lib/base-path";
 import { useLocale } from "@/lib/i18n";
 import { supabase } from "@/lib/supabase/client";
-
-type LoginMode = "password" | "magic";
 
 export default function LoginPage() {
   const { t } = useLocale();
   const router = useRouter();
-  const [mode, setMode] = useState<LoginMode>("password");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -73,7 +69,7 @@ export default function LoginPage() {
     };
   }, [router]);
 
-  const handlePasswordLogin = async (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
     setMessage("");
@@ -104,34 +100,6 @@ export default function LoginPage() {
     }
   };
 
-  const handleMagicLink = async (e: FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setMessage("");
-    setLoading(true);
-    const trimmedEmail = email.trim();
-    try {
-      const { error: otpError } = await supabase.auth.signInWithOtp({
-        email: trimmedEmail,
-        options: {
-          emailRedirectTo: getAuthRedirectUrl("/auth/callback/"),
-        },
-      });
-      if (otpError) throw otpError;
-      setMessage(t("authMagicLinkSent"));
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : t("authErrorGeneric");
-      const code = mapAuthError(msg);
-      console.warn("[auth-login] magic link failed:", { email: trimmedEmail, code, msg });
-      setError(authErrorMessage(t, code, msg));
-      if (code === "email_rate_limit") {
-        setMessage(t("authEmailRateLimitHint"));
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
   if (checking) {
     return (
       <AuthLayout title={t("authLoginTitle")} subtitle={t("authLoginSub")}>
@@ -144,35 +112,7 @@ export default function LoginPage() {
 
   return (
     <AuthLayout title={t("authLoginTitle")} subtitle={t("authLoginSub")}>
-      <div className="auth-tabs">
-        <button
-          type="button"
-          className={`auth-tab ${mode === "password" ? "auth-tab-active" : ""}`}
-          onClick={() => {
-            setMode("password");
-            setError("");
-            setMessage("");
-          }}
-        >
-          {t("authModePassword")}
-        </button>
-        <button
-          type="button"
-          className={`auth-tab ${mode === "magic" ? "auth-tab-active" : ""}`}
-          onClick={() => {
-            setMode("magic");
-            setError("");
-            setMessage("");
-          }}
-        >
-          {t("authModeMagicLink")}
-        </button>
-      </div>
-
-      <form
-        className="auth-form"
-        onSubmit={mode === "password" ? handlePasswordLogin : handleMagicLink}
-      >
+      <form className="auth-form" onSubmit={handleSubmit}>
         <label className="auth-field">
           <span className="auth-label">{t("authEmail")}</span>
           <input
@@ -184,39 +124,29 @@ export default function LoginPage() {
             required
           />
         </label>
-        {mode === "password" && (
-          <label className="auth-field">
-            <span className="auth-label">{t("authPassword")}</span>
-            <input
-              className="auth-input"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="current-password"
-              required
-              minLength={6}
-            />
-          </label>
-        )}
+        <label className="auth-field">
+          <span className="auth-label">{t("authPassword")}</span>
+          <input
+            className="auth-input"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="current-password"
+            required
+            minLength={6}
+          />
+        </label>
         {error && <p className="auth-error">{error}</p>}
         {message && <p className="auth-msg">{message}</p>}
         <button type="submit" className="btn btn-primary auth-submit" disabled={loading}>
-          {loading
-            ? t("authLoading")
-            : mode === "password"
-              ? t("authLoginBtn")
-              : t("authSendMagicLink")}
+          {loading ? t("authLoading") : t("authLoginBtn")}
         </button>
       </form>
       <div className="auth-links">
-        {mode === "password" && (
-          <>
-            <Link href="/auth/forgot-password/" className="auth-link">
-              {t("authForgotLink")}
-            </Link>
-            <span className="auth-sep">·</span>
-          </>
-        )}
+        <Link href="/auth/forgot-password/" className="auth-link">
+          {t("authForgotLink")}
+        </Link>
+        <span className="auth-sep">·</span>
         <Link href="/auth/register/" className="auth-link">
           {t("authRegisterLink")}
         </Link>
