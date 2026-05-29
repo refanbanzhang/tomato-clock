@@ -134,7 +134,7 @@
   "authLoginTitle": "ログイン",
   "authLoginSub": "ログインしてポモドーロ記録を同期",
   "authRegisterTitle": "新規登録",
-  "authRegisterSub": "アカウント作成 — 登録後すぐ使えます",
+  "authRegisterSub": "アカウント作成 — メール認証後にログインできます",
   "authForgotTitle": "パスワードを忘れた",
   "authForgotSub": "メールアドレスを入力するとリセットリンクを送信します",
   "authResetTitle": "パスワードリセット",

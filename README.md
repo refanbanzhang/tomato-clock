@@ -61,7 +61,7 @@ https://www.keepgoing2049.cn/tomato-clock/auth/reset-password/
 ### 4. 可选
 
 - [Rate Limits](https://supabase.com/dashboard/project/bfgbjtuyojgvcvvxjlxv/auth/rate-limits) 按需提高邮件发送上限（配 SMTP 后默认约 30/小时）
-- [Providers → Email](https://supabase.com/dashboard/project/bfgbjtuyojgvcvvxjlxv/auth/providers) 关闭 **Confirm email**（项目已 DB 自动确认，可省掉验证邮件）
+- [Providers → Email](https://supabase.com/dashboard/project/bfgbjtuyojgvcvvxjlxv/auth/providers) 开启 **Confirm email**（注册后需点击邮件中的验证链接）
 
 ## 部署
 

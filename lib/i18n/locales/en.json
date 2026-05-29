@@ -134,7 +134,7 @@
   "authLoginTitle": "Sign In",
   "authLoginSub": "Sign in to sync your pomodoro records",
   "authRegisterTitle": "Sign Up",
-  "authRegisterSub": "Create an account — ready to use immediately",
+  "authRegisterSub": "Create an account — verify your email to sign in",
   "authForgotTitle": "Forgot Password",
   "authForgotSub": "Enter your email and we'll send a reset link",
   "authResetTitle": "Reset Password",

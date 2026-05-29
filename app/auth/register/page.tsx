@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import AuthLayout from "@/app/components/AuthLayout";
 import { mapAuthError } from "@/lib/auth/errors";
 import { authErrorMessage } from "@/lib/auth/messages";
+import { getAuthRedirectUrl } from "@/lib/base-path";
 import { useLocale } from "@/lib/i18n";
 import { supabase } from "@/lib/supabase/client";
 
@@ -16,11 +17,13 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
+    setMessage("");
 
     if (password !== confirm) {
       setError(t("authPasswordMismatch"));
@@ -33,6 +36,9 @@ export default function RegisterPage() {
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: trimmedEmail,
         password,
+        options: {
+          emailRedirectTo: getAuthRedirectUrl("/auth/callback/"),
+        },
       });
       if (signUpError) throw signUpError;
 
@@ -41,21 +47,17 @@ export default function RegisterPage() {
         return;
       }
 
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: trimmedEmail,
-        password,
-      });
-      if (!signInError) {
-        router.replace("/");
-        return;
-      }
-
-      throw signInError;
+      setMessage(t("authRegisterCheckEmail"));
     } catch (err) {
       const msg = err instanceof Error ? err.message : t("authErrorGeneric");
       const code = mapAuthError(msg);
       console.warn("[auth-register] signUp failed:", { email: trimmedEmail, code, msg });
       setError(authErrorMessage(t, code, msg));
+      if (code === "email_rate_limit") {
+        setMessage(t("authEmailRateLimitHint"));
+      } else if (code === "email_send_failed") {
+        setMessage(t("authEmailSendFailedHint"));
+      }
     } finally {
       setLoading(false);
     }
@@ -100,7 +102,8 @@ export default function RegisterPage() {
           />
         </label>
         {error && <p className="auth-error">{error}</p>}
-        <button type="submit" className="btn btn-primary auth-submit" disabled={loading}>
+        {message && <p className="auth-msg">{message}</p>}
+        <button type="submit" className="btn btn-primary auth-submit" disabled={loading || !!message}>
           {loading ? t("authLoading") : t("authRegisterBtn")}
         </button>
       </form>

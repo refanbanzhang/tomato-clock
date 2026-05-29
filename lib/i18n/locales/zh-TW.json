@@ -134,7 +134,7 @@
   "authLoginTitle": "登入",
   "authLoginSub": "登入以同步你的番茄記錄",
   "authRegisterTitle": "註冊",
-  "authRegisterSub": "建立帳戶，註冊後立即可用",
+  "authRegisterSub": "建立帳戶，驗證郵箱後即可登入",
   "authForgotTitle": "忘記密碼",
   "authForgotSub": "輸入信箱，我們將寄送重設連結",
   "authResetTitle": "重設密碼",
