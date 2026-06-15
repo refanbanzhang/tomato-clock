@@ -61,6 +61,9 @@
   "target": "Target",
   "thisMonth": "This Month",
   "thisYear": "This Year",
+  "weeklyProgress": "Weekly Progress",
+  "weeklyProgressUnit": "tomatoes",
+  "weeklyProgressDone": "Goal Reached",
 
   "calendarTitle": "Focus Calendar",
   "calendarSubtitle": "Track daily Pomodoro completion",

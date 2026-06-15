@@ -61,6 +61,9 @@
   "target": "目標",
   "thisMonth": "今月",
   "thisYear": "今年",
+  "weeklyProgress": "今週の進捗",
+  "weeklyProgressUnit": "個",
+  "weeklyProgressDone": "目標達成",
 
   "calendarTitle": "集中カレンダー",
   "calendarSubtitle": "毎日のポモドーロ完了を追跡",

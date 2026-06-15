@@ -5,6 +5,7 @@ import AppNav from "./components/AppNav";
 import TomatoIcon from "./components/TomatoIcon";
 import TimerDisplay from "./components/TimerDisplay";
 import TimerControls from "./components/TimerControls";
+import WeeklyProgress from "./components/WeeklyProgress";
 import SettingsModal from "./components/SettingsModal";
 import Toast from "./components/Toast";
 import Fireworks from "./components/Fireworks";
@@ -320,6 +321,10 @@ export default function Home() {
       </header>
 
       <main className="page-inner flex flex-col items-center gap-6 w-full">
+        <WeeklyProgress
+          sessions={appState.sessions}
+          weeklyTarget={appState.weeklyTarget}
+        />
         <TimerDisplay
           mode={timer.mode}
           remainingSeconds={timer.remainingSeconds}

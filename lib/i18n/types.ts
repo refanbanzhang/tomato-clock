@@ -73,6 +73,9 @@ export interface Translations {
   target: string;
   thisMonth: string;
   thisYear: string;
+  weeklyProgress: string;
+  weeklyProgressUnit: string;
+  weeklyProgressDone: string;
 
   // Calendar page
   calendarTitle: string;

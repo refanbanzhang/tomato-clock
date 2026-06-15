@@ -61,6 +61,9 @@
   "target": "目标",
   "thisMonth": "本月",
   "thisYear": "今年",
+  "weeklyProgress": "本周进度",
+  "weeklyProgressUnit": "个",
+  "weeklyProgressDone": "目标达成",
 
   "calendarTitle": "专注日历",
   "calendarSubtitle": "追踪每日番茄完成情况",

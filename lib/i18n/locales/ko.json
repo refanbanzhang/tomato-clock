@@ -61,6 +61,9 @@
   "target": "목표",
   "thisMonth": "이번 달",
   "thisYear": "올해",
+  "weeklyProgress": "이번 주 진행도",
+  "weeklyProgressUnit": "개",
+  "weeklyProgressDone": "목표 달성",
 
   "calendarTitle": "집중 캘린더",
   "calendarSubtitle": "매일 포모도로 완료 현황 추적",
