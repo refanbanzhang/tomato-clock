@@ -11,28 +11,49 @@ import {
   type SyncAuth,
 } from "@/lib/supabase-sync";
 
+export type SyncErrorType = "upload" | "pull";
+
 interface SyncCallbacks {
   auth: SyncAuth | null;
   localReady: boolean;
   onRemoteState: (state: AppState) => void;
   getCurrentState: () => AppState;
+  onSyncError?: (type: SyncErrorType) => void;
 }
+
+const ERROR_TOAST_COOLDOWN_MS = 8000;
 
 export function useSupabaseSync({
   auth,
   localReady,
   onRemoteState,
   getCurrentState,
+  onSyncError,
 }: SyncCallbacks) {
   const lastUploadedAt = useRef<Date>(new Date(0));
   const uploadTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isSyncing = useRef(false);
   const initialSyncDone = useRef(false);
+  const lastErrorToastAt = useRef<Record<SyncErrorType, number>>({
+    upload: 0,
+    pull: 0,
+  });
   const authKey = auth ? `${auth.syncId}:${auth.accessToken.slice(0, 8)}` : null;
 
+  const notifySyncError = useCallback(
+    (type: SyncErrorType) => {
+      if (!onSyncError) return;
+      const now = Date.now();
+      if (now - lastErrorToastAt.current[type] < ERROR_TOAST_COOLDOWN_MS) return;
+      lastErrorToastAt.current[type] = now;
+      onSyncError(type);
+    },
+    [onSyncError]
+  );
+
   const runUpload = useCallback(
-    async (reason: string) => {
-      if (!auth) return;
+    async (reason: string): Promise<boolean> => {
+      if (!auth) return false;
       const state = getCurrentState();
       const now = new Date();
       try {
@@ -42,11 +63,14 @@ export function useSupabaseSync({
           reason,
           sessionCount: state.sessions.length,
         });
+        return true;
       } catch (e) {
         console.warn("[sync] upload failed", { reason, error: e });
+        notifySyncError("upload");
+        return false;
       }
     },
-    [auth, getCurrentState]
+    [auth, getCurrentState, notifySyncError]
   );
 
   const syncFromRemote = useCallback(async () => {
@@ -89,10 +113,11 @@ export function useSupabaseSync({
       }
     } catch (e) {
       console.warn("[sync] pull failed:", e);
+      notifySyncError("pull");
     } finally {
       isSyncing.current = false;
     }
-  }, [auth, getCurrentState, onRemoteState, runUpload]);
+  }, [auth, getCurrentState, onRemoteState, runUpload, notifySyncError]);
 
   const triggerUpload = useCallback(() => {
     if (!auth) return;
@@ -114,6 +139,7 @@ export function useSupabaseSync({
   useEffect(() => {
     initialSyncDone.current = false;
     lastUploadedAt.current = new Date(0);
+    lastErrorToastAt.current = { upload: 0, pull: 0 };
   }, [authKey]);
 
   useEffect(() => {

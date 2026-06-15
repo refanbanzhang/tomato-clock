@@ -57,6 +57,10 @@ export interface Translations {
   notificationBody: string;
   toastTitle: string;
   toastSubtitle: string;
+  syncUploadError: string;
+  syncUploadErrorSub: string;
+  syncPullError: string;
+  syncPullErrorSub: string;
   weeklyCompleteTitle: string;
   weeklyCompleteSub: string;
   weeklyCompleteBtn: string;

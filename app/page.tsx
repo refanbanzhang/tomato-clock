@@ -12,7 +12,7 @@ import Fireworks from "./components/Fireworks";
 import WeeklyCompleteModal from "./components/WeeklyCompleteModal";
 import PageTools from "./components/PageTools";
 import { useNotification, useAudio, useKeyboardShortcut } from "./components/hooks";
-import { useSupabaseSync } from "./components/useSupabaseSync";
+import { useSupabaseSync, type SyncErrorType } from "./components/useSupabaseSync";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { createSyncAuth } from "@/lib/supabase-sync";
 import { useLocale } from "@/lib/i18n";
@@ -83,6 +83,23 @@ export default function Home() {
     saveTimerState(timer);
   }, [timer]);
 
+  const handleSyncError = useCallback(
+    (type: SyncErrorType) => {
+      if (type === "upload") {
+        setToast({
+          message: t("syncUploadError"),
+          sub: t("syncUploadErrorSub"),
+        });
+        return;
+      }
+      setToast({
+        message: t("syncPullError"),
+        sub: t("syncPullErrorSub"),
+      });
+    },
+    [t]
+  );
+
   const { triggerUpload } = useSupabaseSync({
     auth: syncAuth,
     localReady: appState !== null,
@@ -90,6 +107,7 @@ export default function Home() {
       setAppState(remote);
     },
     getCurrentState: () => appStateRef.current!,
+    onSyncError: handleSyncError,
   });
 
   useEffect(() => {

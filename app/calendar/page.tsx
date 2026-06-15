@@ -7,7 +7,7 @@ import StatsSummary from "../components/StatsSummary";
 import PageTools from "../components/PageTools";
 import SettingsModal from "../components/SettingsModal";
 import Toast from "../components/Toast";
-import { useSupabaseSync } from "../components/useSupabaseSync";
+import { useSupabaseSync, type SyncErrorType } from "../components/useSupabaseSync";
 import { loadState, saveState, setWeeklyTarget, stateStorageKey } from "@/lib/store";
 import { createSyncAuth } from "@/lib/supabase-sync";
 import { useAuth } from "@/lib/auth/AuthProvider";
@@ -40,6 +40,23 @@ export default function CalendarPage() {
     }
   }, [appState, userId]);
 
+  const handleSyncError = useCallback(
+    (type: SyncErrorType) => {
+      if (type === "upload") {
+        setToast({
+          message: t("syncUploadError"),
+          sub: t("syncUploadErrorSub"),
+        });
+        return;
+      }
+      setToast({
+        message: t("syncPullError"),
+        sub: t("syncPullErrorSub"),
+      });
+    },
+    [t]
+  );
+
   const { triggerUpload } = useSupabaseSync({
     auth: syncAuth,
     localReady: appState !== null,
@@ -47,6 +64,7 @@ export default function CalendarPage() {
       setAppState(remote);
     },
     getCurrentState: () => appStateRef.current!,
+    onSyncError: handleSyncError,
   });
 
   useEffect(() => {
