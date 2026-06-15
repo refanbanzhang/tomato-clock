@@ -85,6 +85,7 @@ export default function Home() {
 
   const { triggerUpload } = useSupabaseSync({
     auth: syncAuth,
+    localReady: appState !== null,
     onRemoteState: (remote) => {
       setAppState(remote);
     },
@@ -166,6 +167,8 @@ export default function Home() {
       hitWeeklyTarget,
       weekCountBefore,
       weeklyTarget: currentState.weeklyTarget,
+      sessionCountAfter: currentState.sessions.length + 1,
+      userId,
     });
 
     if (hitWeeklyTarget) {
@@ -174,7 +177,7 @@ export default function Home() {
     }
 
     setToast({ message: t("toastTitle"), sub: t("toastSubtitle") + " \uD83C\uDF45" });
-  }, [notify, playBeep, stopTimer, t, celebrateWeeklyComplete]);
+  }, [notify, playBeep, stopTimer, t, celebrateWeeklyComplete, userId]);
 
   const handleStartFocus = useCallback(() => {
     requestPermission();

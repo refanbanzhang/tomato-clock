@@ -42,6 +42,7 @@ export default function CalendarPage() {
 
   const { triggerUpload } = useSupabaseSync({
     auth: syncAuth,
+    localReady: appState !== null,
     onRemoteState: (remote) => {
       setAppState(remote);
     },

@@ -1,5 +1,6 @@
-import { AppState } from "./types";
+import { AppState, PomodoroSession, TargetChange } from "./types";
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from "./supabase/config";
+import { supabase } from "./supabase/client";
 
 const TABLE = "tomato_clock_state";
 
@@ -37,6 +38,55 @@ function authHeaders(auth: SyncAuth): Record<string, string> {
     apikey: SUPABASE_ANON_KEY,
     Authorization: `Bearer ${auth.accessToken}`,
   };
+}
+
+async function resolveSyncAuth(auth: SyncAuth): Promise<SyncAuth> {
+  const { data, error } = await supabase.auth.getSession();
+  if (error || !data.session) {
+    console.warn("[sync] getSession failed, using cached token:", error?.message);
+    return auth;
+  }
+  return {
+    syncId: data.session.user.id,
+    accessToken: data.session.access_token,
+  };
+}
+
+function latestSessionEnd(state: AppState): number {
+  return state.sessions.reduce(
+    (max, session) => Math.max(max, new Date(session.endDate).getTime()),
+    0
+  );
+}
+
+export function mergeAppStates(local: AppState, remote: AppState): AppState {
+  const sessionsById = new Map<string, PomodoroSession>();
+  for (const session of remote.sessions) sessionsById.set(session.id, session);
+  for (const session of local.sessions) sessionsById.set(session.id, session);
+
+  const sessions = [...sessionsById.values()].sort(
+    (a, b) => new Date(a.endDate).getTime() - new Date(b.endDate).getTime()
+  );
+
+  const changesById = new Map<string, TargetChange>();
+  for (const change of remote.targetChanges) changesById.set(change.id, change);
+  for (const change of local.targetChanges) changesById.set(change.id, change);
+
+  const targetChanges = [...changesById.values()].sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+  );
+
+  const weeklyTarget =
+    targetChanges.length > 0
+      ? targetChanges[targetChanges.length - 1].newValue
+      : local.weeklyTarget;
+
+  return { sessions, weeklyTarget, targetChanges };
+}
+
+export function countLocalOnlySessions(local: AppState, remote: AppState): number {
+  const remoteIds = new Set(remote.sessions.map((session) => session.id));
+  return local.sessions.filter((session) => !remoteIds.has(session.id)).length;
 }
 
 const SWIFT_EPOCH_OFFSET = 978307200;
@@ -78,11 +128,12 @@ function normalizeStateForWeb(raw: unknown): AppState {
 }
 
 export async function fetchRemoteState(auth: SyncAuth): Promise<RemoteAppState | null> {
-  const url = `${restURL(TABLE)}?id=eq.${encodeURIComponent(auth.syncId)}&select=state,updated_at&limit=1`;
+  const freshAuth = await resolveSyncAuth(auth);
+  const url = `${restURL(TABLE)}?id=eq.${encodeURIComponent(freshAuth.syncId)}&select=state,updated_at&limit=1`;
 
   const res = await fetch(url, {
     headers: {
-      ...authHeaders(auth),
+      ...authHeaders(freshAuth),
       "Cache-Control": "no-cache",
       Pragma: "no-cache",
     },
@@ -109,16 +160,26 @@ export async function uploadState(
   state: AppState,
   updatedAt: Date
 ): Promise<void> {
+  const freshAuth = await resolveSyncAuth(auth);
   const body = {
-    id: auth.syncId,
+    id: freshAuth.syncId,
     state,
     updated_at: updatedAt.toISOString(),
   };
 
+  console.info("[sync] upload", {
+    syncId: freshAuth.syncId,
+    sessionCount: state.sessions.length,
+    latestSessionEnd: latestSessionEnd(state)
+      ? new Date(latestSessionEnd(state)).toISOString()
+      : null,
+    updatedAt: updatedAt.toISOString(),
+  });
+
   const res = await fetch(restURL(TABLE), {
     method: "POST",
     headers: {
-      ...authHeaders(auth),
+      ...authHeaders(freshAuth),
       "Content-Type": "application/json",
       Prefer: "resolution=merge-duplicates",
     },
