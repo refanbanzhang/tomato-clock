@@ -3,7 +3,7 @@
   "siteDescription": "간단하고 효율적인 포모도로 타이머",
 
   "navTimer": "타이머",
-  "navCalendar": "캘린더",
+  "navStats": "통계",
 
   "timerTitle": "Tomato Clock",
   "timerSubtitle": "25분 집중하고, 모든 포모도로를 기록하세요",
@@ -68,9 +68,14 @@
   "weeklyProgress": "이번 주 진행도",
   "weeklyProgressUnit": "개",
   "weeklyProgressDone": "목표 달성",
-
-  "calendarTitle": "집중 캘린더",
-  "calendarSubtitle": "매일 포모도로 완료 현황 추적",
+  "monthlyTarget": "월간 목표",
+  "monthlyTargetLabel": "월간 목표 수",
+  "monthlyProgress": "이번 달 진행도",
+  "yearlyTarget": "연간 목표",
+  "yearlyTargetLabel": "연간 목표 수",
+  "yearlyProgress": "올해 진행도",
+  "statsTitle": "집중 통계",
+  "statsSubtitle": "주·월·년 목표 진행률 확인",
 
   "prevMonth": "이전 달",
   "today": "오늘",

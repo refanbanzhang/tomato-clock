@@ -3,7 +3,7 @@
   "siteDescription": "A simple and efficient Pomodoro timer",
 
   "navTimer": "Timer",
-  "navCalendar": "Calendar",
+  "navStats": "Stats",
 
   "timerTitle": "Tomato Clock",
   "timerSubtitle": "Focus for 25 minutes, track every Pomodoro",
@@ -68,9 +68,14 @@
   "weeklyProgress": "Weekly Progress",
   "weeklyProgressUnit": "tomatoes",
   "weeklyProgressDone": "Goal Reached",
-
-  "calendarTitle": "Focus Calendar",
-  "calendarSubtitle": "Track daily Pomodoro completion",
+  "monthlyTarget": "Monthly Target",
+  "monthlyTargetLabel": "Monthly target count",
+  "monthlyProgress": "Monthly Progress",
+  "yearlyTarget": "Yearly Target",
+  "yearlyTargetLabel": "Yearly target count",
+  "yearlyProgress": "Yearly Progress",
+  "statsTitle": "Focus Stats",
+  "statsSubtitle": "Track weekly, monthly, and yearly goals",
 
   "prevMonth": "Previous month",
   "today": "Today",

@@ -1,6 +1,8 @@
 import {
   AppState,
   DEFAULT_WEEKLY_TARGET,
+  DEFAULT_MONTHLY_TARGET,
+  DEFAULT_YEARLY_TARGET,
   PomodoroSession,
   TargetChange,
 } from "./types";
@@ -78,6 +80,15 @@ function validateAppState(raw: unknown): AppState {
       ? Math.max(1, Math.min(999, raw.weeklyTarget))
       : DEFAULT_WEEKLY_TARGET;
 
+  const monthlyTarget =
+    typeof raw.monthlyTarget === "number"
+      ? Math.max(1, Math.min(9999, raw.monthlyTarget))
+      : DEFAULT_MONTHLY_TARGET;
+
+  const yearlyTarget =
+    typeof raw.yearlyTarget === "number"
+      ? Math.max(1, Math.min(99999, raw.yearlyTarget))
+      : DEFAULT_YEARLY_TARGET;
   if (!Array.isArray(raw.sessions)) {
     throw new DataImportError("invalidFormat");
   }
@@ -105,7 +116,7 @@ function validateAppState(raw: unknown): AppState {
     }
   }
 
-  return { weeklyTarget, sessions, targetChanges };
+  return { weeklyTarget, monthlyTarget, yearlyTarget, sessions, targetChanges };
 }
 
 function isExportPayload(value: unknown): value is ExportPayload {

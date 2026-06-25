@@ -3,7 +3,7 @@
   "siteDescription": "シンプルで効率的なポモドーロタイマー",
 
   "navTimer": "タイマー",
-  "navCalendar": "カレンダー",
+  "navStats": "統計",
 
   "timerTitle": "Tomato Clock",
   "timerSubtitle": "25分集中して、ポモドーロごとに記録",
@@ -68,9 +68,14 @@
   "weeklyProgress": "今週の進捗",
   "weeklyProgressUnit": "個",
   "weeklyProgressDone": "目標達成",
-
-  "calendarTitle": "集中カレンダー",
-  "calendarSubtitle": "毎日のポモドーロ完了を追跡",
+  "monthlyTarget": "月間目標",
+  "monthlyTargetLabel": "月間目標数",
+  "monthlyProgress": "今月の進捗",
+  "yearlyTarget": "年間目標",
+  "yearlyTargetLabel": "年間目標数",
+  "yearlyProgress": "今年の進捗",
+  "statsTitle": "集中統計",
+  "statsSubtitle": "週・月・年の目標進捗を確認",
 
   "prevMonth": "前月",
   "today": "今日",

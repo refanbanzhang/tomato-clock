@@ -3,7 +3,7 @@
   "siteDescription": "一個簡潔高效的番茄工作法計時器",
 
   "navTimer": "計時器",
-  "navCalendar": "日曆",
+  "navStats": "統計",
 
   "timerTitle": "番茄時鐘",
   "timerSubtitle": "專注 25 分鐘，記錄每一個番茄",
@@ -68,9 +68,14 @@
   "weeklyProgress": "本週進度",
   "weeklyProgressUnit": "個",
   "weeklyProgressDone": "目標達成",
-
-  "calendarTitle": "專注日曆",
-  "calendarSubtitle": "追蹤每日番茄完成情況",
+  "monthlyTarget": "月目標",
+  "monthlyTargetLabel": "月目標數量",
+  "monthlyProgress": "本月進度",
+  "yearlyTarget": "年目標",
+  "yearlyTargetLabel": "年目標數量",
+  "yearlyProgress": "今年進度",
+  "statsTitle": "專注統計",
+  "statsSubtitle": "查看週、月、年目標進度",
 
   "prevMonth": "上個月",
   "today": "今天",

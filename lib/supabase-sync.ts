@@ -81,7 +81,13 @@ export function mergeAppStates(local: AppState, remote: AppState): AppState {
       ? targetChanges[targetChanges.length - 1].newValue
       : local.weeklyTarget;
 
-  return { sessions, weeklyTarget, targetChanges };
+  return {
+    sessions,
+    weeklyTarget,
+    monthlyTarget: local.monthlyTarget ?? remote.monthlyTarget ?? 160,
+    yearlyTarget: local.yearlyTarget ?? remote.yearlyTarget ?? 2000,
+    targetChanges,
+  };
 }
 
 export function countLocalOnlySessions(local: AppState, remote: AppState): number {
@@ -196,6 +202,8 @@ export async function clearRemoteState(auth: SyncAuth): Promise<void> {
   const empty: AppState = {
     sessions: [],
     weeklyTarget: 40,
+    monthlyTarget: 160,
+    yearlyTarget: 2000,
     targetChanges: [],
   };
   await uploadState(auth, empty, new Date());

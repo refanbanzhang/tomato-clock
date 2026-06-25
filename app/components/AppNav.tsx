@@ -16,14 +16,14 @@ export default function AppNav() {
 
   const links = [
     { href: "/", label: t("navTimer") },
-    { href: "/calendar", label: t("navCalendar") },
+    { href: "/stats", label: t("navStats") },
   ];
 
   return (
     <nav className="page-inner mb-8">
       <div className="card nav">
         {links.map(({ href, label }) => {
-          // 生产环境 trailingSlash: true，pathname 带尾部斜杠（如 /calendar/），需要 normalize 后再比较
+          // 生产环境 trailingSlash: true，pathname 带尾部斜杠（如 /stats/），需要 normalize 后再比较
           const normalizedPath = pathname.replace(/\/$/, "") || "/";
           const normalizedHref = href.replace(/\/$/, "") || "/";
           const active = normalizedPath === normalizedHref;

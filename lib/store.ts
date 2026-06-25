@@ -2,6 +2,8 @@ import {
   AppState,
   PomodoroSession,
   DEFAULT_WEEKLY_TARGET,
+  DEFAULT_MONTHLY_TARGET,
+  DEFAULT_YEARLY_TARGET,
 } from "./types";
 
 const STORAGE_PREFIX = "tomato-clock-state";
@@ -13,6 +15,8 @@ export function stateStorageKey(userId: string): string {
 function emptyState(): AppState {
   return {
     weeklyTarget: DEFAULT_WEEKLY_TARGET,
+    monthlyTarget: DEFAULT_MONTHLY_TARGET,
+    yearlyTarget: DEFAULT_YEARLY_TARGET,
     sessions: [],
     targetChanges: [],
   };
@@ -22,6 +26,8 @@ function parseStoredState(raw: string): AppState {
   const parsed = JSON.parse(raw);
   return {
     weeklyTarget: parsed.weeklyTarget ?? DEFAULT_WEEKLY_TARGET,
+    monthlyTarget: parsed.monthlyTarget ?? DEFAULT_MONTHLY_TARGET,
+    yearlyTarget: parsed.yearlyTarget ?? DEFAULT_YEARLY_TARGET,
     sessions: parsed.sessions ?? [],
     targetChanges: parsed.targetChanges ?? [],
   };
@@ -62,5 +68,19 @@ export function setWeeklyTarget(state: AppState, newTarget: number): AppState {
         newValue: newTarget,
       },
     ],
+  };
+}
+
+export function setMonthlyTarget(state: AppState, newTarget: number): AppState {
+  return {
+    ...state,
+    monthlyTarget: newTarget,
+  };
+}
+
+export function setYearlyTarget(state: AppState, newTarget: number): AppState {
+  return {
+    ...state,
+    yearlyTarget: newTarget,
   };
 }

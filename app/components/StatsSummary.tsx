@@ -8,11 +8,15 @@ import { useLocale } from "@/lib/i18n";
 interface StatsSummaryProps {
   sessions: PomodoroSession[];
   weeklyTarget?: number;
+  monthlyTarget?: number;
+  yearlyTarget?: number;
 }
 
 export default function StatsSummary({
   sessions,
   weeklyTarget,
+  monthlyTarget,
+  yearlyTarget,
 }: StatsSummaryProps) {
   const { t } = useLocale();
   const stats = useMemo(() => {
@@ -44,12 +48,22 @@ export default function StatsSummary({
         <p className="text-xl font-semibold text-teal-600 dark:text-teal-400 tabular-nums">
           {stats.month}
         </p>
+        {monthlyTarget !== undefined && (
+          <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
+            {t("target")} {monthlyTarget}
+          </p>
+        )}
       </div>
       <div className="card p-3 text-center">
         <p className="text-xs text-slate-400 dark:text-slate-500 mb-1">{t("thisYear")}</p>
         <p className="text-xl font-semibold text-teal-600 dark:text-teal-400 tabular-nums">
           {stats.year}
         </p>
+        {yearlyTarget !== undefined && (
+          <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
+            {t("target")} {yearlyTarget}
+          </p>
+        )}
       </div>
     </div>
   );

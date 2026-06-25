@@ -5,7 +5,6 @@ import AppNav from "./components/AppNav";
 import TomatoIcon from "./components/TomatoIcon";
 import TimerDisplay from "./components/TimerDisplay";
 import TimerControls from "./components/TimerControls";
-import WeeklyProgress from "./components/WeeklyProgress";
 import SettingsModal from "./components/SettingsModal";
 import Toast from "./components/Toast";
 import Fireworks from "./components/Fireworks";
@@ -21,6 +20,8 @@ import {
   saveState,
   addSession,
   setWeeklyTarget,
+  setMonthlyTarget,
+  setYearlyTarget,
 } from "@/lib/store";
 import { FOCUS_SECONDS, AppState } from "@/lib/types";
 import { willReachWeeklyTarget } from "@/lib/weekly-target";
@@ -291,6 +292,20 @@ export default function Home() {
     });
   }, []);
 
+  const handleSetMonthlyTarget = useCallback((target: number) => {
+    setAppState((prev) => {
+      if (!prev) return prev;
+      return setMonthlyTarget(prev, target);
+    });
+  }, []);
+
+  const handleSetYearlyTarget = useCallback((target: number) => {
+    setAppState((prev) => {
+      if (!prev) return prev;
+      return setYearlyTarget(prev, target);
+    });
+  }, []);
+
   const handleImport = useCallback(
     (imported: AppState) => {
       setAppState(imported);
@@ -342,10 +357,6 @@ export default function Home() {
       </header>
 
       <main className="page-inner flex flex-col items-center gap-6 w-full">
-        <WeeklyProgress
-          sessions={appState.sessions}
-          weeklyTarget={appState.weeklyTarget}
-        />
         <TimerDisplay
           mode={timer.mode}
           remainingSeconds={timer.remainingSeconds}
@@ -367,6 +378,8 @@ export default function Home() {
           onClose={() => setShowSettings(false)}
           appState={appState}
           onSetTarget={handleSetTarget}
+          onSetMonthlyTarget={handleSetMonthlyTarget}
+          onSetYearlyTarget={handleSetYearlyTarget}
           onImport={handleImport}
           onImportError={handleImportError}
           onAccountMessage={(message) => setToast({ message })}

@@ -11,6 +11,8 @@ interface SettingsModalProps {
   onClose: () => void;
   appState: AppState;
   onSetTarget: (target: number) => void;
+  onSetMonthlyTarget: (target: number) => void;
+  onSetYearlyTarget: (target: number) => void;
   onImport: (state: AppState) => void;
   onImportError: (message: string) => void;
   onAccountMessage?: (message: string) => void;
@@ -21,6 +23,8 @@ export default function SettingsModal({
   onClose,
   appState,
   onSetTarget,
+  onSetMonthlyTarget,
+  onSetYearlyTarget,
   onImport,
   onImportError,
   onAccountMessage,
@@ -81,9 +85,19 @@ export default function SettingsModal({
 
         <SettingsPanel
           weeklyTarget={appState.weeklyTarget}
+          monthlyTarget={appState.monthlyTarget}
+          yearlyTarget={appState.yearlyTarget}
           appState={appState}
           onSetTarget={(target) => {
             onSetTarget(target);
+            onClose();
+          }}
+          onSetMonthlyTarget={(target) => {
+            onSetMonthlyTarget(target);
+            onClose();
+          }}
+          onSetYearlyTarget={(target) => {
+            onSetYearlyTarget(target);
             onClose();
           }}
           onImport={onImport}

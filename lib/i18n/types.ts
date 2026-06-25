@@ -7,7 +7,7 @@ export interface Translations {
 
   // Navigation
   navTimer: string;
-  navCalendar: string;
+  navStats: string;
 
   // Timer page
   timerTitle: string;
@@ -80,10 +80,16 @@ export interface Translations {
   weeklyProgress: string;
   weeklyProgressUnit: string;
   weeklyProgressDone: string;
+  monthlyTarget: string;
+  monthlyTargetLabel: string;
+  monthlyProgress: string;
+  yearlyTarget: string;
+  yearlyTargetLabel: string;
+  yearlyProgress: string;
 
-  // Calendar page
-  calendarTitle: string;
-  calendarSubtitle: string;
+  // Stats page
+  statsTitle: string;
+  statsSubtitle: string;
 
   // CalendarView
   prevMonth: string;

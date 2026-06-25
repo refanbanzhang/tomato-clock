@@ -2,19 +2,20 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import AppNav from "../components/AppNav";
-import CalendarView from "../components/CalendarView";
 import StatsSummary from "../components/StatsSummary";
+import GoalProgress from "../components/GoalProgress";
+import CalendarView from "../components/CalendarView";
 import PageTools from "../components/PageTools";
 import SettingsModal from "../components/SettingsModal";
 import Toast from "../components/Toast";
 import { useSupabaseSync, type SyncErrorType } from "../components/useSupabaseSync";
-import { loadState, saveState, setWeeklyTarget, stateStorageKey } from "@/lib/store";
+import { loadState, saveState, setWeeklyTarget, setMonthlyTarget, setYearlyTarget, stateStorageKey } from "@/lib/store";
 import { createSyncAuth } from "@/lib/supabase-sync";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { useLocale } from "@/lib/i18n";
 import type { AppState } from "@/lib/types";
 
-export default function CalendarPage() {
+export default function StatsPage() {
   const { t } = useLocale();
   const { session } = useAuth();
   const userId = session?.user.id;
@@ -98,6 +99,20 @@ export default function CalendarPage() {
     });
   }, []);
 
+  const handleSetMonthlyTarget = useCallback((target: number) => {
+    setAppState((prev) => {
+      if (!prev) return prev;
+      return setMonthlyTarget(prev, target);
+    });
+  }, []);
+
+  const handleSetYearlyTarget = useCallback((target: number) => {
+    setAppState((prev) => {
+      if (!prev) return prev;
+      return setYearlyTarget(prev, target);
+    });
+  }, []);
+
   const handleImport = useCallback(
     (imported: AppState) => {
       setAppState(imported);
@@ -133,14 +148,32 @@ export default function CalendarPage() {
       <AppNav />
 
       <header className="page-inner mb-6 text-center">
-        <h1 className="title">{t("calendarTitle")}</h1>
-        <p className="subtitle mt-1.5">{t("calendarSubtitle")}</p>
+        <h1 className="title">{t("statsTitle")}</h1>
+        <p className="subtitle mt-1.5">{t("statsSubtitle")}</p>
       </header>
 
-      <main className="page-inner w-full">
+      <main className="page-inner w-full flex flex-col gap-4">
         <StatsSummary
           sessions={appState.sessions}
           weeklyTarget={appState.weeklyTarget}
+          monthlyTarget={appState.monthlyTarget}
+          yearlyTarget={appState.yearlyTarget}
+        />
+
+        <GoalProgress
+          sessions={appState.sessions}
+          target={appState.weeklyTarget}
+          timeRange="week"
+        />
+        <GoalProgress
+          sessions={appState.sessions}
+          target={appState.monthlyTarget}
+          timeRange="month"
+        />
+        <GoalProgress
+          sessions={appState.sessions}
+          target={appState.yearlyTarget}
+          timeRange="year"
         />
 
         <CalendarView sessions={appState.sessions} />
@@ -154,6 +187,8 @@ export default function CalendarPage() {
           onClose={() => setShowSettings(false)}
           appState={appState}
           onSetTarget={handleSetTarget}
+          onSetMonthlyTarget={handleSetMonthlyTarget}
+          onSetYearlyTarget={handleSetYearlyTarget}
           onImport={handleImport}
           onImportError={handleImportError}
           onAccountMessage={(message) => setToast({ message })}
