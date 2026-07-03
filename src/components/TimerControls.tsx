@@ -23,11 +23,11 @@ export default function TimerControls({
 
   if (mode === "idle") {
     return (
-      <div className="flex flex-col items-center gap-3 w-full">
-        <button onClick={onStart} className="btn btn-cta w-full max-w-xs">
+      <div className="focus-ctrl">
+        <button onClick={onStart} className="btn btn-cta btn-lg w-full">
           {t("startFocus", { minutes: FOCUS_SECONDS / 60 })}
         </button>
-        <p className="subtitle">
+        <p className="focus-hint">
           {t("shortcut")} <kbd className="kbd">Space</kbd>
         </p>
       </div>
@@ -36,31 +36,30 @@ export default function TimerControls({
 
   if (mode === "focusing") {
     return (
-      <div className="flex flex-wrap items-center justify-center gap-2 w-full">
-        <button onClick={onPause} className="btn btn-warn">
+      <div className="focus-ctrl">
+        <button onClick={onPause} className="btn btn-warn btn-lg w-full">
           {t("pause")}
         </button>
-        <button onClick={onFinishEarly} className="btn btn-muted">
+        <button onClick={onFinishEarly} className="btn btn-soft w-full">
           {t("finishEarly")}
-          <span className="block text-[10px] font-normal opacity-70">{t("notCounted")}</span>
+          <span className="btn-note">{t("notCounted")}</span>
         </button>
-          <button onClick={onAbandon} className="btn btn-ghost">
-            {t("giveUp")}
-            <span className="block text-[10px] font-normal opacity-70">{t("notCounted")}</span>
-          </button>
+        <button onClick={onAbandon} className="btn btn-link w-full">
+          {t("giveUp")}
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-wrap items-center justify-center gap-2 w-full">
-      <button onClick={onResume} className="btn btn-cta">
+    <div className="focus-ctrl">
+      <button onClick={onResume} className="btn btn-cta btn-lg w-full">
         {t("resume")}
       </button>
-      <button onClick={onFinishEarly} className="btn btn-muted">
+      <button onClick={onFinishEarly} className="btn btn-soft w-full">
         {t("finishEarly")}
       </button>
-      <button onClick={onAbandon} className="btn btn-ghost">
+      <button onClick={onAbandon} className="btn btn-link w-full">
         {t("giveUp")}
       </button>
     </div>

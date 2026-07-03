@@ -1,4 +1,3 @@
-"use client";
 
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/lib/auth/AuthProvider";
@@ -19,24 +18,21 @@ export default function AppNav() {
   ];
 
   return (
-    <nav className="page-inner mb-8">
-      <div className="card nav">
-        {links.map(({ href, label }) => {
-          // 生产环境 trailingSlash: true，pathname 带尾部斜杠（如 /stats/），需要 normalize 后再比较
-          const normalizedPath = pathname.replace(/\/$/, "") || "/";
-          const normalizedHref = href.replace(/\/$/, "") || "/";
-          const active = normalizedPath === normalizedHref;
-          return (
-            <Link
-              key={href}
-              to={href}
-              className={`nav-link ${active ? "nav-link-active" : ""}`}
-            >
-              {label}
-            </Link>
-          );
-        })}
-      </div>
+    <nav className="tabs">
+      {links.map(({ href, label }) => {
+        const normalizedPath = pathname.replace(/\/$/, "") || "/";
+        const normalizedHref = href.replace(/\/$/, "") || "/";
+        const active = normalizedPath === normalizedHref;
+        return (
+          <Link
+            key={href}
+            to={href}
+            className={`tab-link${active ? " tab-link-on" : ""}`}
+          >
+            {label}
+          </Link>
+        );
+      })}
     </nav>
   );
 }

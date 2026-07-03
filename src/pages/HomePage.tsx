@@ -1,14 +1,12 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import AppNav from "@/components/AppNav";
-import TomatoIcon from "@/components/TomatoIcon";
+import AppShell from "@/components/AppShell";
 import TimerDisplay from "@/components/TimerDisplay";
 import TimerControls from "@/components/TimerControls";
 import SettingsModal from "@/components/SettingsModal";
 import Toast from "@/components/Toast";
 import Fireworks from "@/components/Fireworks";
 import WeeklyCompleteModal from "@/components/WeeklyCompleteModal";
-import PageTools from "@/components/PageTools";
 import { useNotification, useAudio, useKeyboardShortcut } from "@/components/hooks";
 import { useSupabaseSync, type SyncErrorType } from "@/components/useSupabaseSync";
 import { useAuth } from "@/lib/auth/AuthProvider";
@@ -329,33 +327,28 @@ export default function Home() {
 
   useKeyboardShortcut(" ", handleSpaceShortcut, true);
 
+  const shellProps = {
+    title: t("timerTitle"),
+    subtitle: t("timerSubtitle"),
+    showBrand: true,
+    wide: true,
+    onSettingsClick: () => setShowSettings(true),
+    footer: <footer className="app-footer">{t("footer")}</footer>,
+  };
+
   if (!appState) {
     return (
-      <div className="page">
-        <PageTools onSettingsClick={() => setShowSettings(true)} />
-        <AppNav />
-        <div className="flex flex-1 items-center justify-center">
+      <AppShell {...shellProps}>
+        <div className="flex flex-1 items-center justify-center py-16">
           <div className="loader" role="status" aria-label={t("loading")} />
         </div>
-      </div>
+      </AppShell>
     );
   }
 
   return (
-    <div className="page">
-      <PageTools onSettingsClick={() => setShowSettings(true)} />
-
-      <AppNav />
-
-      <header className="page-inner mb-8 text-center">
-        <div className="flex items-center justify-center gap-2.5">
-          <TomatoIcon />
-          <h1 className="title">{t("timerTitle")}</h1>
-        </div>
-        <p className="subtitle mt-1.5">{t("timerSubtitle")}</p>
-      </header>
-
-      <main className="page-inner flex flex-col items-center gap-6 w-full">
+    <AppShell {...shellProps}>
+      <section className="focus-stage">
         <TimerDisplay
           mode={timer.mode}
           remainingSeconds={timer.remainingSeconds}
@@ -369,7 +362,7 @@ export default function Home() {
           onFinishEarly={handleFinishEarly}
           onAbandon={handleAbandon}
         />
-      </main>
+      </section>
 
       {showSettings && (
         <SettingsModal
@@ -384,8 +377,6 @@ export default function Home() {
           onAccountMessage={(message) => setToast({ message })}
         />
       )}
-
-      <footer className="footer">{t("footer")}</footer>
 
       {toast && (
         <Toast
@@ -410,6 +401,6 @@ export default function Home() {
           onClose={() => setShowWeeklyComplete(false)}
         />
       )}
-    </div>
+    </AppShell>
   );
 }

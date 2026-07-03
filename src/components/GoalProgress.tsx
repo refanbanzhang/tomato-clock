@@ -50,28 +50,22 @@ export default function GoalProgress({
   const done = count >= safeTarget;
 
   return (
-    <div className="card w-full px-4 py-3">
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-1.5">
-          <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+    <div className="goal card">
+      <div className="goal-head">
+        <div className="goal-label-wrap">
+          <span className="goal-label">
             {t(getLabelKey(timeRange) as Parameters<TFn>[0])}
           </span>
-          {done && (
-            <span className="text-[10px] font-semibold text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-500/15 rounded-full px-1.5 py-0.5">
-              {t("weeklyProgressDone")}
-            </span>
-          )}
+          {done && <span className="goal-badge">{t("weeklyProgressDone")}</span>}
         </div>
-        <p className="text-xs text-slate-500 dark:text-slate-400 tabular-nums">
-          <span className="font-semibold text-teal-600 dark:text-teal-400">
-            {count}
-          </span>
+        <p className="goal-count">
+          <span className="goal-count-now">{count}</span>
           {" / "}
           {safeTarget} {t("weeklyProgressUnit")}
         </p>
       </div>
       <div
-        className="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-700/60 overflow-hidden"
+        className="goal-track"
         role="progressbar"
         aria-valuenow={count}
         aria-valuemin={0}
@@ -79,12 +73,7 @@ export default function GoalProgress({
         aria-label={t(getLabelKey(timeRange) as Parameters<TFn>[0])}
       >
         <div
-          className={
-            "h-full rounded-full transition-all duration-500 ease-out " +
-            (done
-              ? "bg-orange-500"
-              : "bg-teal-500")
-          }
+          className={`goal-bar${done ? " goal-bar-done" : ""}`}
           style={{ width: `${percent}%` }}
         />
       </div>

@@ -1,10 +1,9 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import AppNav from "@/components/AppNav";
+import AppShell from "@/components/AppShell";
 import StatsSummary from "@/components/StatsSummary";
 import GoalProgress from "@/components/GoalProgress";
 import CalendarView from "@/components/CalendarView";
-import PageTools from "@/components/PageTools";
 import SettingsModal from "@/components/SettingsModal";
 import Toast from "@/components/Toast";
 import { useSupabaseSync, type SyncErrorType } from "@/components/useSupabaseSync";
@@ -128,30 +127,27 @@ export default function StatsPage() {
     setToast({ message });
   }, []);
 
+  const shellProps = {
+    title: t("statsTitle"),
+    subtitle: t("statsSubtitle"),
+    wide: true,
+    onSettingsClick: () => setShowSettings(true),
+    footer: <footer className="app-footer">{t("footer")}</footer>,
+  };
+
   if (!appState) {
     return (
-      <div className="page">
-        <PageTools onSettingsClick={() => setShowSettings(true)} />
-        <AppNav />
-        <div className="flex flex-1 items-center justify-center">
+      <AppShell {...shellProps}>
+        <div className="flex flex-1 items-center justify-center py-16">
           <div className="loader" role="status" aria-label={t("loading")} />
         </div>
-      </div>
+      </AppShell>
     );
   }
 
   return (
-    <div className="page">
-      <PageTools onSettingsClick={() => setShowSettings(true)} />
-
-      <AppNav />
-
-      <header className="page-inner mb-6 text-center">
-        <h1 className="title">{t("statsTitle")}</h1>
-        <p className="subtitle mt-1.5">{t("statsSubtitle")}</p>
-      </header>
-
-      <main className="page-inner w-full flex flex-col gap-4">
+    <AppShell {...shellProps}>
+      <div className="stats-layout">
         <StatsSummary
           sessions={appState.sessions}
           weeklyTarget={appState.weeklyTarget}
@@ -159,26 +155,29 @@ export default function StatsPage() {
           yearlyTarget={appState.yearlyTarget}
         />
 
-        <GoalProgress
-          sessions={appState.sessions}
-          target={appState.weeklyTarget}
-          timeRange="week"
-        />
-        <GoalProgress
-          sessions={appState.sessions}
-          target={appState.monthlyTarget}
-          timeRange="month"
-        />
-        <GoalProgress
-          sessions={appState.sessions}
-          target={appState.yearlyTarget}
-          timeRange="year"
-        />
-
-        <CalendarView sessions={appState.sessions} />
-      </main>
-
-      <footer className="footer">{t("footer")}</footer>
+        <div className="stats-grid">
+          <div className="stats-main stack">
+            <GoalProgress
+              sessions={appState.sessions}
+              target={appState.weeklyTarget}
+              timeRange="week"
+            />
+            <GoalProgress
+              sessions={appState.sessions}
+              target={appState.monthlyTarget}
+              timeRange="month"
+            />
+            <GoalProgress
+              sessions={appState.sessions}
+              target={appState.yearlyTarget}
+              timeRange="year"
+            />
+          </div>
+          <div className="stats-side">
+            <CalendarView sessions={appState.sessions} />
+          </div>
+        </div>
+      </div>
 
       {showSettings && (
         <SettingsModal
@@ -201,6 +200,6 @@ export default function StatsPage() {
           onDismiss={() => setToast(null)}
         />
       )}
-    </div>
+    </AppShell>
   );
 }

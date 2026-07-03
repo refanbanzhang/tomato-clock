@@ -10,9 +10,9 @@ interface TimerDisplayProps {
 }
 
 const modeColor: Record<TimerMode, string> = {
-  idle: "#cbd5e1",
-  focusing: "#0d9488",
-  paused: "#f59e0b",
+  idle: "#c3b7a6",
+  focusing: "#d9542f",
+  paused: "#d98324",
 };
 
 export default function TimerDisplay({
@@ -33,67 +33,59 @@ export default function TimerDisplay({
   const accent = modeColor[mode];
 
   return (
-    <div className="card p-8 flex flex-col items-center">
-      <div className="relative flex flex-col items-center justify-center">
-        <svg
-          width="280"
-          height="280"
-          viewBox="0 0 280 280"
-          className="transform -rotate-90"
-          aria-hidden="true"
-        >
-          {/* Light mode ring background */}
-          <circle
-            cx="140"
-            cy="140"
-            r={radius}
-            fill="none"
-            stroke="#e2e8f0"
-            strokeWidth="6"
-            className="dark:hidden"
-          />
-          {/* Dark mode ring background */}
-          <circle
-            cx="140"
-            cy="140"
-            r={radius}
-            fill="none"
-            stroke="#334155"
-            strokeWidth="6"
-            className="hidden dark:block"
-          />
-          <circle
-            cx="140"
-            cy="140"
-            r={radius}
-            fill="none"
-            stroke={accent}
-            strokeWidth="6"
-            strokeLinecap="round"
-            strokeDasharray={circumference}
-            strokeDashoffset={strokeDashoffset}
-            className="timer-ring transition-all duration-1000 ease-linear"
-          />
-        </svg>
+    <div className="timer-ring-wrap">
+      <svg
+        width="280"
+        height="280"
+        viewBox="0 0 280 280"
+        className="timer-svg"
+        aria-hidden="true"
+      >
+        <circle
+          cx="140"
+          cy="140"
+          r={radius}
+          fill="none"
+          stroke="#e6dccd"
+          strokeWidth="4"
+          className="dark:hidden"
+        />
+        <circle
+          cx="140"
+          cy="140"
+          r={radius}
+          fill="none"
+          stroke="#3a322b"
+          strokeWidth="4"
+          className="hidden dark:block"
+        />
+        <circle
+          cx="140"
+          cy="140"
+          r={radius}
+          fill="none"
+          stroke={accent}
+          strokeWidth="4"
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={strokeDashoffset}
+          className="timer-ring"
+        />
+      </svg>
 
-        <div className="absolute flex flex-col items-center">
-          <span
-            className="text-[3.25rem] font-mono font-bold tabular-nums tracking-tight text-teal-950 dark:text-slate-100 leading-none"
-            aria-live="polite"
-            aria-atomic="true"
-          >
-            {formatTime(remainingSeconds)}
-          </span>
-          <span
-            className="mt-3 text-sm font-medium px-3 py-1 rounded-full"
-            style={{
-              backgroundColor: `${accent}18`,
-              color: accent,
-            }}
-          >
-            {modeLabel[mode]}
-          </span>
-        </div>
+      <div className="timer-readout">
+        <span className="timer-num" aria-live="polite" aria-atomic="true">
+          {formatTime(remainingSeconds)}
+        </span>
+        <span
+          className="timer-tag"
+          style={{
+            backgroundColor: `${accent}18`,
+            color: accent,
+          }}
+        >
+          {modeLabel[mode]}
+        </span>
       </div>
     </div>
   );

@@ -29,41 +29,25 @@ export default function StatsSummary({
     };
   }, [sessions]);
 
+  const items = [
+    { label: t("thisWeek"), value: stats.week, target: weeklyTarget },
+    { label: t("thisMonth"), value: stats.month, target: monthlyTarget },
+    { label: t("thisYear"), value: stats.year, target: yearlyTarget },
+  ];
+
   return (
-    <div className="grid grid-cols-3 gap-2 mb-4">
-      <div className="card p-3 text-center">
-        <p className="text-xs text-slate-400 dark:text-slate-500 mb-1">{t("thisWeek")}</p>
-        <p className="text-xl font-semibold text-teal-600 dark:text-teal-400 tabular-nums">
-          {stats.week}
-        </p>
-        {weeklyTarget !== undefined && (
-          <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
-            {t("target")} {weeklyTarget}
-          </p>
-        )}
-      </div>
-      <div className="card p-3 text-center">
-        <p className="text-xs text-slate-400 dark:text-slate-500 mb-1">{t("thisMonth")}</p>
-        <p className="text-xl font-semibold text-teal-600 dark:text-teal-400 tabular-nums">
-          {stats.month}
-        </p>
-        {monthlyTarget !== undefined && (
-          <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
-            {t("target")} {monthlyTarget}
-          </p>
-        )}
-      </div>
-      <div className="card p-3 text-center">
-        <p className="text-xs text-slate-400 dark:text-slate-500 mb-1">{t("thisYear")}</p>
-        <p className="text-xl font-semibold text-teal-600 dark:text-teal-400 tabular-nums">
-          {stats.year}
-        </p>
-        {yearlyTarget !== undefined && (
-          <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
-            {t("target")} {yearlyTarget}
-          </p>
-        )}
-      </div>
+    <div className="stat-strip card">
+      {items.map((item) => (
+        <div key={item.label} className="stat-item">
+          <p className="stat-label">{item.label}</p>
+          <p className="stat-val">{item.value}</p>
+          {item.target !== undefined && (
+            <p className="stat-target">
+              {t("target")} {item.target}
+            </p>
+          )}
+        </div>
+      ))}
     </div>
   );
 }

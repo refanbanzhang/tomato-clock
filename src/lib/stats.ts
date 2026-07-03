@@ -106,8 +106,8 @@ export function countInYear(
 
 export function getIntensityClass(count: number): string {
   if (count === 0) return "";
-  if (count <= 2) return "bg-teal-100 text-teal-900";
-  if (count <= 5) return "bg-teal-200 text-teal-900";
-  if (count <= 8) return "bg-teal-300 text-teal-950";
-  return "bg-teal-500 text-white";
+  if (count <= 2) return "bg-orange-100 text-orange-900";
+  if (count <= 5) return "bg-orange-200 text-orange-900";
+  if (count <= 8) return "bg-orange-300 text-orange-950";
+  return "bg-orange-500 text-white";
 }
