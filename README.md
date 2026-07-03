@@ -9,7 +9,7 @@ npm install
 npm run dev
 ```
 
-访问 http://localhost:3002/
+访问 http://localhost:3002/（Vite + React）
 
 ## 用户认证 & 邮件（Resend）
 
@@ -74,6 +74,12 @@ https://www.keepgoing2049.cn/tomato-clock/auth/reset-password/
 本地改完代码后，执行：
 
 ```bash
+npm run publish
+```
+
+或手动：
+
+```bash
 npm run build
-rsync -avz --delete -e "ssh" out/ ubuntu@1.14.248.175:/var/www/tomato-clock/
+rsync -avz --delete -e "ssh" dist/ ubuntu@1.14.248.175:/var/www/tomato-clock/
 ```

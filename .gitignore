@@ -1,7 +1,11 @@
 # dependencies
 node_modules/
+.npm-cache/
 
-# Next.js build output
+# Vite build output
+dist/
+
+# legacy Next.js (should not reappear)
 .next/
 out/
 
