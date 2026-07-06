@@ -9,10 +9,10 @@ interface TimerDisplayProps {
   totalSeconds: number;
 }
 
-const modeColor: Record<TimerMode, string> = {
-  idle: "#c3b7a6",
-  focusing: "#d9542f",
-  paused: "#d98324",
+const modeClass: Record<TimerMode, { ring: string; tag: string }> = {
+  idle: { ring: "timer-ring-idle", tag: "timer-tag-idle" },
+  focusing: { ring: "timer-ring-focus", tag: "timer-tag-focus" },
+  paused: { ring: "timer-ring-pause", tag: "timer-tag-pause" },
 };
 
 export default function TimerDisplay({
@@ -30,7 +30,6 @@ export default function TimerDisplay({
   const radius = 118;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference * (1 - progress);
-  const accent = modeColor[mode];
 
   return (
     <div className="timer-ring-wrap">
@@ -46,30 +45,19 @@ export default function TimerDisplay({
           cy="140"
           r={radius}
           fill="none"
-          stroke="#e6dccd"
-          strokeWidth="4"
-          className="dark:hidden"
+          strokeWidth="5"
+          className="timer-track"
         />
         <circle
           cx="140"
           cy="140"
           r={radius}
           fill="none"
-          stroke="#3a322b"
-          strokeWidth="4"
-          className="hidden dark:block"
-        />
-        <circle
-          cx="140"
-          cy="140"
-          r={radius}
-          fill="none"
-          stroke={accent}
-          strokeWidth="4"
+          strokeWidth="5"
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={strokeDashoffset}
-          className="timer-ring"
+          className={`timer-ring ${modeClass[mode].ring}`}
         />
       </svg>
 
@@ -77,13 +65,7 @@ export default function TimerDisplay({
         <span className="timer-num" aria-live="polite" aria-atomic="true">
           {formatTime(remainingSeconds)}
         </span>
-        <span
-          className="timer-tag"
-          style={{
-            backgroundColor: `${accent}18`,
-            color: accent,
-          }}
-        >
+        <span className={`timer-tag ${modeClass[mode].tag}`}>
           {modeLabel[mode]}
         </span>
       </div>

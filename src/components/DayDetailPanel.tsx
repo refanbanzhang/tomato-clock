@@ -17,7 +17,7 @@ export default function DayDetailPanel({
 
   return (
     <div className="card mt-4 p-4">
-      <h3 className="text-sm font-semibold text-teal-950 dark:text-slate-100 mb-2">
+      <h3 className="set-label mb-2">
         {formatDate(locale, date, {
           month: "long",
           day: "numeric",
@@ -40,10 +40,7 @@ export default function DayDetailPanel({
                 (end.getTime() - start.getTime()) / 60000
               );
               return (
-                <div
-                  key={s.id}
-                  className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 bg-teal-50 dark:bg-slate-700/40 rounded-lg px-3 py-2"
-                >
+                <div key={s.id} className="day-row">
                   <span>
                     {formatTime(locale, start, {
                       hour: "2-digit",
@@ -55,7 +52,7 @@ export default function DayDetailPanel({
                       minute: "2-digit",
                     })}
                   </span>
-                  <span className="text-slate-400 dark:text-slate-500">{durationMin} {t("minutesUnit")}</span>
+                  <span className="day-row-dur">{durationMin} {t("minutesUnit")}</span>
                 </div>
               );
             })}

@@ -148,7 +148,7 @@ export default function CalendarView({ sessions }: CalendarViewProps) {
           </button>
 
           <div className="flex items-center gap-2">
-            <h2 className="text-lg font-semibold text-stone-800 dark:text-stone-100">{monthLabel}</h2>
+            <h2 className="cal-month">{monthLabel}</h2>
             <button onClick={goToToday} className="btn btn-muted px-2 py-0.5 text-xs">
               {t("today")}
             </button>
@@ -179,65 +179,47 @@ export default function CalendarView({ sessions }: CalendarViewProps) {
 
       <div className="grid grid-cols-7 mb-1 px-1">
         {weekdayLabels.map((label, i) => (
-          <div
-            key={label}
-            className={`text-center text-xs font-medium py-2 ${
-              i >= 5 ? "text-orange-500 dark:text-orange-400" : "text-stone-400 dark:text-stone-500"
-            }`}
-          >
+          <div key={label} className={`cal-wd${i >= 5 ? " cal-wd-end" : ""}`}>
             {label}
           </div>
         ))}
       </div>
 
-      <div className="card overflow-hidden p-0">
-        <div className="grid grid-cols-7 gap-px bg-orange-100/70 dark:bg-stone-700/70">
-        {calendarDays.map((day, idx) => {
-          const intensity = getIntensityClass(day.count);
-          const isSelected =
-            selectedDay && isSameDay(selectedDay.date, day.date);
+      <div className="card overflow-hidden">
+        <div className="cal-grid">
+          {calendarDays.map((day, idx) => {
+            const intensity =
+              day.isCurrentMonth ? getIntensityClass(day.count) : "";
+            const isSelected =
+              selectedDay && isSameDay(selectedDay.date, day.date);
+            const dayClass = [
+              "cal-day",
+              intensity,
+              !day.isCurrentMonth && "cal-day-out",
+              day.isToday && "cal-day-today",
+              isSelected && !intensity && "cal-day-sel",
+            ]
+              .filter(Boolean)
+              .join(" ");
 
-          return (
-            <button
-              key={idx}
-              onClick={() => setSelectedDay(day)}
-              className={`
-                relative flex flex-col items-center justify-center
-                h-14 bg-[#fffdf9] dark:bg-[#221d18] transition-colors cursor-pointer
-                ${!day.isCurrentMonth ? "text-stone-300 dark:text-stone-600" : "text-stone-700 dark:text-stone-200"}
-                ${day.isToday ? "z-10 shadow-[inset_0_0_0_2px_#d9542f]" : ""}
-                ${isSelected && day.isCurrentMonth ? "bg-orange-50 dark:bg-stone-700" : ""}
-                ${day.isCurrentMonth && !day.count ? "hover:bg-orange-50/60 dark:hover:bg-stone-700/60" : ""}
-                ${day.isCurrentMonth && day.count ? "hover:brightness-[0.97] dark:hover:brightness-110" : ""}
-              `}
-            >
-              {day.count > 0 && day.isCurrentMonth && (
-                <div className={`absolute inset-0 ${intensity} dark:opacity-50 opacity-70`} />
-              )}
+            return (
+              <button key={idx} onClick={() => setSelectedDay(day)} className={dayClass}>
+                <span className="cal-num">{day.date.getDate()}</span>
 
-              <span className="relative text-sm font-medium leading-none">
-                {day.date.getDate()}
-              </span>
+                {day.count > 0 && day.isCurrentMonth && (
+                  <span className="cal-count">{day.count}</span>
+                )}
 
-              {day.count > 0 && day.isCurrentMonth && (
-                <span className="relative mt-0.5 text-[10px] font-semibold leading-none tabular-nums">
-                  {day.count}
-                </span>
-              )}
-
-              {day.count > 0 && !day.isCurrentMonth && (
-                <div className="mt-0.5 flex gap-0.5">
-                  {Array.from({ length: Math.min(day.count, 4) }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="w-1 h-1 rounded-full bg-orange-300 dark:bg-orange-700"
-                    />
-                  ))}
-                </div>
-              )}
-            </button>
-          );
-        })}
+                {day.count > 0 && !day.isCurrentMonth && (
+                  <div className="mt-1 flex gap-0.5">
+                    {Array.from({ length: Math.min(day.count, 4) }).map((_, i) => (
+                      <div key={i} className="cal-dot" />
+                    ))}
+                  </div>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
 

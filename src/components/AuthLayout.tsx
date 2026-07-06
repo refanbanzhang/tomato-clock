@@ -2,6 +2,7 @@
 import { Link } from "react-router-dom";
 import { useLocale } from "@/lib/i18n";
 import AppNav from "./AppNav";
+import TomatoIcon from "./TomatoIcon";
 
 interface AuthLayoutProps {
   title: string;
@@ -18,6 +19,7 @@ export default function AuthLayout({ title, subtitle, children }: AuthLayoutProp
       <main className="page-inner auth-wrap">
         <div className="auth-card card">
           <header className="auth-head">
+            <TomatoIcon className="auth-logo" />
             <h1 className="auth-title">{title}</h1>
             {subtitle && <p className="auth-sub">{subtitle}</p>}
           </header>

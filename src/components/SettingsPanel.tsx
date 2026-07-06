@@ -17,6 +17,93 @@ interface SettingsPanelProps {
   onImportError: (message: string) => void;
 }
 
+interface TargetRowProps {
+  id: string;
+  label: string;
+  ariaLabel: string;
+  target: number;
+  max: number;
+  unit: string;
+  confirmLabel: string;
+  onSave: (target: number) => void;
+}
+
+function TargetRow({
+  id,
+  label,
+  ariaLabel,
+  target,
+  max,
+  unit,
+  confirmLabel,
+  onSave,
+}: TargetRowProps) {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(target);
+
+  const handleSave = () => {
+    onSave(Math.max(1, Math.min(max, value)));
+    setEditing(false);
+  };
+
+  return (
+    <div className="set-row">
+      <span className="set-label">{label}</span>
+      {editing ? (
+        <div className="flex items-center gap-2">
+          <label htmlFor={id} className="sr-only">
+            {ariaLabel}
+          </label>
+          <input
+            id={id}
+            type="number"
+            value={value}
+            onChange={(e) => setValue(Number(e.target.value))}
+            min={1}
+            max={max}
+            className="set-input"
+            autoFocus
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleSave();
+              if (e.key === "Escape") {
+                setValue(target);
+                setEditing(false);
+              }
+            }}
+          />
+          <button onClick={handleSave} className="btn btn-primary px-3 py-1.5 text-xs">
+            {confirmLabel}
+          </button>
+        </div>
+      ) : (
+        <button
+          onClick={() => {
+            setValue(target);
+            setEditing(true);
+          }}
+          className="set-val"
+        >
+          {target} {unit}
+          <svg
+            className="w-3.5 h-3.5 opacity-50"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+            />
+          </svg>
+        </button>
+      )}
+    </div>
+  );
+}
+
 export default function SettingsPanel({
   weeklyTarget,
   monthlyTarget,
@@ -29,19 +116,7 @@ export default function SettingsPanel({
   onImportError,
 }: SettingsPanelProps) {
   const { t } = useLocale();
-  const [editing, setEditing] = useState(false);
-  const [value, setValue] = useState(weeklyTarget);
-  const [editingMonthly, setEditingMonthly] = useState(false);
-  const [monthlyValue, setMonthlyValue] = useState(monthlyTarget);
-  const [editingYearly, setEditingYearly] = useState(false);
-  const [yearlyValue, setYearlyValue] = useState(yearlyTarget);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleSave = () => {
-    const v = Math.max(1, Math.min(999, value));
-    onSetTarget(v);
-    setEditing(false);
-  };
 
   const handleExport = () => {
     downloadStateExport(appState);
@@ -73,196 +148,45 @@ export default function SettingsPanel({
     }
   };
 
-  const handleMonthlySave = () => {
-    const v = Math.max(1, Math.min(9999, monthlyValue));
-    onSetMonthlyTarget(v);
-    setEditingMonthly(false);
-  };
-
-  const handleYearlySave = () => {
-    const v = Math.max(1, Math.min(99999, yearlyValue));
-    onSetYearlyTarget(v);
-    setEditingYearly(false);
-  };
-
   return (
     <div className="p-6">
-      <h2
-        id="settings-title"
-        className="text-xs font-semibold text-teal-600 dark:text-teal-400 uppercase tracking-wider mb-5 pr-8"
-      >
+      <h2 id="settings-title" className="set-title">
         {t("settingsTitle")}
       </h2>
 
-      <div className="flex items-center justify-between gap-4">
-        <span className="text-sm font-medium text-teal-950 dark:text-slate-200">{t("weeklyTarget")}</span>
-        {editing ? (
-          <div className="flex items-center gap-2">
-            <label htmlFor="weekly-target" className="sr-only">
-              {t("weeklyTargetLabel")}
-            </label>
-            <input
-              id="weekly-target"
-              type="number"
-              value={value}
-              onChange={(e) => setValue(Number(e.target.value))}
-              min={1}
-              max={999}
-              className="w-20 px-3 py-1.5 text-sm text-center border border-teal-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-              autoFocus
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleSave();
-                if (e.key === "Escape") {
-                  setValue(weeklyTarget);
-                  setEditing(false);
-                }
-              }}
-            />
-            <button onClick={handleSave} className="btn btn-primary px-3 py-1.5 text-xs">
-              {t("confirm")}
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={() => {
-              setValue(weeklyTarget);
-              setEditing(true);
-            }}
-            className="flex items-center gap-2 text-sm font-semibold text-teal-950 dark:text-slate-200 hover:text-teal-600 dark:hover:text-teal-400 transition-colors cursor-pointer"
-          >
-            {weeklyTarget} {t("unitPieces")}
-            <svg
-              className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-              />
-            </svg>
-          </button>
-        )}
-      </div>
+      <TargetRow
+        id="weekly-target"
+        label={t("weeklyTarget")}
+        ariaLabel={t("weeklyTargetLabel")}
+        target={weeklyTarget}
+        max={999}
+        unit={t("unitPieces")}
+        confirmLabel={t("confirm")}
+        onSave={onSetTarget}
+      />
+      <TargetRow
+        id="monthly-target"
+        label={t("monthlyTarget")}
+        ariaLabel={t("monthlyTargetLabel")}
+        target={monthlyTarget}
+        max={9999}
+        unit={t("unitPieces")}
+        confirmLabel={t("confirm")}
+        onSave={onSetMonthlyTarget}
+      />
+      <TargetRow
+        id="yearly-target"
+        label={t("yearlyTarget")}
+        ariaLabel={t("yearlyTargetLabel")}
+        target={yearlyTarget}
+        max={99999}
+        unit={t("unitPieces")}
+        confirmLabel={t("confirm")}
+        onSave={onSetYearlyTarget}
+      />
 
-      {/* Monthly target */}
-      <div className="flex items-center justify-between gap-4 mt-4">
-        <span className="text-sm font-medium text-teal-950 dark:text-slate-200">{t("monthlyTarget")}</span>
-        {editingMonthly ? (
-          <div className="flex items-center gap-2">
-            <label htmlFor="monthly-target" className="sr-only">
-              {t("monthlyTargetLabel")}
-            </label>
-            <input
-              id="monthly-target"
-              type="number"
-              value={monthlyValue}
-              onChange={(e) => setMonthlyValue(Number(e.target.value))}
-              min={1}
-              max={9999}
-              className="w-20 px-3 py-1.5 text-sm text-center border border-teal-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-              autoFocus
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleMonthlySave();
-                if (e.key === "Escape") {
-                  setMonthlyValue(monthlyTarget);
-                  setEditingMonthly(false);
-                }
-              }}
-            />
-            <button onClick={handleMonthlySave} className="btn btn-primary px-3 py-1.5 text-xs">
-              {t("confirm")}
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={() => {
-              setMonthlyValue(monthlyTarget);
-              setEditingMonthly(true);
-            }}
-            className="flex items-center gap-2 text-sm font-semibold text-teal-950 dark:text-slate-200 hover:text-teal-600 dark:hover:text-teal-400 transition-colors cursor-pointer"
-          >
-            {monthlyTarget} {t("unitPieces")}
-            <svg
-              className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-              />
-            </svg>
-          </button>
-        )}
-      </div>
-
-      {/* Yearly target */}
-      <div className="flex items-center justify-between gap-4 mt-4">
-        <span className="text-sm font-medium text-teal-950 dark:text-slate-200">{t("yearlyTarget")}</span>
-        {editingYearly ? (
-          <div className="flex items-center gap-2">
-            <label htmlFor="yearly-target" className="sr-only">
-              {t("yearlyTargetLabel")}
-            </label>
-            <input
-              id="yearly-target"
-              type="number"
-              value={yearlyValue}
-              onChange={(e) => setYearlyValue(Number(e.target.value))}
-              min={1}
-              max={99999}
-              className="w-20 px-3 py-1.5 text-sm text-center border border-teal-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-              autoFocus
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleYearlySave();
-                if (e.key === "Escape") {
-                  setYearlyValue(yearlyTarget);
-                  setEditingYearly(false);
-                }
-              }}
-            />
-            <button onClick={handleYearlySave} className="btn btn-primary px-3 py-1.5 text-xs">
-              {t("confirm")}
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={() => {
-              setYearlyValue(yearlyTarget);
-              setEditingYearly(true);
-            }}
-            className="flex items-center gap-2 text-sm font-semibold text-teal-950 dark:text-slate-200 hover:text-teal-600 dark:hover:text-teal-400 transition-colors cursor-pointer"
-          >
-            {yearlyTarget} {t("unitPieces")}
-            <svg
-              className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-              />
-            </svg>
-          </button>
-        )}
-      </div>
-
-      <div className="mt-5 pt-5 border-t border-teal-50 dark:border-slate-700/50">
-        <p className="text-sm font-medium text-teal-950 dark:text-slate-200">{t("dataSection")}</p>
+      <div className="set-split">
+        <p className="set-label">{t("dataSection")}</p>
         <p className="subtitle mt-1">{t("dataSectionHint")}</p>
         <div className="data-actions">
           <button onClick={handleExport} className="btn btn-muted py-2 text-sm">

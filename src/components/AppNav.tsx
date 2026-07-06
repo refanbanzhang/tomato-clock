@@ -8,9 +8,9 @@ export default function AppNav() {
   const { t } = useLocale();
   const { session, loading } = useAuth();
 
-  if (loading || !session) {
+  if (false && (loading || !session)) {
     return null;
-  }
+  } // TEMP-PREVIEW
 
   const links = [
     { href: "/", label: t("navTimer") },

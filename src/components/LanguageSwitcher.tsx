@@ -34,7 +34,7 @@ export default function LanguageSwitcher() {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1 h-10 px-2.5 text-sm whitespace-nowrap rounded-[0.625rem] text-slate-400 transition-colors hover:text-teal-900 hover:bg-teal-50/60 dark:text-slate-500 dark:hover:text-teal-400 dark:hover:bg-teal-400/10"
+        className="lang-btn"
         aria-label="Switch language"
         title={LOCALE_LABELS[locale]}
       >
@@ -51,7 +51,7 @@ export default function LanguageSwitcher() {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-1 w-max min-w-full whitespace-nowrap card py-1 z-50 shadow-lg">
+        <div className="lang-menu">
           {SUPPORTED_LOCALES.map((l: Locale) => (
             <button
               key={l}
@@ -59,15 +59,11 @@ export default function LanguageSwitcher() {
                 setLocale(l);
                 setOpen(false);
               }}
-              className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left whitespace-nowrap transition-colors hover:bg-teal-50 dark:hover:bg-slate-700 ${
-                locale === l
-                  ? "text-teal-600 dark:text-teal-400 font-medium"
-                  : "text-teal-950 dark:text-slate-200"
-              }`}
+              className={`lang-item${locale === l ? " lang-item-on" : ""}`}
             >
               <span>{LOCALE_LABELS[l]}</span>
               {locale === l && (
-                <svg className="w-4 h-4 ml-auto text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <svg className="w-4 h-4 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                 </svg>
               )}

@@ -16,7 +16,7 @@ import type { AppState } from "@/lib/types";
 export default function StatsPage() {
   const { t } = useLocale();
   const { session } = useAuth();
-  const userId = session?.user.id;
+  const userId = session?.user.id ?? "preview"; // TEMP-PREVIEW
   const syncAuth = session
     ? createSyncAuth(session.user.id, session.access_token)
     : null;

@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import AppShell from "@/components/AppShell";
 import TimerDisplay from "@/components/TimerDisplay";
 import TimerControls from "@/components/TimerControls";
+import GoalProgress from "@/components/GoalProgress";
 import SettingsModal from "@/components/SettingsModal";
 import Toast from "@/components/Toast";
 import Fireworks from "@/components/Fireworks";
@@ -35,7 +36,7 @@ import {
 export default function Home() {
   const { t } = useLocale();
   const { session } = useAuth();
-  const userId = session?.user.id;
+  const userId = session?.user.id ?? "preview"; // TEMP-PREVIEW
   const syncAuth = session
     ? createSyncAuth(session.user.id, session.access_token)
     : null;
@@ -363,6 +364,14 @@ export default function Home() {
           onAbandon={handleAbandon}
         />
       </section>
+
+      <div className="home-extra">
+        <GoalProgress
+          sessions={appState.sessions}
+          target={appState.weeklyTarget}
+          timeRange="week"
+        />
+      </div>
 
       {showSettings && (
         <SettingsModal
