@@ -5,8 +5,6 @@ const dist = path.resolve("dist");
 const index = path.join(dist, "index.html");
 
 const routes = [
-  "stats",
-  "landing",
   "auth/login",
   "auth/register",
   "auth/forgot-password",

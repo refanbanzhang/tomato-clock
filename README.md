@@ -24,9 +24,7 @@ Auth 使用 Supabase，发信走 **Resend SMTP**（不用 Supabase 内置邮件�
 
 > **临时测试**：域名未验证前，Supabase SMTP 发件地址可填 `onboarding@resend.dev`，但只能发到 Resend 账号绑定的邮箱。
 
-### 2. Supabase 侧（二选一）
-
-**方式 A：控制台（推荐）**
+### 2. Supabase 侧
 
 打开 [Auth → SMTP](https://supabase.com/dashboard/project/bfgbjtuyojgvcvvxjlxv/auth/smtp)，启用 Custom SMTP：
 
@@ -38,15 +36,6 @@ Auth 使用 Supabase，发信走 **Resend SMTP**（不用 Supabase 内置邮件�
 | Port | `587` |
 | Username | `resend` |
 | Password | 你的 Resend API Key（`re_...`） |
-
-**方式 B：脚本**
-
-```bash
-export SUPABASE_ACCESS_TOKEN="sbp_..."   # https://supabase.com/dashboard/account/tokens
-export RESEND_API_KEY="re_..."
-export SMTP_FROM="no-reply@keepgoing2049.cn"
-bash scripts/configure-supabase-smtp.sh
-```
 
 ### 3. 相关 URL 配置
 
