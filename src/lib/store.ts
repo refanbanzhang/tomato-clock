@@ -1,56 +1,36 @@
-import {
-  AppState,
-  PomodoroSession,
-  DEFAULT_WEEKLY_TARGET,
-  DEFAULT_MONTHLY_TARGET,
-  DEFAULT_YEARLY_TARGET,
-} from "./types";
+import { AppState, PomodoroSession } from "./types";
 
-const STORAGE_PREFIX = "tomato-clock-state";
-
-export function stateStorageKey(userId: string): string {
-  return `${STORAGE_PREFIX}:${userId}`;
-}
+const STORAGE_KEY = "tomato-clock";
+const OBSOLETE_KEYS = ["tomato-clock-state:preview", "token"];
 
 function emptyState(): AppState {
-  return {
-    weeklyTarget: DEFAULT_WEEKLY_TARGET,
-    monthlyTarget: DEFAULT_MONTHLY_TARGET,
-    yearlyTarget: DEFAULT_YEARLY_TARGET,
-    settingsUpdatedAt: 0,
-    sessions: [],
-    targetChanges: [],
-  };
+  return { sessions: [] };
 }
 
 function parseStoredState(raw: string): AppState {
-  const parsed = JSON.parse(raw);
-  return {
-    weeklyTarget: parsed.weeklyTarget ?? DEFAULT_WEEKLY_TARGET,
-    monthlyTarget: parsed.monthlyTarget ?? DEFAULT_MONTHLY_TARGET,
-    yearlyTarget: parsed.yearlyTarget ?? DEFAULT_YEARLY_TARGET,
-    settingsUpdatedAt: parsed.settingsUpdatedAt ?? 0,
-    sessions: parsed.sessions ?? [],
-    targetChanges: parsed.targetChanges ?? [],
-  };
+  const parsed = JSON.parse(raw) as AppState;
+  if (!parsed || !Array.isArray(parsed.sessions)) {
+    throw new Error("invalid tomato clock data");
+  }
+  return { sessions: parsed.sessions };
 }
 
-export function loadState(userId: string): AppState {
-  if (typeof window === "undefined") {
-    return emptyState();
-  }
+export function loadState(): AppState {
+  if (typeof window === "undefined") return emptyState();
+  for (const key of OBSOLETE_KEYS) localStorage.removeItem(key);
   try {
-    const raw = localStorage.getItem(stateStorageKey(userId));
+    const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return parseStoredState(raw);
-  } catch {
-    // corrupted data, reset
+  } catch (error) {
+    console.warn("[tomato-clock] drop invalid local data", error);
+    localStorage.removeItem(STORAGE_KEY);
   }
   return emptyState();
 }
 
-export function saveState(state: AppState, userId: string): void {
+export function saveState(state: AppState): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem(stateStorageKey(userId), JSON.stringify(state));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
 export function addSession(state: AppState, session: PomodoroSession): AppState {

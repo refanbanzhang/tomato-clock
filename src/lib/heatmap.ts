@@ -33,7 +33,6 @@ function dayKey(date: Date): string {
 function minutesByDay(sessions: PomodoroSession[]): Map<string, number> {
   const totals = new Map<string, number>();
   for (const session of sessions) {
-    if (!session.completed || session.deleted) continue;
     if (!Number.isFinite(session.plannedSeconds) || session.plannedSeconds <= 0) continue;
     const end = new Date(session.endDate);
     if (Number.isNaN(end.getTime())) continue;
@@ -84,12 +83,4 @@ export function totalMinutes(weeks: HeatDay[][]): number {
     }
   }
   return sum;
-}
-
-export function monthLabelDate(week: HeatDay[], index: number): Date | null {
-  const firstOfMonth = week.find((day) => !day.future && day.date.getDate() === 1);
-  if (firstOfMonth) return firstOfMonth.date;
-  if (index !== 0) return null;
-  const first = week.find((day) => !day.future);
-  return first ? first.date : null;
 }

@@ -5,11 +5,11 @@ interface AppShellProps {
 
 export default function AppShell({ title, children }: AppShellProps) {
   return (
-    <div className="app">
-      <header className="app-head">
-        <h1 className="app-name">{title}</h1>
+    <>
+      <header>
+        <h1>{title}</h1>
       </header>
-      <main className="app-body">{children}</main>
-    </div>
+      <main>{children}</main>
+    </>
   );
 }

@@ -5,8 +5,6 @@ import TimerDisplay from "@/components/TimerDisplay";
 import TimerControls from "@/components/TimerControls";
 import Toast from "@/components/Toast";
 import { useNotification, useAudio, useKeyboardShortcut } from "@/components/hooks";
-import { useSync, type SyncErrorType } from "@/components/useSync";
-import { useLocale } from "@/lib/i18n";
 import { loadState, saveState, addSession } from "@/lib/store";
 import { FOCUS_SECONDS, AppState } from "@/lib/types";
 import { countToday } from "@/lib/stats";
@@ -20,8 +18,6 @@ import {
 } from "@/lib/timer-engine";
 
 export default function Home() {
-  const { t } = useLocale();
-  const userId = "preview";
   const [appState, setAppState] = useState<AppState | null>(null);
   const [timer, setTimer] = useState<TimerState>(() => loadTimerState());
 
@@ -33,53 +29,19 @@ export default function Home() {
   const [toast, setToast] = useState<{ message: string; sub?: string } | null>(null);
 
   useEffect(() => {
-    if (!userId) return;
-    setAppState(loadState(userId));
-  }, [userId]);
+    setAppState(loadState());
+  }, []);
 
   useEffect(() => {
-    if (appState && userId) {
-      appStateRef.current = appState;
-      saveState(appState, userId);
-    }
-  }, [appState, userId]);
+    if (!appState) return;
+    appStateRef.current = appState;
+    saveState(appState);
+  }, [appState]);
 
   useEffect(() => {
     clockRef.current = timer;
     saveTimerState(timer);
   }, [timer]);
-
-  const handleSyncError = useCallback(
-    (type: SyncErrorType) => {
-      if (type === "upload") {
-        setToast({
-          message: t("syncUploadError"),
-          sub: t("syncUploadErrorSub"),
-        });
-        return;
-      }
-      setToast({
-        message: t("syncPullError"),
-        sub: t("syncPullErrorSub"),
-      });
-    },
-    [t]
-  );
-
-  const { syncNow } = useSync({
-    localReady: appState !== null,
-    getState: () => appStateRef.current!,
-    getTimer: () => clockRef.current,
-    onState: (next) => {
-      appStateRef.current = next;
-      setAppState(next);
-    },
-    onTimer: (next) => {
-      clockRef.current = next;
-      setTimer(next);
-    },
-    onSyncError: handleSyncError,
-  });
 
   const stopTimer = useCallback(() => {
     if (timerRef.current) {
@@ -128,7 +90,6 @@ export default function Home() {
       startDate: new Date(now.getTime() - FOCUS_SECONDS * 1000).toISOString(),
       endDate: now.toISOString(),
       plannedSeconds: FOCUS_SECONDS,
-      completed: true,
     });
     appStateRef.current = nextState;
     setAppState(nextState);
@@ -136,12 +97,11 @@ export default function Home() {
     const nextClock = createInitialTimerState(Date.now());
     clockRef.current = nextClock;
     setTimer(nextClock);
-    void syncNow();
 
-    notify(t("notificationTitle"), t("notificationBody"));
+    notify("番茄完成", "已记录。");
     playBeep();
-    setToast({ message: t("toastTitle"), sub: t("toastSubtitle") });
-  }, [notify, playBeep, stopTimer, syncNow, t]);
+    setToast({ message: "番茄完成！", sub: "已记录，继续保持节奏" });
+  }, [notify, playBeep, stopTimer]);
 
   const handleStartFocus = useCallback(() => {
     requestPermission();
@@ -156,8 +116,7 @@ export default function Home() {
     clockRef.current = nextClock;
     setTimer(nextClock);
     startTick(handleFocusComplete);
-    void syncNow();
-  }, [requestPermission, startTick, handleFocusComplete, syncNow]);
+  }, [requestPermission, startTick, handleFocusComplete]);
 
   const handlePause = useCallback(() => {
     stopTimer();
@@ -173,8 +132,7 @@ export default function Home() {
           };
     clockRef.current = nextClock;
     setTimer(nextClock);
-    void syncNow();
-  }, [stopTimer, syncNow]);
+  }, [stopTimer]);
 
   const handleResume = useCallback(() => {
     const prev = clockRef.current;
@@ -187,16 +145,14 @@ export default function Home() {
     clockRef.current = nextClock;
     setTimer(nextClock);
     startTick(handleFocusComplete);
-    void syncNow();
-  }, [startTick, handleFocusComplete, syncNow]);
+  }, [startTick, handleFocusComplete]);
 
   const handleAbandon = useCallback(() => {
     stopTimer();
     const nextClock = createInitialTimerState(Date.now());
     clockRef.current = nextClock;
     setTimer(nextClock);
-    void syncNow();
-  }, [stopTimer, syncNow]);
+  }, [stopTimer]);
 
   useEffect(() => {
     if (timer.mode === "focusing" && timer.remainingSeconds <= 0) {
@@ -240,17 +196,15 @@ export default function Home() {
 
   if (!appState) {
     return (
-      <AppShell title={t("timerTitle")}>
-        <div className="flex flex-1 items-center justify-center py-16">
-          <div className="loader" role="status" aria-label={t("loading")} />
-        </div>
+      <AppShell title="番茄时钟">
+        <p role="status">加载中</p>
       </AppShell>
     );
   }
 
   return (
-    <AppShell title={t("timerTitle")}>
-      <section className="focus-stage">
+    <AppShell title="番茄时钟">
+      <section>
         <TimerDisplay
           mode={timer.mode}
           remainingSeconds={timer.remainingSeconds}
@@ -263,8 +217,13 @@ export default function Home() {
           onResume={handleResume}
           onAbandon={handleAbandon}
         />
-        <p className="today">
-          {t("today")} {countToday(appState.sessions)} {t("weeklyProgressUnit")}
+        <p>
+          <button type="button" onClick={handleFocusComplete}>
+            测试完成
+          </button>
+        </p>
+        <p>
+          今天 {countToday(appState.sessions)} 个
         </p>
       </section>
 

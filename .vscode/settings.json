@@ -1,0 +1,4 @@
+{
+  "npm.scriptRunner": "npm",
+  "npm.packageManager": "npm"
+}

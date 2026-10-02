@@ -1,5 +1,4 @@
 import { TimerMode, FOCUS_SECONDS } from "@/lib/types";
-import { useLocale } from "@/lib/i18n";
 
 interface TimerControlsProps {
   mode: TimerMode;
@@ -16,39 +15,37 @@ export default function TimerControls({
   onResume,
   onAbandon,
 }: TimerControlsProps) {
-  const { t } = useLocale();
-
   if (mode === "idle") {
     return (
-      <div className="focus-ctrl">
-        <button onClick={onStart} className="btn btn-cta btn-lg w-full">
-          {t("startFocus", { minutes: FOCUS_SECONDS / 60 })}
+      <p>
+        <button type="button" onClick={onStart}>
+          开始 {FOCUS_SECONDS / 60} 分钟
         </button>
-      </div>
+      </p>
     );
   }
 
   if (mode === "focusing") {
     return (
-      <div className="focus-ctrl">
-        <button onClick={onPause} className="btn btn-warn btn-lg w-full">
-          {t("pause")}
+      <p>
+        <button type="button" onClick={onPause}>
+          暂停
+        </button>{" "}
+        <button type="button" onClick={onAbandon}>
+          放弃
         </button>
-        <button onClick={onAbandon} className="btn btn-link w-full">
-          {t("giveUp")}
-        </button>
-      </div>
+      </p>
     );
   }
 
   return (
-    <div className="focus-ctrl">
-      <button onClick={onResume} className="btn btn-cta btn-lg w-full">
-        {t("resume")}
+    <p>
+      <button type="button" onClick={onResume}>
+        继续
+      </button>{" "}
+      <button type="button" onClick={onAbandon}>
+        放弃
       </button>
-      <button onClick={onAbandon} className="btn btn-link w-full">
-        {t("giveUp")}
-      </button>
-    </div>
+    </p>
   );
 }
