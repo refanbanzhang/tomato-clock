@@ -8,6 +8,7 @@ import { addSession, loadState, saveState } from "@/lib/store";
 import { scheduleSync } from "@/lib/sync";
 import { useWallClock } from "@/lib/use-clock";
 import { BREAK_TIMER_KEY, FOCUS_TIMER_KEY } from "@/lib/timer-engine";
+import { asset } from "@/lib/asset";
 import { AppState, BREAK_SECONDS, FOCUS_SECONDS, PomodoroSession } from "@/lib/types";
 
 type View = "timer" | "break";
@@ -136,7 +137,7 @@ export default function HomePage() {
         ) : view === "timer" ? (
           <ClockScreen
             title={TITLE}
-            cat="/art/cat-timer.png"
+            cat={asset("art/cat-timer.png")}
             seconds={focus.timer.remainingSeconds}
             action={actionText(focus.timer.mode)}
             actionLabel={actionLabel(focus.timer.mode, "专注")}
@@ -146,7 +147,7 @@ export default function HomePage() {
         ) : (
           <ClockScreen
             title={TITLE}
-            cat="/art/cat-break.png"
+            cat={asset("art/cat-break.png")}
             seconds={rest.timer.remainingSeconds}
             action={rest.timer.mode === "idle" ? "休息" : actionText(rest.timer.mode)}
             actionLabel={actionLabel(rest.timer.mode, "休息")}

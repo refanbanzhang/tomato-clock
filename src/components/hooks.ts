@@ -1,7 +1,8 @@
 
 import { useEffect, useCallback, useState } from "react";
+import { asset } from "@/lib/asset";
 
-const NOTIFY_ICON = "/icon.svg";
+const NOTIFY_ICON = asset("icon.svg");
 
 /** 获取 basePath 对应的 sw.js 路径，兼容 output: "export" + basePath 部署 */
 function getSwPath(): string {
