@@ -17,6 +17,7 @@ function emptyState(): AppState {
     weeklyTarget: DEFAULT_WEEKLY_TARGET,
     monthlyTarget: DEFAULT_MONTHLY_TARGET,
     yearlyTarget: DEFAULT_YEARLY_TARGET,
+    settingsUpdatedAt: 0,
     sessions: [],
     targetChanges: [],
   };
@@ -28,6 +29,7 @@ function parseStoredState(raw: string): AppState {
     weeklyTarget: parsed.weeklyTarget ?? DEFAULT_WEEKLY_TARGET,
     monthlyTarget: parsed.monthlyTarget ?? DEFAULT_MONTHLY_TARGET,
     yearlyTarget: parsed.yearlyTarget ?? DEFAULT_YEARLY_TARGET,
+    settingsUpdatedAt: parsed.settingsUpdatedAt ?? 0,
     sessions: parsed.sessions ?? [],
     targetChanges: parsed.targetChanges ?? [],
   };
@@ -53,34 +55,4 @@ export function saveState(state: AppState, userId: string): void {
 
 export function addSession(state: AppState, session: PomodoroSession): AppState {
   return { ...state, sessions: [...state.sessions, session] };
-}
-
-export function setWeeklyTarget(state: AppState, newTarget: number): AppState {
-  return {
-    ...state,
-    weeklyTarget: newTarget,
-    targetChanges: [
-      ...state.targetChanges,
-      {
-        id: crypto.randomUUID(),
-        date: new Date().toISOString(),
-        oldValue: state.weeklyTarget,
-        newValue: newTarget,
-      },
-    ],
-  };
-}
-
-export function setMonthlyTarget(state: AppState, newTarget: number): AppState {
-  return {
-    ...state,
-    monthlyTarget: newTarget,
-  };
-}
-
-export function setYearlyTarget(state: AppState, newTarget: number): AppState {
-  return {
-    ...state,
-    yearlyTarget: newTarget,
-  };
 }

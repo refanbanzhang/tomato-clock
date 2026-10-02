@@ -94,6 +94,11 @@
   "noPomodoros": "当天没有完成的番茄记录",
   "completedTomatoes": "完成 {n} 个番茄",
   "minutesUnit": "分钟",
+  "heatTitle": "专注记录",
+  "heatYear": "过去一年 {n} 分钟",
+  "heatLess": "少",
+  "heatMore": "多",
+  "heatNone": "无记录",
 
   "landing_title": "番茄时钟 - 专注，从一个番茄开始",
   "landing_description": "简单高效的番茄工作法计时器，25分钟专注时段帮你告别拖延、提升效率。支持跨平台数据同步。",

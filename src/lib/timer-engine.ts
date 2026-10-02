@@ -6,6 +6,8 @@ export interface TimerState {
   totalSeconds: number;
   /** 专注中的绝对结束时间（毫秒），暂停时清除 */
   endAt?: number;
+  /** 开始、暂停、继续、完成、放弃时更新。滴答不要改它。 */
+  updatedAt: number;
 }
 
 export function getRemainingSeconds(endAt: number): number {
@@ -28,15 +30,17 @@ interface PersistedTimer {
   remainingSeconds: number;
   totalSeconds: number;
   endAt?: number;
+  updatedAt?: number;
 }
 
 const TIMER_STORAGE_KEY = "tomato-clock-timer";
 
-export function createInitialTimerState(): TimerState {
+export function createInitialTimerState(updatedAt = 0): TimerState {
   return {
     mode: "idle",
     remainingSeconds: FOCUS_SECONDS,
     totalSeconds: FOCUS_SECONDS,
+    updatedAt,
   };
 }
 
@@ -52,8 +56,10 @@ export function loadTimerState(): TimerState {
     }
 
     const parsed = JSON.parse(raw) as PersistedTimer;
+    const updatedAt = parsed.updatedAt ?? 0;
+
     if (parsed.mode === "idle") {
-      return createInitialTimerState();
+      return createInitialTimerState(updatedAt);
     }
 
     if (parsed.mode === "paused") {
@@ -61,6 +67,7 @@ export function loadTimerState(): TimerState {
         mode: "paused",
         remainingSeconds: parsed.remainingSeconds,
         totalSeconds: parsed.totalSeconds,
+        updatedAt,
       };
     }
 
@@ -70,6 +77,7 @@ export function loadTimerState(): TimerState {
         remainingSeconds: getRemainingSeconds(parsed.endAt),
         totalSeconds: parsed.totalSeconds,
         endAt: parsed.endAt,
+        updatedAt,
       };
     }
   } catch {
@@ -82,15 +90,11 @@ export function loadTimerState(): TimerState {
 export function saveTimerState(state: TimerState): void {
   if (typeof window === "undefined") return;
 
-  if (state.mode === "idle") {
-    localStorage.removeItem(TIMER_STORAGE_KEY);
-    return;
-  }
-
   const payload: PersistedTimer = {
     mode: state.mode,
     remainingSeconds: state.remainingSeconds,
     totalSeconds: state.totalSeconds,
+    updatedAt: state.updatedAt,
   };
 
   if (state.mode === "focusing" && state.endAt != null) {

@@ -1,5 +1,5 @@
 const PUBLIC_PATHS = new Set([
-  "/landing",
+  "/",
   "/auth/login",
   "/auth/register",
   "/auth/forgot-password",

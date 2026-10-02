@@ -1,7 +1,6 @@
 
 import { Link } from "react-router-dom";
 import { useLocale } from "@/lib/i18n";
-import AppNav from "./AppNav";
 import TomatoIcon from "./TomatoIcon";
 
 interface AuthLayoutProps {
@@ -15,7 +14,6 @@ export default function AuthLayout({ title, subtitle, children }: AuthLayoutProp
 
   return (
     <div className="page">
-      <AppNav />
       <main className="page-inner auth-wrap">
         <div className="auth-card card">
           <header className="auth-head">
@@ -25,7 +23,7 @@ export default function AuthLayout({ title, subtitle, children }: AuthLayoutProp
           </header>
           {children}
           <p className="auth-back">
-            <Link to="/landing" className="auth-link">
+            <Link to="/" className="auth-link">
               {t("authBackHome")}
             </Link>
           </p>

@@ -94,6 +94,11 @@
   "noPomodoros": "이 날 완료된 포모도로가 없습니다",
   "completedTomatoes": "{n}개의 토마토 완료",
   "minutesUnit": "분",
+  "heatTitle": "집중 기록",
+  "heatYear": "지난 1년 {n}분",
+  "heatLess": "적음",
+  "heatMore": "많음",
+  "heatNone": "기록 없음",
 
   "landing_title": "Tomato Clock - 집중은 하나의 포모도로부터",
   "landing_description": "간단하고 효율적인 포모도로 타이머. 25분 집중 세션으로 미루기를 극복하고 생산성을 높이세요. 크로스 플랫폼 동기화 지원.",

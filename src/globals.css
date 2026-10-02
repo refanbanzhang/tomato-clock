@@ -28,6 +28,12 @@
   --shadow: 0 16px 48px -20px rgba(35, 40, 70, 0.25);
   --cta-grad: linear-gradient(135deg, #ff7a55 0%, #ef4323 100%);
   --cta-glow: 0 10px 32px -10px rgba(232, 83, 47, 0.55);
+
+  --heat-0: rgba(23, 26, 44, 0.08);
+  --heat-1: #9be9a8;
+  --heat-2: #40c463;
+  --heat-3: #30a14e;
+  --heat-4: #216e39;
 }
 
 .dark {
@@ -57,6 +63,12 @@
   --shadow: 0 20px 60px -24px rgba(0, 0, 0, 0.6);
   --cta-grad: linear-gradient(135deg, #ff8a5f 0%, #f4502c 100%);
   --cta-glow: 0 12px 36px -10px rgba(255, 100, 65, 0.5);
+
+  --heat-0: rgba(255, 255, 255, 0.08);
+  --heat-1: #0e4429;
+  --heat-2: #006d32;
+  --heat-3: #26a641;
+  --heat-4: #39d353;
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
@@ -95,7 +107,7 @@ body {
 /* ===== App Shell ===== */
 .app {
   width: 100%;
-  max-width: 40rem;
+  max-width: 56rem;
   min-height: 100vh;
   min-height: 100dvh;
   margin: 0 auto;
@@ -104,59 +116,17 @@ body {
   flex-direction: column;
 }
 
-.app-wide {
-  max-width: 58rem;
-}
-
 .app-head {
-  margin-bottom: 0.5rem;
-}
-
-.app-top {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 0.5rem 1rem;
-  border-radius: 999px;
-  background: var(--glass);
-  border: 1px solid var(--line);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-}
-
-.app-brand {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  min-width: 0;
-}
-
-.app-logo {
-  width: 1.625rem;
-  height: 1.625rem;
-  flex-shrink: 0;
+  margin-bottom: 0.25rem;
+  text-align: center;
 }
 
 .app-name {
+  margin: 0;
   font-family: var(--font-display);
-  font-size: 1.0625rem;
+  font-size: 1.125rem;
   font-weight: 600;
   color: var(--ink);
-  letter-spacing: 0.01em;
-}
-
-.app-nav-slot {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-}
-
-.app-lead {
-  margin: 1.5rem 0 0;
-  font-size: 0.9375rem;
-  color: var(--muted);
-  line-height: 1.6;
-  text-align: center;
 }
 
 .app-body {
@@ -166,55 +136,17 @@ body {
   flex-direction: column;
 }
 
-.app-footer {
-  margin-top: auto;
-  padding-top: 3rem;
-  text-align: center;
-  font-size: 0.6875rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--faint);
-}
-
-/* ===== Tab Navigation ===== */
-.tabs {
-  display: inline-flex;
-  gap: 0.125rem;
-}
-
-.tab-link {
-  padding: 0.4rem 1.15rem;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--muted);
-  border-radius: 999px;
-  cursor: pointer;
-  transition: color 0.2s ease, background-color 0.2s ease;
-}
-
-.tab-link:hover {
-  color: var(--ink);
-}
-
-.tab-link-on {
-  color: var(--accent);
-  background: var(--accent-soft);
-}
-
-.tab-link-on:hover {
-  color: var(--accent);
-}
-
 /* ===== Focus Stage ===== */
 .focus-stage {
-  flex: 1;
+  width: 100%;
+  max-width: 28rem;
+  margin: 1.25rem auto 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2.75rem;
-  margin-top: 1.5rem;
-  padding: 3rem 2rem;
+  gap: 2rem;
+  padding: 2.5rem 1.5rem;
   border-radius: 1.75rem;
   background: var(--glass);
   border: 1px solid var(--line);
@@ -223,15 +155,161 @@ body {
   -webkit-backdrop-filter: blur(20px);
 }
 
-.home-extra {
-  margin-top: 1.25rem;
+.heat {
+  margin-top: 1.5rem;
 }
 
-@media (min-width: 720px) {
-  .focus-stage {
-    flex-direction: row;
-    gap: 4.5rem;
-  }
+.heat-head,
+.heat-foot {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.heat-title,
+.heat-sum,
+.heat-detail {
+  margin: 0;
+}
+
+.heat-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.heat-sum,
+.heat-detail {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.heat-board {
+  display: flex;
+  gap: 3px;
+  margin-top: 0.75rem;
+}
+
+.heat-side {
+  flex: 0 0 1.25rem;
+  width: 1.25rem;
+}
+
+.heat-month-gap {
+  display: block;
+  height: 16px;
+  margin-bottom: 4px;
+}
+
+.heat-scroll {
+  overflow-x: auto;
+  flex: 1;
+  min-width: 0;
+  padding-bottom: 0.25rem;
+}
+
+.heat-months,
+.heat-weeks,
+.heat-legend {
+  display: flex;
+  gap: 3px;
+}
+
+.heat-months {
+  height: 16px;
+  margin-bottom: 4px;
+  font-size: 0.625rem;
+  line-height: 16px;
+  color: var(--muted);
+}
+
+.heat-days {
+  display: grid;
+  grid-template-rows: repeat(7, 12px);
+  gap: 3px;
+  font-size: 0.625rem;
+  line-height: 12px;
+  color: var(--faint);
+}
+
+.heat-month,
+.heat-week,
+.heat-cell,
+.heat-pad {
+  width: 12px;
+  flex: 0 0 12px;
+}
+
+.heat-month {
+  overflow: visible;
+  white-space: nowrap;
+}
+
+.heat-week {
+  display: grid;
+  grid-template-rows: repeat(7, 12px);
+  gap: 3px;
+}
+
+.heat-cell,
+.heat-pad {
+  height: 12px;
+  border-radius: 2px;
+}
+
+.heat-cell {
+  display: block;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: var(--heat-0);
+  cursor: pointer;
+}
+
+.heat-lv-1 {
+  background: var(--heat-1);
+}
+
+.heat-lv-2 {
+  background: var(--heat-2);
+}
+
+.heat-lv-3 {
+  background: var(--heat-3);
+}
+
+.heat-lv-4 {
+  background: var(--heat-4);
+}
+
+.heat-on {
+  outline: 1px solid var(--ink);
+  outline-offset: 1px;
+}
+
+.heat-foot {
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+.heat-legend {
+  align-items: center;
+  flex-shrink: 0;
+  font-size: 0.625rem;
+  color: var(--muted);
+}
+
+.heat-legend .heat-cell {
+  cursor: default;
+}
+
+.today {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--muted);
 }
 
 .timer-ring-wrap {

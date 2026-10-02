@@ -94,6 +94,11 @@
   "noPomodoros": "No completed Pomodoros on this day",
   "completedTomatoes": "{n} tomatoes completed",
   "minutesUnit": "min",
+  "heatTitle": "Focus",
+  "heatYear": "{n} min in the past year",
+  "heatLess": "Less",
+  "heatMore": "More",
+  "heatNone": "No focus",
 
   "landing_title": "Tomato Clock - Focus starts with one Pomodoro",
   "landing_description": "A simple and efficient Pomodoro timer. 25-minute focus sessions to beat procrastination and boost productivity. Cross-platform sync supported.",

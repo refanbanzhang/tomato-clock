@@ -112,6 +112,13 @@ export interface Translations {
   completedTomatoes: string; // "完成 {n} 个番茄"
   minutesUnit: string; // "分钟" / "min"
 
+  // Contribution heatmap
+  heatTitle: string;
+  heatYear: string; // "过去一年 {n} 分钟"
+  heatLess: string;
+  heatMore: string;
+  heatNone: string;
+
   // Landing page
   landing_title: string;
   landing_description: string;

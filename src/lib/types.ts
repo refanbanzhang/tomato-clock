@@ -6,6 +6,8 @@ export interface PomodoroSession {
   endDate: string;
   plannedSeconds: number;
   completed: boolean;
+  /** 墓碑。同步时保留，避免别的设备把已删记录又推回来。 */
+  deleted?: boolean;
 }
 
 export interface TargetChange {
@@ -19,6 +21,7 @@ export interface AppState {
   weeklyTarget: number;
   monthlyTarget: number;
   yearlyTarget: number;
+  settingsUpdatedAt: number;
   sessions: PomodoroSession[];
   targetChanges: TargetChange[];
 }

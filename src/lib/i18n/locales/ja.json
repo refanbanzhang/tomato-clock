@@ -94,6 +94,11 @@
   "noPomodoros": "この日は完了したポモドーロがありません",
   "completedTomatoes": "{n} 個のトマトを完了",
   "minutesUnit": "分",
+  "heatTitle": "集中の記録",
+  "heatYear": "過去1年 {n} 分",
+  "heatLess": "少",
+  "heatMore": "多",
+  "heatNone": "記録なし",
 
   "landing_title": "Tomato Clock - 集中はポモドーロから",
   "landing_description": "シンプルで効率的なポモドーロタイマー。25分の集中セッションで先延ばしを克服し、生産性を向上。クロスプラットフォーム同期対応。",

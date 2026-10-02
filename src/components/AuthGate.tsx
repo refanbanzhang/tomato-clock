@@ -12,7 +12,7 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (loading || session || allowed) return;
-    navigate("/landing", { replace: true });
+    navigate("/", { replace: true });
   }, [loading, session, allowed, navigate]);
 
   if (!allowed && (loading || !session)) {
