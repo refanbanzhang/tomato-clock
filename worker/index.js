@@ -19,6 +19,7 @@ const DROPPED_SESSION_IDS = new Set([
   "ddee1fc3-c85e-42ce-99a0-6b7b48daf1f2",
   "fc5a57c3-bce6-4221-8f8f-291197236622",
   "fdfec062-55ec-46c7-a071-79029ac24ee8",
+  "6a2f6534-409e-4d08-9959-7abd906c4a3d",
 ]);
 
 class HttpError extends Error {

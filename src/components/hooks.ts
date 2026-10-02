@@ -2,7 +2,7 @@
 import { useEffect, useCallback, useState } from "react";
 import { asset } from "@/lib/asset";
 
-const NOTIFY_ICON = asset("icon.svg");
+const NOTIFY_ICON = asset("art/icon-timer.png");
 
 /** 获取 basePath 对应的 sw.js 路径，兼容 output: "export" + basePath 部署 */
 function getSwPath(): string {
@@ -17,6 +17,28 @@ function getSwPath(): string {
   }
   // 兜底：相对于当前路径
   return new URL("sw.js", window.location.href).pathname;
+}
+
+/** ready 挂起时不能干等，否则降级通知永远发不出去。 */
+function serviceWorkerRegistration(): Promise<ServiceWorkerRegistration | null> {
+  if (!("serviceWorker" in navigator)) return Promise.resolve(null);
+  return new Promise((resolve) => {
+    const timer = window.setTimeout(() => {
+      console.warn("[notify] service worker ready timed out");
+      resolve(null);
+    }, 1000);
+    navigator.serviceWorker.ready.then(
+      (reg) => {
+        window.clearTimeout(timer);
+        resolve(reg);
+      },
+      (err) => {
+        window.clearTimeout(timer);
+        console.warn("[notify] service worker ready failed:", err);
+        resolve(null);
+      },
+    );
+  });
 }
 
 export function useNotification() {
@@ -81,17 +103,23 @@ export function useNotification() {
       return false;
     }
 
+    // 不要设 requireInteraction，也不要复用 tag。
+    // Mac 上 requireInteraction 走 Chrome Helper (Alerts)，这个权限经常是关的，横幅直接不出现。
+    // 同一个 tag 再发一次时，默认也不会再弹横幅。
     const options: NotificationOptions = {
       body,
       icon: NOTIFY_ICON,
-      tag: "tomato-complete",
-      requireInteraction: true,
     };
+    console.log("[notify] sending", {
+      title,
+      body,
+      icon: NOTIFY_ICON,
+      hidden: document.hidden,
+    });
 
-    // 优先通过 Service Worker 发送（后台标签页也能弹出）
-    if ("serviceWorker" in navigator) {
+    const reg = await serviceWorkerRegistration();
+    if (reg) {
       try {
-        const reg = await navigator.serviceWorker.ready;
         await reg.showNotification(title, options);
         console.log("[notify] sent via service worker");
         return true;
@@ -100,9 +128,10 @@ export function useNotification() {
       }
     }
 
-    // 降级：直接 new Notification
     try {
-      new Notification(title, options);
+      const notification = new Notification(title, options);
+      notification.onshow = () => console.log("[notify] page notification shown");
+      notification.onerror = () => console.error("[notify] page notification error");
       console.log("[notify] sent via new Notification()");
       return true;
     } catch (err) {

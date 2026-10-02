@@ -30,22 +30,23 @@ export function useWallClock(
   }, []);
 
   const finish = useCallback(
-    (prev: TimerState): TimerState => {
-      if (finishing.current) {
-        return createInitialTimerState(Date.now(), totalSeconds);
-      }
+    (prev: TimerState) => {
+      if (finishing.current || prev.mode !== "focusing") return;
       finishing.current = true;
       stop();
       const next = createInitialTimerState(Date.now(), totalSeconds);
       clockRef.current = next;
-      const planned = prev.totalSeconds;
-      setTimeout(() => {
-        finishing.current = false;
-        onCompleteRef.current(planned);
-      }, 0);
-      return next;
+      setTimer(next);
+      // 必须在这次计时回调里直接发完成事件。
+      // 放进 setTimeout 后，后台标签页会把这个定时器再推迟，Mac 通知就发不出去。
+      console.log("[clock] finish", {
+        storageKey,
+        plannedSeconds: prev.totalSeconds,
+        hidden: document.hidden,
+      });
+      onCompleteRef.current(prev.totalSeconds);
     },
-    [stop, totalSeconds],
+    [stop, storageKey, totalSeconds],
   );
 
   useEffect(() => {
@@ -56,18 +57,21 @@ export function useWallClock(
   const startTick = useCallback(() => {
     stop();
     tickRef.current = setInterval(() => {
-      setTimer((prev) => {
-        if (prev.mode !== "focusing" || prev.endAt == null) return prev;
-        const remainingSeconds = getRemainingSeconds(prev.endAt);
-        if (remainingSeconds <= 0) return finish(prev);
-        const next = { ...prev, remainingSeconds };
-        clockRef.current = next;
-        return next;
-      });
+      const prev = clockRef.current;
+      if (prev.mode !== "focusing" || prev.endAt == null) return;
+      const remainingSeconds = getRemainingSeconds(prev.endAt);
+      if (remainingSeconds <= 0) {
+        finish(prev);
+        return;
+      }
+      const next = { ...prev, remainingSeconds };
+      clockRef.current = next;
+      setTimer(next);
     }, 1000);
   }, [finish, stop]);
 
   const start = useCallback(() => {
+    finishing.current = false;
     const endAt = Date.now() + totalSeconds * 1000;
     const next: TimerState = {
       mode: "focusing",
@@ -121,7 +125,7 @@ export function useWallClock(
     const current = clockRef.current;
     if (current.mode !== "focusing") return;
     if (current.endAt == null || getRemainingSeconds(current.endAt) <= 0) {
-      setTimer((prev) => finish(prev));
+      finish(current);
       return;
     }
     startTick();
@@ -131,14 +135,14 @@ export function useWallClock(
   useEffect(() => {
     const onVisible = () => {
       if (document.visibilityState !== "visible") return;
-      setTimer((prev) => {
-        const synced = syncTimerFromWallClock(prev);
-        if (synced.mode === "focusing" && synced.remainingSeconds <= 0) {
-          return finish(synced);
-        }
-        clockRef.current = synced;
-        return synced;
-      });
+      const prev = clockRef.current;
+      const synced = syncTimerFromWallClock(prev);
+      if (synced.mode === "focusing" && synced.remainingSeconds <= 0) {
+        finish(synced);
+        return;
+      }
+      clockRef.current = synced;
+      setTimer(synced);
     };
     document.addEventListener("visibilitychange", onVisible);
     return () => document.removeEventListener("visibilitychange", onVisible);
