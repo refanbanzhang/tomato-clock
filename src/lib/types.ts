@@ -12,3 +12,4 @@ export interface AppState {
 }
 
 export const FOCUS_SECONDS = 25 * 60;
+export const BREAK_SECONDS = 5 * 60;

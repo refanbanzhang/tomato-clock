@@ -1,34 +1,27 @@
-import { useState, useEffect, useCallback, useRef } from "react";
-import AppShell from "@/components/AppShell";
-import Heatmap from "@/components/Heatmap";
-import TimerDisplay from "@/components/TimerDisplay";
-import TimerControls from "@/components/TimerControls";
+import { useCallback, useEffect, useRef, useState } from "react";
+import ClockScreen from "@/components/ClockScreen";
+import LoadingScreen from "@/components/LoadingScreen";
+import SideBoard from "@/components/SideBoard";
 import Toast from "@/components/Toast";
-import { useNotification, useAudio, useKeyboardShortcut } from "@/components/hooks";
-import { loadState, saveState, addSession } from "@/lib/store";
+import { useAudio, useKeyboardShortcut, useNotification } from "@/components/hooks";
+import { addSession, loadState, saveState } from "@/lib/store";
 import { scheduleSync } from "@/lib/sync";
-import { FOCUS_SECONDS, AppState, PomodoroSession } from "@/lib/types";
-import { countToday } from "@/lib/stats";
-import {
-  createInitialTimerState,
-  getRemainingSeconds,
-  loadTimerState,
-  saveTimerState,
-  syncTimerFromWallClock,
-  TimerState,
-} from "@/lib/timer-engine";
+import { useWallClock } from "@/lib/use-clock";
+import { BREAK_TIMER_KEY, FOCUS_TIMER_KEY } from "@/lib/timer-engine";
+import { AppState, BREAK_SECONDS, FOCUS_SECONDS, PomodoroSession } from "@/lib/types";
 
-export default function Home() {
+type View = "timer" | "break";
+
+const TITLE = "番茄时钟";
+
+export default function HomePage() {
   const [appState, setAppState] = useState<AppState | null>(null);
-  const [timer, setTimer] = useState<TimerState>(() => loadTimerState());
-
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [view, setView] = useState<View>("timer");
+  const [splashDone, setSplashDone] = useState(false);
+  const [toast, setToast] = useState<{ message: string; sub?: string } | null>(null);
   const appStateRef = useRef<AppState | null>(null);
-  const clockRef = useRef<TimerState>(timer);
   const { requestPermission, notify } = useNotification();
   const { playBeep } = useAudio();
-  const [toast, setToast] = useState<{ message: string; sub?: string } | null>(null);
-  const [syncNote, setSyncNote] = useState("");
 
   const applySessions = useCallback((sessions: PomodoroSession[]) => {
     const next = { sessions };
@@ -38,16 +31,55 @@ export default function Home() {
 
   const runSync = useCallback(() => {
     return scheduleSync(() => appStateRef.current?.sessions ?? [], applySessions).then(
-      () => setSyncNote("已同步"),
+      () => undefined,
       (error: unknown) => {
         console.warn("[sync] failed", error);
-        setSyncNote("同步失败");
       },
     );
   }, [applySessions]);
 
+  const onFocusDone = useCallback(
+    (plannedSeconds: number) => {
+      const current = appStateRef.current;
+      if (!current) {
+        console.warn("[tomato-clock] focus complete skipped: app state not ready");
+        return;
+      }
+      const now = new Date();
+      const next = addSession(current, {
+        id: crypto.randomUUID(),
+        startDate: new Date(now.getTime() - plannedSeconds * 1000).toISOString(),
+        endDate: now.toISOString(),
+        plannedSeconds,
+      });
+      appStateRef.current = next;
+      setAppState(next);
+      notify("番茄完成", "已记录。");
+      playBeep();
+      setToast({ message: "番茄完成！", sub: "已记录，继续保持节奏" });
+      setView("break");
+      void runSync();
+    },
+    [notify, playBeep, runSync],
+  );
+
+  const onBreakDone = useCallback(() => {
+    notify("休息结束", "回到专注。");
+    playBeep();
+    setToast({ message: "休息结束", sub: "回到专注" });
+    setView("timer");
+  }, [notify, playBeep]);
+
+  const focus = useWallClock(FOCUS_TIMER_KEY, FOCUS_SECONDS, onFocusDone);
+  const rest = useWallClock(BREAK_TIMER_KEY, BREAK_SECONDS, onBreakDone);
+
   useEffect(() => {
     setAppState(loadState());
+  }, []);
+
+  useEffect(() => {
+    const id = window.setTimeout(() => setSplashDone(true), 900);
+    return () => window.clearTimeout(id);
   }, []);
 
   useEffect(() => {
@@ -55,153 +87,6 @@ export default function Home() {
     appStateRef.current = appState;
     saveState(appState);
   }, [appState]);
-
-  useEffect(() => {
-    clockRef.current = timer;
-    saveTimerState(timer);
-  }, [timer]);
-
-  const stopTimer = useCallback(() => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
-  }, []);
-
-  const startTick = useCallback(
-    (onComplete: () => void) => {
-      stopTimer();
-      timerRef.current = setInterval(() => {
-        setTimer((prev) => {
-          if (prev.mode !== "focusing" || prev.endAt == null) {
-            return prev;
-          }
-          const remainingSeconds = getRemainingSeconds(prev.endAt);
-          if (remainingSeconds <= 0) {
-            stopTimer();
-            setTimeout(onComplete, 0);
-            const next = { ...prev, remainingSeconds: 0 };
-            clockRef.current = next;
-            return next;
-          }
-          const next = { ...prev, remainingSeconds };
-          clockRef.current = next;
-          return next;
-        });
-      }, 1000);
-    },
-    [stopTimer]
-  );
-
-  const handleFocusComplete = useCallback(() => {
-    stopTimer();
-
-    const now = new Date();
-    const currentState = appStateRef.current;
-    if (!currentState) {
-      console.warn("[tomato-clock] focus complete skipped: app state not ready");
-      return;
-    }
-
-    const nextState = addSession(currentState, {
-      id: crypto.randomUUID(),
-      startDate: new Date(now.getTime() - FOCUS_SECONDS * 1000).toISOString(),
-      endDate: now.toISOString(),
-      plannedSeconds: FOCUS_SECONDS,
-    });
-    appStateRef.current = nextState;
-    setAppState(nextState);
-
-    const nextClock = createInitialTimerState(Date.now());
-    clockRef.current = nextClock;
-    setTimer(nextClock);
-
-    notify("番茄完成", "已记录。");
-    playBeep();
-    setToast({ message: "番茄完成！", sub: "已记录，继续保持节奏" });
-    void runSync();
-  }, [notify, playBeep, stopTimer, runSync]);
-
-  const handleStartFocus = useCallback(() => {
-    requestPermission();
-    const endAt = Date.now() + FOCUS_SECONDS * 1000;
-    const nextClock: TimerState = {
-      mode: "focusing",
-      remainingSeconds: FOCUS_SECONDS,
-      totalSeconds: FOCUS_SECONDS,
-      endAt,
-      updatedAt: Date.now(),
-    };
-    clockRef.current = nextClock;
-    setTimer(nextClock);
-    startTick(handleFocusComplete);
-  }, [requestPermission, startTick, handleFocusComplete]);
-
-  const handlePause = useCallback(() => {
-    stopTimer();
-    const prev = clockRef.current;
-    const nextClock: TimerState =
-      prev.mode !== "focusing" || prev.endAt == null
-        ? { ...prev, mode: "paused", updatedAt: Date.now() }
-        : {
-            mode: "paused",
-            remainingSeconds: getRemainingSeconds(prev.endAt),
-            totalSeconds: prev.totalSeconds,
-            updatedAt: Date.now(),
-          };
-    clockRef.current = nextClock;
-    setTimer(nextClock);
-  }, [stopTimer]);
-
-  const handleResume = useCallback(() => {
-    const prev = clockRef.current;
-    const nextClock: TimerState = {
-      ...prev,
-      mode: "focusing",
-      endAt: Date.now() + prev.remainingSeconds * 1000,
-      updatedAt: Date.now(),
-    };
-    clockRef.current = nextClock;
-    setTimer(nextClock);
-    startTick(handleFocusComplete);
-  }, [startTick, handleFocusComplete]);
-
-  const handleAbandon = useCallback(() => {
-    stopTimer();
-    const nextClock = createInitialTimerState(Date.now());
-    clockRef.current = nextClock;
-    setTimer(nextClock);
-  }, [stopTimer]);
-
-  useEffect(() => {
-    if (timer.mode === "focusing" && timer.remainingSeconds <= 0) {
-      handleFocusComplete();
-      return;
-    }
-
-    if (timer.mode === "focusing" && timer.remainingSeconds > 0) {
-      startTick(handleFocusComplete);
-    }
-  }, [appState, timer.mode, timer.remainingSeconds, startTick, handleFocusComplete]);
-
-  useEffect(() => {
-    const onVisible = () => {
-      if (document.visibilityState !== "visible") return;
-      setTimer((prev) => {
-        const synced = syncTimerFromWallClock(prev);
-        if (synced.mode === "focusing" && synced.remainingSeconds <= 0) {
-          const next = { ...synced, remainingSeconds: 0 };
-          clockRef.current = next;
-          setTimeout(handleFocusComplete, 0);
-          return next;
-        }
-        clockRef.current = synced;
-        return synced;
-      });
-    };
-    document.addEventListener("visibilitychange", onVisible);
-    return () => document.removeEventListener("visibilitychange", onVisible);
-  }, [handleFocusComplete]);
 
   const loaded = appState !== null;
   useEffect(() => {
@@ -219,58 +104,83 @@ export default function Home() {
     };
   }, [loaded, runSync]);
 
-  useEffect(() => () => stopTimer(), [stopTimer]);
+  const press = useCallback(
+    (clock: typeof focus) => {
+      if (clock.timer.mode === "idle") {
+        requestPermission();
+        clock.start();
+        return;
+      }
+      if (clock.timer.mode === "focusing") {
+        clock.pause();
+        return;
+      }
+      clock.resume();
+    },
+    [requestPermission],
+  );
 
-  const handleSpaceShortcut = useCallback(() => {
-    if (timer.mode === "idle") handleStartFocus();
-    else if (timer.mode === "focusing") handlePause();
-    else if (timer.mode === "paused") handleResume();
-  }, [timer.mode, handleStartFocus, handlePause, handleResume]);
+  const active = view === "timer" ? focus : rest;
+  const handleSpace = useCallback(() => {
+    press(active);
+  }, [active, press]);
+  useKeyboardShortcut(" ", handleSpace, true);
 
-  useKeyboardShortcut(" ", handleSpaceShortcut, true);
-
-  if (!appState) {
-    return (
-      <AppShell title="番茄时钟">
-        <p role="status">加载中</p>
-      </AppShell>
-    );
-  }
+  const showSplash = appState == null || !splashDone;
 
   return (
-    <AppShell title="番茄时钟">
-      <section>
-        <TimerDisplay
-          mode={timer.mode}
-          remainingSeconds={timer.remainingSeconds}
-          totalSeconds={timer.totalSeconds}
-        />
-        <TimerControls
-          mode={timer.mode}
-          onStart={handleStartFocus}
-          onPause={handlePause}
-          onResume={handleResume}
-          onAbandon={handleAbandon}
-        />
-        <p>
-          <button type="button" onClick={handleFocusComplete}>
-            测试完成
-          </button>
-        </p>
-        <p>
-          今天 {countToday(appState.sessions)} 个{syncNote ? `，${syncNote}` : ""}
-        </p>
-      </section>
-
-      <Heatmap sessions={appState.sessions} />
-
-      {toast && (
-        <Toast
-          message={toast.message}
-          sub={toast.sub}
-          onDismiss={() => setToast(null)}
-        />
-      )}
-    </AppShell>
+    <div className="stage">
+      <div className="phone">
+        {showSplash || !appState ? (
+          <LoadingScreen />
+        ) : view === "timer" ? (
+          <ClockScreen
+            title={TITLE}
+            cat="/art/cat-timer.png"
+            seconds={focus.timer.remainingSeconds}
+            action={actionText(focus.timer.mode)}
+            actionLabel={actionLabel(focus.timer.mode, "专注")}
+            actionClass={actionClass(focus.timer.mode)}
+            onAction={() => press(focus)}
+          />
+        ) : (
+          <ClockScreen
+            title={TITLE}
+            cat="/art/cat-break.png"
+            seconds={rest.timer.remainingSeconds}
+            action={rest.timer.mode === "idle" ? "休息" : actionText(rest.timer.mode)}
+            actionLabel={actionLabel(rest.timer.mode, "休息")}
+            actionClass={actionClass(rest.timer.mode)}
+            onAction={() => press(rest)}
+          />
+        )}
+        {toast && !showSplash && (
+          <Toast
+            message={toast.message}
+            sub={toast.sub}
+            onDismiss={() => setToast(null)}
+          />
+        )}
+      </div>
+      {appState && !showSplash && <SideBoard sessions={appState.sessions} />}
+    </div>
   );
+}
+
+function actionText(mode: "idle" | "focusing" | "paused"): string {
+  if (mode === "focusing") return "暂停";
+  if (mode === "paused") return "继续";
+  return "开始";
+}
+
+function actionClass(mode: "idle" | "focusing" | "paused"): string {
+  if (mode === "focusing") return "go go-run";
+  if (mode === "paused") return "go go-pause";
+  return "go";
+}
+
+function actionLabel(mode: "idle" | "focusing" | "paused", name: string): string {
+  if (mode === "focusing") return `暂停${name}`;
+  if (mode === "paused") return `继续${name}`;
+  return `开始${name}`;
 }

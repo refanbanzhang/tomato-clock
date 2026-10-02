@@ -33,33 +33,40 @@ interface PersistedTimer {
   updatedAt?: number;
 }
 
-const TIMER_STORAGE_KEY = "tomato-clock-timer";
+export const FOCUS_TIMER_KEY = "tomato-clock-timer";
+export const BREAK_TIMER_KEY = "tomato-clock-break";
 
-export function createInitialTimerState(updatedAt = 0): TimerState {
+export function createInitialTimerState(
+  updatedAt = 0,
+  totalSeconds = FOCUS_SECONDS,
+): TimerState {
   return {
     mode: "idle",
-    remainingSeconds: FOCUS_SECONDS,
-    totalSeconds: FOCUS_SECONDS,
+    remainingSeconds: totalSeconds,
+    totalSeconds,
     updatedAt,
   };
 }
 
-export function loadTimerState(): TimerState {
+export function loadTimerState(
+  storageKey = FOCUS_TIMER_KEY,
+  totalSeconds = FOCUS_SECONDS,
+): TimerState {
   if (typeof window === "undefined") {
-    return createInitialTimerState();
+    return createInitialTimerState(0, totalSeconds);
   }
 
   try {
-    const raw = localStorage.getItem(TIMER_STORAGE_KEY);
+    const raw = localStorage.getItem(storageKey);
     if (!raw) {
-      return createInitialTimerState();
+      return createInitialTimerState(0, totalSeconds);
     }
 
     const parsed = JSON.parse(raw) as PersistedTimer;
     const updatedAt = parsed.updatedAt ?? 0;
 
     if (parsed.mode === "idle") {
-      return createInitialTimerState(updatedAt);
+      return createInitialTimerState(updatedAt, totalSeconds);
     }
 
     if (parsed.mode === "paused") {
@@ -84,10 +91,13 @@ export function loadTimerState(): TimerState {
     // corrupted data, reset
   }
 
-  return createInitialTimerState();
+  return createInitialTimerState(0, totalSeconds);
 }
 
-export function saveTimerState(state: TimerState): void {
+export function saveTimerState(
+  state: TimerState,
+  storageKey = FOCUS_TIMER_KEY,
+): void {
   if (typeof window === "undefined") return;
 
   const payload: PersistedTimer = {
@@ -101,7 +111,7 @@ export function saveTimerState(state: TimerState): void {
     payload.endAt = state.endAt;
   }
 
-  localStorage.setItem(TIMER_STORAGE_KEY, JSON.stringify(payload));
+  localStorage.setItem(storageKey, JSON.stringify(payload));
 }
 
 export function formatTime(seconds: number): string {

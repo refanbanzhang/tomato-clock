@@ -1,3 +1,4 @@
+import { keepSessions } from "./store";
 import { PomodoroSession } from "./types";
 
 const MAX_TRIES = 8;
@@ -6,7 +7,7 @@ export const SYNC_API = "https://tomato-sync.nevergiveuppiano.workers.dev";
 
 export function mergeSessions(local: PomodoroSession[], remote: PomodoroSession[]): PomodoroSession[] {
   const byId = new Map<string, PomodoroSession>();
-  for (const session of [...remote, ...local]) {
+  for (const session of keepSessions([...remote, ...local])) {
     const next = sessionOf(session);
     const prev = byId.get(next.id);
     if (!prev) {
