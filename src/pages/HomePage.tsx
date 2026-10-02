@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import ClockScreen from "@/components/ClockScreen";
-import LoadingScreen from "@/components/LoadingScreen";
 import SideBoard from "@/components/SideBoard";
 import Toast from "@/components/Toast";
 import { useAudio, useKeyboardShortcut, useNotification } from "@/components/hooks";
@@ -16,11 +15,10 @@ type View = "timer" | "break";
 const TITLE = "番茄时钟";
 
 export default function HomePage() {
-  const [appState, setAppState] = useState<AppState | null>(null);
+  const [appState, setAppState] = useState<AppState>(() => loadState());
   const [view, setView] = useState<View>("timer");
-  const [splashDone, setSplashDone] = useState(false);
   const [toast, setToast] = useState<{ message: string; sub?: string } | null>(null);
-  const appStateRef = useRef<AppState | null>(null);
+  const appStateRef = useRef(appState);
   const { requestPermission, notify } = useNotification();
   const { playBeep } = useAudio();
 
@@ -75,23 +73,11 @@ export default function HomePage() {
   const rest = useWallClock(BREAK_TIMER_KEY, BREAK_SECONDS, onBreakDone);
 
   useEffect(() => {
-    setAppState(loadState());
-  }, []);
-
-  useEffect(() => {
-    const id = window.setTimeout(() => setSplashDone(true), 900);
-    return () => window.clearTimeout(id);
-  }, []);
-
-  useEffect(() => {
-    if (!appState) return;
     appStateRef.current = appState;
     saveState(appState);
   }, [appState]);
 
-  const loaded = appState !== null;
   useEffect(() => {
-    if (!loaded) return;
     void runSync();
     const kick = () => {
       if (document.visibilityState === "visible") void runSync();
@@ -103,7 +89,7 @@ export default function HomePage() {
       document.removeEventListener("visibilitychange", kick);
       window.removeEventListener("online", onOnline);
     };
-  }, [loaded, runSync]);
+  }, [runSync]);
 
   const press = useCallback(
     (clock: typeof focus) => {
@@ -127,17 +113,13 @@ export default function HomePage() {
   }, [active, press]);
   useKeyboardShortcut(" ", handleSpace, true);
 
-  const showSplash = appState == null || !splashDone;
-
   return (
     <div className="stage">
       <div className="phone">
-        {showSplash || !appState ? (
-          <LoadingScreen />
-        ) : view === "timer" ? (
+        {view === "timer" ? (
           <ClockScreen
             title={TITLE}
-            cat={asset("art/cat-timer.png")}
+            cat={asset("art/cat-timer.webp")}
             seconds={focus.timer.remainingSeconds}
             action={actionText(focus.timer.mode)}
             actionLabel={actionLabel(focus.timer.mode, "专注")}
@@ -147,7 +129,7 @@ export default function HomePage() {
         ) : (
           <ClockScreen
             title={TITLE}
-            cat={asset("art/cat-break.png")}
+            cat={asset("art/cat-break.webp")}
             seconds={rest.timer.remainingSeconds}
             action={rest.timer.mode === "idle" ? "休息" : actionText(rest.timer.mode)}
             actionLabel={actionLabel(rest.timer.mode, "休息")}
@@ -155,7 +137,7 @@ export default function HomePage() {
             onAction={() => press(rest)}
           />
         )}
-        {toast && !showSplash && (
+        {toast && (
           <Toast
             message={toast.message}
             sub={toast.sub}
@@ -163,7 +145,7 @@ export default function HomePage() {
           />
         )}
       </div>
-      {appState && !showSplash && <SideBoard sessions={appState.sessions} />}
+      <SideBoard sessions={appState.sessions} />
     </div>
   );
 }
