@@ -6,7 +6,6 @@ import TimerControls from "@/components/TimerControls";
 import Toast from "@/components/Toast";
 import { useNotification, useAudio, useKeyboardShortcut } from "@/components/hooks";
 import { useSync, type SyncErrorType } from "@/components/useSync";
-import { useAuth } from "@/lib/auth/AuthProvider";
 import { useLocale } from "@/lib/i18n";
 import { loadState, saveState, addSession } from "@/lib/store";
 import { FOCUS_SECONDS, AppState } from "@/lib/types";
@@ -22,8 +21,7 @@ import {
 
 export default function Home() {
   const { t } = useLocale();
-  const { session } = useAuth();
-  const userId = session?.user.id ?? "preview"; // TEMP-PREVIEW
+  const userId = "preview";
   const [appState, setAppState] = useState<AppState | null>(null);
   const [timer, setTimer] = useState<TimerState>(() => loadTimerState());
 

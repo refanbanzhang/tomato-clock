@@ -5,15 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite --port 3002",
-    "build": "tsc --noEmit && vite build && node scripts/spa-fallback.mjs",
+    "build": "tsc --noEmit && vite build",
     "preview": "vite preview --port 3002",
     "publish": "vite build && rsync -avz --delete -e \"ssh\" dist/ ubuntu@1.14.248.175:/var/www/tomato-clock/"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.106.2",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "react-router-dom": "^7.6.3"
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.0",
