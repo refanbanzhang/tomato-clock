@@ -6,7 +6,8 @@ import TimerControls from "@/components/TimerControls";
 import Toast from "@/components/Toast";
 import { useNotification, useAudio, useKeyboardShortcut } from "@/components/hooks";
 import { loadState, saveState, addSession } from "@/lib/store";
-import { FOCUS_SECONDS, AppState } from "@/lib/types";
+import { scheduleSync } from "@/lib/sync";
+import { FOCUS_SECONDS, AppState, PomodoroSession } from "@/lib/types";
 import { countToday } from "@/lib/stats";
 import {
   createInitialTimerState,
@@ -27,6 +28,23 @@ export default function Home() {
   const { requestPermission, notify } = useNotification();
   const { playBeep } = useAudio();
   const [toast, setToast] = useState<{ message: string; sub?: string } | null>(null);
+  const [syncNote, setSyncNote] = useState("");
+
+  const applySessions = useCallback((sessions: PomodoroSession[]) => {
+    const next = { sessions };
+    appStateRef.current = next;
+    setAppState(next);
+  }, []);
+
+  const runSync = useCallback(() => {
+    return scheduleSync(() => appStateRef.current?.sessions ?? [], applySessions).then(
+      () => setSyncNote("已同步"),
+      (error: unknown) => {
+        console.warn("[sync] failed", error);
+        setSyncNote("同步失败");
+      },
+    );
+  }, [applySessions]);
 
   useEffect(() => {
     setAppState(loadState());
@@ -101,7 +119,8 @@ export default function Home() {
     notify("番茄完成", "已记录。");
     playBeep();
     setToast({ message: "番茄完成！", sub: "已记录，继续保持节奏" });
-  }, [notify, playBeep, stopTimer]);
+    void runSync();
+  }, [notify, playBeep, stopTimer, runSync]);
 
   const handleStartFocus = useCallback(() => {
     requestPermission();
@@ -184,6 +203,22 @@ export default function Home() {
     return () => document.removeEventListener("visibilitychange", onVisible);
   }, [handleFocusComplete]);
 
+  const loaded = appState !== null;
+  useEffect(() => {
+    if (!loaded) return;
+    void runSync();
+    const kick = () => {
+      if (document.visibilityState === "visible") void runSync();
+    };
+    const onOnline = () => void runSync();
+    document.addEventListener("visibilitychange", kick);
+    window.addEventListener("online", onOnline);
+    return () => {
+      document.removeEventListener("visibilitychange", kick);
+      window.removeEventListener("online", onOnline);
+    };
+  }, [loaded, runSync]);
+
   useEffect(() => () => stopTimer(), [stopTimer]);
 
   const handleSpaceShortcut = useCallback(() => {
@@ -223,7 +258,7 @@ export default function Home() {
           </button>
         </p>
         <p>
-          今天 {countToday(appState.sessions)} 个
+          今天 {countToday(appState.sessions)} 个{syncNote ? `，${syncNote}` : ""}
         </p>
       </section>
 

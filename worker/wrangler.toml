@@ -1,0 +1,9 @@
+name = "tomato-sync"
+main = "index.js"
+compatibility_date = "2026-10-02"
+workers_dev = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "tomato-sync"
+database_id = "c79553f3-d242-4905-8dbd-94c1175145ce"

@@ -12,6 +12,7 @@ out/
 # misc
 .DS_Store
 *.tsbuildinfo
+.wrangler/
 
 # brainstorming visual companion
 .superpowers/

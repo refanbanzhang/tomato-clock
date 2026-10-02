@@ -1,7 +1,7 @@
 import { AppState, PomodoroSession } from "./types";
 
 const STORAGE_KEY = "tomato-clock";
-const OBSOLETE_KEYS = ["tomato-clock-state:preview", "token"];
+const OBSOLETE_KEYS = ["tomato-clock-state:preview", "token", "tomato-clock-sync-token"];
 
 function emptyState(): AppState {
   return { sessions: [] };
