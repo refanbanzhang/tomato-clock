@@ -34,7 +34,6 @@ interface PersistedTimer {
 }
 
 export const FOCUS_TIMER_KEY = "tomato-clock-timer";
-export const BREAK_TIMER_KEY = "tomato-clock-break";
 
 export function createInitialTimerState(
   updatedAt = 0,
