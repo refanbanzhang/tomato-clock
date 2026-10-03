@@ -2,13 +2,13 @@
   --cell: 12px;
   --gap: 3px;
   --canvas: #ffffff;
-  --fg: #262626;
-  --muted: #8a8378;
-  --c0: #f4f1ea;
-  --c1: #d2f4ff;
-  --c2: #7fd4ee;
-  --c3: #ffe08a;
-  --c4: #f0b429;
+  --fg: #1f2328;
+  --muted: #656d76;
+  --c0: #ebedf0;
+  --c1: #9be9a8;
+  --c2: #40c463;
+  --c3: #30a14e;
+  --c4: #216e39;
   margin-top: 22px;
   width: max-content;
   max-width: 100%;
@@ -17,8 +17,22 @@
   line-height: 1.5;
 }
 
-.goal {
+.goals {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
   margin: 0 0 12px;
+}
+
+.goal {
+  margin: 0;
+}
+
+.goal-empty {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 18px;
 }
 
 .goal-top {
@@ -39,22 +53,23 @@
 }
 
 .goal-track {
-  height: 10px;
-  border-radius: 20px;
-  background: #fff;
+  height: 8px;
+  border-radius: 6px;
+  background: #ebedf0;
   overflow: hidden;
 }
 
 .goal-fill {
   height: 100%;
-  border-radius: 20px;
-  background: #f0b429;
+  border-radius: 6px;
+  background: #2da44e;
 }
 
 .heat-box {
   max-width: 100%;
   background: var(--canvas);
-  border-radius: 12px;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
   padding: 16px 16px 12px;
 }
 
@@ -128,13 +143,12 @@
   z-index: 20;
   margin: 0;
   padding: 6px 10px;
-  color: #000;
+  color: #fff;
   font-size: 12px;
   line-height: 1.5;
   white-space: nowrap;
-  background: #fff9e5;
-  border-radius: 10px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  background: #24292f;
+  border-radius: 6px;
   pointer-events: none;
   transform: translate(-50%, calc(-100% - 8px));
 }

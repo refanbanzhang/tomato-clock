@@ -11,7 +11,7 @@ import {
 export function useWallClock(
   storageKey: string,
   totalSeconds: number,
-  onComplete: (plannedSeconds: number) => void,
+  onComplete: (plannedSeconds: number, tag?: string) => void,
 ) {
   const [timer, setTimer] = useState<TimerState>(() =>
     loadTimerState(storageKey, totalSeconds),
@@ -44,7 +44,7 @@ export function useWallClock(
         plannedSeconds: prev.totalSeconds,
         hidden: document.hidden,
       });
-      onCompleteRef.current(prev.totalSeconds);
+      onCompleteRef.current(prev.totalSeconds, prev.tag);
     },
     [stop, storageKey, totalSeconds],
   );
@@ -70,7 +70,9 @@ export function useWallClock(
     }, 1000);
   }, [finish, stop]);
 
-  const start = useCallback(() => {
+  const start = useCallback((tag: string) => {
+    const name = tag.trim();
+    if (!name) throw new Error("先选一个标签");
     finishing.current = false;
     const endAt = Date.now() + totalSeconds * 1000;
     const next: TimerState = {
@@ -79,6 +81,7 @@ export function useWallClock(
       totalSeconds,
       endAt,
       updatedAt: Date.now(),
+      tag: name,
     };
     clockRef.current = next;
     setTimer(next);
@@ -96,6 +99,7 @@ export function useWallClock(
             remainingSeconds: getRemainingSeconds(prev.endAt),
             totalSeconds: prev.totalSeconds,
             updatedAt: Date.now(),
+            tag: prev.tag,
           };
     clockRef.current = next;
     setTimer(next);

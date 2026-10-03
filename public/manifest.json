@@ -5,8 +5,8 @@
   "start_url": "/tomato-clock/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#ffffff",
-  "theme_color": "#F97316",
+  "background_color": "#f6f8fa",
+  "theme_color": "#f6f8fa",
   "icons": [
     {
       "src": "/tomato-clock/apple-touch-icon.png",

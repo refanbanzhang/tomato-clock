@@ -1,5 +1,7 @@
 import { AppState, PomodoroSession } from "./types";
 
+const TAG_MAX = 16;
+
 const STORAGE_KEY = "tomato-clock";
 const OBSOLETE_KEYS = ["tomato-clock-state:preview", "token", "tomato-clock-sync-token"];
 
@@ -29,8 +31,62 @@ export function keepSessions(sessions: PomodoroSession[]): PomodoroSession[] {
   return sessions.filter((session) => !DROPPED_SESSION_IDS.has(session.id));
 }
 
+export function cleanTag(value: string): string {
+  const tag = value.trim().replace(/\s+/g, " ");
+  if (!tag) throw new Error("标签不能为空");
+  if (tag.length > TAG_MAX) throw new Error("标签最多 16 个字");
+  return tag;
+}
+
+function readTag(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  try {
+    return cleanTag(value);
+  } catch {
+    return undefined;
+  }
+}
+
+export function unionTags(tags: string[], sessions: PomodoroSession[]): string[] {
+  const next = [...tags];
+  for (const session of sessions) {
+    if (session.tag && !next.includes(session.tag)) next.push(session.tag);
+  }
+  return next;
+}
+
+function tagList(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  const tags: string[] = [];
+  for (const item of value) {
+    const tag = readTag(item);
+    if (tag && !tags.includes(tag)) tags.push(tag);
+  }
+  return tags;
+}
+
+function readTagAt(value: unknown): number | undefined {
+  if (typeof value !== "number" || !Number.isInteger(value) || value < 1 || value > 1e13) return undefined;
+  return value;
+}
+
+function normalizeSession(session: PomodoroSession): PomodoroSession {
+  if (!session || typeof session !== "object") return session;
+  const tag = readTag(session.tag);
+  const tagAt = readTagAt(session.tagAt);
+  const next: PomodoroSession = {
+    id: session.id,
+    startDate: session.startDate,
+    endDate: session.endDate,
+    plannedSeconds: session.plannedSeconds,
+  };
+  if (tag) next.tag = tag;
+  if (tagAt) next.tagAt = tagAt;
+  return next;
+}
+
 function emptyState(): AppState {
-  return { sessions: [] };
+  return { sessions: [], tags: [] };
 }
 
 function parseStoredState(raw: string): AppState {
@@ -38,7 +94,14 @@ function parseStoredState(raw: string): AppState {
   if (!parsed || !Array.isArray(parsed.sessions)) {
     throw new Error("invalid tomato clock data");
   }
-  return { sessions: keepSessions(parsed.sessions) };
+  const sessions = keepSessions(parsed.sessions).map(normalizeSession);
+  const tags = unionTags(tagList(parsed.tags), sessions);
+  const currentTag = readTag(parsed.currentTag);
+  return {
+    sessions,
+    tags,
+    currentTag: currentTag && tags.includes(currentTag) ? currentTag : undefined,
+  };
 }
 
 export function loadState(): AppState {
@@ -61,4 +124,45 @@ export function saveState(state: AppState): void {
 
 export function addSession(state: AppState, session: PomodoroSession): AppState {
   return { ...state, sessions: [...state.sessions, session] };
+}
+
+export function addTag(state: AppState, name: string): AppState {
+  const tag = cleanTag(name);
+  if (state.tags.includes(tag)) return { ...state, currentTag: tag };
+  return { ...state, tags: [...state.tags, tag], currentTag: tag };
+}
+
+export function selectTag(state: AppState, name: string): AppState {
+  if (!state.tags.includes(name)) throw new Error("标签不存在");
+  return { ...state, currentTag: name };
+}
+
+export function setSessionTag(state: AppState, id: string, name: string): AppState {
+  const tag = name ? cleanTag(name) : undefined;
+  if (tag && !state.tags.includes(tag)) throw new Error("标签不存在");
+  let found = false;
+  const sessions = state.sessions.map((session) => {
+    if (session.id !== id) return session;
+    found = true;
+    if ((session.tag ?? "") === (tag ?? "")) return session;
+    const tagAt = Date.now();
+    if (!tag) {
+      const { tag: _omit, ...rest } = session;
+      return { ...rest, tagAt };
+    }
+    return { ...session, tag, tagAt };
+  });
+  if (!found) throw new Error("记录不存在");
+  return { ...state, sessions };
+}
+
+export function removeTag(state: AppState, name: string): AppState {
+  if (state.sessions.some((session) => session.tag === name)) {
+    throw new Error("这个标签已有记录");
+  }
+  return {
+    ...state,
+    tags: state.tags.filter((tag) => tag !== name),
+    currentTag: state.currentTag === name ? undefined : state.currentTag,
+  };
 }

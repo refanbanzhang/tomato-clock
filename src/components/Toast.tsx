@@ -19,7 +19,7 @@ export default function Toast({
   }, [duration, onDismiss]);
 
   return (
-    <div role="alert">
+    <div className="toast" role="alert">
       <p>{message}</p>
       {sub && <p>{sub}</p>}
       <button type="button" onClick={onDismiss}>

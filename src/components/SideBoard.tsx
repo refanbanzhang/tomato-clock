@@ -1,12 +1,15 @@
 import Heatmap from "@/components/Heatmap";
+import SessionList from "@/components/SessionList";
 import { countToday } from "@/lib/stats";
 import type { PomodoroSession } from "@/lib/types";
 
 interface SideBoardProps {
   sessions: PomodoroSession[];
+  tags: string[];
+  onRetag: (id: string, tag: string) => void;
 }
 
-export default function SideBoard({ sessions }: SideBoardProps) {
+export default function SideBoard({ sessions, tags, onRetag }: SideBoardProps) {
   const today = countToday(sessions);
 
   return (
@@ -21,7 +24,8 @@ export default function SideBoard({ sessions }: SideBoardProps) {
           <span className="num-k">累计</span>
         </p>
       </div>
-      <Heatmap sessions={sessions} />
+      {sessions.length > 0 && <SessionList sessions={sessions} tags={tags} onRetag={onRetag} />}
+      <Heatmap sessions={sessions} tags={tags} />
     </aside>
   );
 }

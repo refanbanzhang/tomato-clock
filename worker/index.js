@@ -143,7 +143,32 @@ function session(item) {
   ) {
     throw new HttpError(400, "bad session length");
   }
-  return { id, startDate, endDate, plannedSeconds };
+  const row = { id, startDate, endDate, plannedSeconds };
+  if (item.tag != null && item.tag !== "") {
+    if (typeof item.tag !== "string" || item.tag !== item.tag.trim() || item.tag.length > 16) {
+      throw new HttpError(400, "bad session tag");
+    }
+    row.tag = item.tag;
+  }
+  if (item.tagAt != null && item.tagAt !== "") {
+    if (typeof item.tagAt !== "number" || !Number.isInteger(item.tagAt) || item.tagAt < 1 || item.tagAt > 1e13) {
+      throw new HttpError(400, "bad session tag time");
+    }
+    row.tagAt = item.tagAt;
+  }
+  return row;
+}
+
+function stamp(base, from) {
+  const row = {
+    id: base.id,
+    startDate: base.startDate,
+    endDate: base.endDate,
+    plannedSeconds: base.plannedSeconds,
+  };
+  if (from.tag) row.tag = from.tag;
+  if (from.tagAt) row.tagAt = from.tagAt;
+  return row;
 }
 
 function keep(prev, next) {
@@ -151,6 +176,12 @@ function keep(prev, next) {
   if (prev.startDate !== next.startDate || prev.endDate !== next.endDate || prev.plannedSeconds !== next.plannedSeconds) {
     throw new HttpError(409, "session conflict");
   }
+  const prevAt = prev.tagAt || 0;
+  const nextAt = next.tagAt || 0;
+  if (nextAt > prevAt) return stamp(prev, next);
+  if (prevAt > nextAt) return prev;
+  if ((prev.tag || "") === (next.tag || "")) return prev;
+  if (!prev.tag && next.tag) return stamp(prev, next);
   return prev;
 }
 

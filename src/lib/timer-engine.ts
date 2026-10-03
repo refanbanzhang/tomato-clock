@@ -8,6 +8,8 @@ export interface TimerState {
   endAt?: number;
   /** 开始、暂停、继续、完成、放弃时更新。滴答不要改它。 */
   updatedAt: number;
+  /** 这次番茄的标签。只有专注和暂停时有。 */
+  tag?: string;
 }
 
 export function getRemainingSeconds(endAt: number): number {
@@ -31,6 +33,7 @@ interface PersistedTimer {
   totalSeconds: number;
   endAt?: number;
   updatedAt?: number;
+  tag?: string;
 }
 
 export const FOCUS_TIMER_KEY = "tomato-clock-timer";
@@ -63,6 +66,9 @@ export function loadTimerState(
 
     const parsed = JSON.parse(raw) as PersistedTimer;
     const updatedAt = parsed.updatedAt ?? 0;
+    const tag = typeof parsed.tag === "string" && parsed.tag.trim() === parsed.tag && parsed.tag.length <= 16
+      ? parsed.tag
+      : undefined;
 
     if (parsed.mode === "idle") {
       return createInitialTimerState(updatedAt, totalSeconds);
@@ -74,6 +80,7 @@ export function loadTimerState(
         remainingSeconds: parsed.remainingSeconds,
         totalSeconds: parsed.totalSeconds,
         updatedAt,
+        tag,
       };
     }
 
@@ -84,6 +91,7 @@ export function loadTimerState(
         totalSeconds: parsed.totalSeconds,
         endAt: parsed.endAt,
         updatedAt,
+        tag,
       };
     }
   } catch {
@@ -104,6 +112,7 @@ export function saveTimerState(
     remainingSeconds: state.remainingSeconds,
     totalSeconds: state.totalSeconds,
     updatedAt: state.updatedAt,
+    tag: state.tag,
   };
 
   if (state.mode === "focusing" && state.endAt != null) {

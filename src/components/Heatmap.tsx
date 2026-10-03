@@ -1,21 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { buildHeatmap, type HeatDay } from "@/lib/heatmap";
+import { GOAL_HOURS, hoursByTag } from "@/lib/stats";
 import type { PomodoroSession } from "@/lib/types";
 import "@/heatmap.css";
 
 interface HeatmapProps {
   sessions: PomodoroSession[];
-}
-
-const GOAL_HOURS = 10000;
-
-function focusHours(sessions: PomodoroSession[]): number {
-  let seconds = 0;
-  for (const session of sessions) {
-    if (!Number.isFinite(session.plannedSeconds) || session.plannedSeconds <= 0) continue;
-    seconds += session.plannedSeconds;
-  }
-  return seconds / 3600;
+  tags: string[];
 }
 
 function hourLabel(hours: number): string {
@@ -62,14 +53,37 @@ function placeTip(el: HTMLElement, text: string): Tip {
   return { text, x: edge === "start" ? rect.left : edge === "end" ? rect.right : x, y: rect.top, edge };
 }
 
-export default function Heatmap({ sessions }: HeatmapProps) {
-  const weeks = useMemo(() => buildHeatmap(sessions), [sessions]);
-  const months = useMemo(() => monthMarks(weeks), [weeks]);
-  const hours = useMemo(() => focusHours(sessions), [sessions]);
-  const [tip, setTip] = useState<Tip | null>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
+function Goal({ tag, hours }: { tag: string; hours: number }) {
   const ratio = Math.min(1, hours / GOAL_HOURS);
   const fill = hours <= 0 ? "0" : `max(4px, ${ratio * 100}%)`;
+  return (
+    <div className="goal">
+      <p className="goal-top">
+        <span className="goal-name">{tag}</span>
+        <span className="goal-num">
+          {hourLabel(hours)} / {GOAL_HOURS}
+        </span>
+      </p>
+      <div
+        className="goal-track"
+        role="progressbar"
+        aria-valuemin={0}
+        aria-valuemax={GOAL_HOURS}
+        aria-valuenow={Math.min(GOAL_HOURS, Math.round(hours * 10) / 10)}
+        aria-label={`${tag}一万小时`}
+      >
+        <div className="goal-fill" style={{ width: fill }} />
+      </div>
+    </div>
+  );
+}
+
+export default function Heatmap({ sessions, tags }: HeatmapProps) {
+  const weeks = useMemo(() => buildHeatmap(sessions), [sessions]);
+  const months = useMemo(() => monthMarks(weeks), [weeks]);
+  const goals = useMemo(() => hoursByTag(sessions, tags), [sessions, tags]);
+  const [tip, setTip] = useState<Tip | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -83,24 +97,15 @@ export default function Heatmap({ sessions }: HeatmapProps) {
 
   return (
     <section className="heat" aria-label="专注记录">
-      <div className="goal">
-        <p className="goal-top">
-          <span className="goal-name">一万小时</span>
-          <span className="goal-num">
-            {hourLabel(hours)} / {GOAL_HOURS}
-          </span>
-        </p>
-        <div
-          className="goal-track"
-          role="progressbar"
-          aria-valuemin={0}
-          aria-valuemax={GOAL_HOURS}
-          aria-valuenow={Math.min(GOAL_HOURS, hours)}
-          aria-label="一万小时进度"
-        >
-          <div className="goal-fill" style={{ width: fill }} />
+      {goals.length === 0 ? (
+        <p className="goal-empty">添加标签后，按类型统计一万小时</p>
+      ) : (
+        <div className="goals">
+          {goals.map((goal) => (
+            <Goal key={goal.tag} tag={goal.tag} hours={goal.hours} />
+          ))}
         </div>
-      </div>
+      )}
       {tip && (
         <p className={`heat-pop ${tip.edge}`} role="status" style={{ left: tip.x, top: tip.y }}>
           {tip.text}
