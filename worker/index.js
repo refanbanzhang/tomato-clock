@@ -48,43 +48,51 @@ export default {
 
 async function read(env, key) {
   const snapshot = await load(env, key);
-  return json({ sessions: snapshot.sessions }, 200, quote(String(snapshot.rev)));
+  return json({ sessions: snapshot.sessions, tags: snapshot.tags }, 200, quote(String(snapshot.rev)));
 }
 
 async function write(env, key, request) {
   const match = ifMatch(request);
   const expected = Number(match);
   if (!Number.isInteger(expected) || expected < 0) throw new HttpError(400, "bad If-Match");
-  const sessions = normalize(await readBody(request));
-  const body = JSON.stringify({ sessions });
+  const incoming = await readBody(request);
+  const sessions = normalize(incoming.sessions);
 
   if (expected === 0) {
+    const tags = incoming.tags == null ? [] : normalizeTags(incoming.tags);
+    const body = JSON.stringify({ sessions, tags });
     const inserted = await env.DB.prepare(
       "INSERT INTO blobs (key, rev, body) VALUES (?, 1, ?) ON CONFLICT(key) DO NOTHING",
     )
       .bind(key, body)
       .run();
     if (inserted.meta.changes !== 1) return conflict(await load(env, key));
-    return json({ sessions }, 200, quote("1"));
+    return json({ sessions, tags }, 200, quote("1"));
   }
 
   const existing = await load(env, key);
   if (existing.rev !== expected) return conflict(existing);
-  if (JSON.stringify(existing.sessions) === JSON.stringify(sessions)) {
-    return json({ sessions: existing.sessions }, 200, quote(String(existing.rev)));
+  const tags = incoming.tags == null ? existing.tags : normalizeTags(incoming.tags);
+  const body = JSON.stringify({ sessions, tags });
+  if (
+    JSON.stringify(existing.sessions) === JSON.stringify(sessions) &&
+    JSON.stringify(existing.tags) === JSON.stringify(tags)
+  ) {
+    return json({ sessions: existing.sessions, tags: existing.tags }, 200, quote(String(existing.rev)));
   }
   const updated = await env.DB.prepare("UPDATE blobs SET rev = rev + 1, body = ? WHERE key = ? AND rev = ?")
     .bind(body, key, expected)
     .run();
   if (updated.meta.changes !== 1) return conflict(await load(env, key));
-  return json({ sessions }, 200, quote(String(expected + 1)));
+  return json({ sessions, tags }, 200, quote(String(expected + 1)));
 }
 
 async function load(env, key) {
   const row = await env.DB.prepare("SELECT rev, body FROM blobs WHERE key = ?").bind(key).first();
-  if (!row) return { rev: 0, sessions: [] };
+  if (!row) return { rev: 0, sessions: [], tags: [] };
   const parsed = JSON.parse(row.body);
-  return { rev: row.rev, sessions: normalize(parsed.sessions) };
+  const tags = parsed && Object.prototype.hasOwnProperty.call(parsed, "tags") ? normalizeTags(parsed.tags) : [];
+  return { rev: row.rev, sessions: normalize(parsed.sessions), tags };
 }
 
 function ifMatch(request) {
@@ -110,7 +118,35 @@ async function readBody(request) {
     throw new HttpError(400, "sync body has no sessions");
   }
   if (parsed.sessions.length > MAX_SESSIONS) throw new HttpError(413, "too many sessions");
-  return parsed.sessions;
+  if (!Object.prototype.hasOwnProperty.call(parsed, "tags")) return { sessions: parsed.sessions, tags: null };
+  if (!Array.isArray(parsed.tags)) throw new HttpError(400, "sync body tags must be an array");
+  if (parsed.tags.length > 100) throw new HttpError(413, "too many tags");
+  return { sessions: parsed.sessions, tags: parsed.tags };
+}
+
+function normalizeTags(value) {
+  if (!Array.isArray(value)) throw new HttpError(400, "tags must be an array");
+  const byName = new Map();
+  for (const item of value) {
+    const next = tagEntry(item);
+    const prev = byName.get(next.name);
+    if (!prev || next.at > prev.at) byName.set(next.name, next);
+  }
+  return [...byName.values()].sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
+}
+
+function tagEntry(item) {
+  if (!item || typeof item !== "object") throw new HttpError(400, "bad tag");
+  const name = item.name;
+  if (typeof name !== "string" || name.length === 0 || name !== name.trim() || name.length > 16) {
+    throw new HttpError(400, "bad tag name");
+  }
+  if (typeof item.at !== "number" || !Number.isInteger(item.at) || item.at < 1 || item.at > 1e13) {
+    throw new HttpError(400, "bad tag time");
+  }
+  const row = { name, at: item.at };
+  if (item.off === true) row.off = true;
+  return row;
 }
 
 function normalize(value) {
@@ -186,7 +222,7 @@ function keep(prev, next) {
 }
 
 function conflict(snapshot) {
-  return json({ sessions: snapshot.sessions }, 412, quote(String(snapshot.rev)));
+  return json({ sessions: snapshot.sessions, tags: snapshot.tags }, 412, quote(String(snapshot.rev)));
 }
 
 function quote(etag) {

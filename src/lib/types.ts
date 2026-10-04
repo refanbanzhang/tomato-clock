@@ -11,11 +11,19 @@ export interface PomodoroSession {
   tagAt?: number;
 }
 
+/** 标签目录里的一条。删除留下 off，同步时才不会被另一台设备加回来。 */
+export interface TagEntry {
+  name: string;
+  /** 添加、重新添加或删除的时间。 */
+  at: number;
+  off?: boolean;
+}
+
 export interface AppState {
   sessions: PomodoroSession[];
-  /** 可选标签，顺序就是用户添加的顺序。 */
-  tags: string[];
-  /** 下一次开始时用的标签。计时中以计时器上的 tag 为准。 */
+  /** 标签目录，含已删除的记录。展示用 tagNames。 */
+  tags: TagEntry[];
+  /** 下一次开始时用的标签。计时中以计时器上的 tag 为准。只留在本机。 */
   currentTag?: string;
 }
 

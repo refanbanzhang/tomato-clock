@@ -1,5 +1,10 @@
-import { keepSessions } from "./store";
-import { PomodoroSession } from "./types";
+import { keepSessions, mergeTags, unionTags } from "./store";
+import { PomodoroSession, TagEntry } from "./types";
+
+export interface SyncState {
+  sessions: PomodoroSession[];
+  tags: TagEntry[];
+}
 
 const MAX_TRIES = 8;
 
@@ -29,10 +34,10 @@ export function mergeSessions(local: PomodoroSession[], remote: PomodoroSession[
 let tail: Promise<void> = Promise.resolve();
 
 export function scheduleSync(
-  getSessions: () => PomodoroSession[],
-  apply: (sessions: PomodoroSession[]) => void,
+  getState: () => SyncState,
+  apply: (next: SyncState) => void,
 ): Promise<void> {
-  const run = tail.then(() => syncLoop(getSessions, apply));
+  const run = tail.then(() => syncLoop(getState, apply));
   tail = run.then(
     () => undefined,
     () => undefined,
@@ -41,24 +46,37 @@ export function scheduleSync(
 }
 
 async function syncLoop(
-  getSessions: () => PomodoroSession[],
-  apply: (sessions: PomodoroSession[]) => void,
+  getState: () => SyncState,
+  apply: (next: SyncState) => void,
 ): Promise<void> {
   for (let attempt = 0; attempt < MAX_TRIES; attempt += 1) {
     const remote = await pull();
-    const merged = mergeSessions(getSessions(), remote.sessions);
-    if (!sameSessions(merged, getSessions())) apply(merged);
-    const latest = mergeSessions(getSessions(), []);
-    if (sameSessions(latest, remote.sessions)) return;
+    const local = getState();
+    const merged = combine(local, remote);
+    if (!sameState(merged, local)) apply(merged);
+    const latest = getState();
+    if (settled(latest, remote)) return;
     const written = await push(latest, remote.etag);
     if (written === "conflict") continue;
     if (written === "stripped") return;
-    if (sameSessions(mergeSessions(getSessions(), []), latest)) return;
+    if (sameState(getState(), latest)) return;
   }
   throw new Error("sync did not converge");
 }
 
-async function pull(): Promise<{ etag: string; sessions: PomodoroSession[] }> {
+function combine(local: SyncState, remote: { sessions: PomodoroSession[]; tags: TagEntry[] | null }): SyncState {
+  const sessions = mergeSessions(local.sessions, remote.sessions);
+  const tags = unionTags(remote.tags == null ? local.tags : mergeTags(local.tags, remote.tags), sessions);
+  return { sessions, tags };
+}
+
+function settled(local: SyncState, remote: { sessions: PomodoroSession[]; tags: TagEntry[] | null }): boolean {
+  if (!sameSessions(local.sessions, remote.sessions)) return false;
+  if (remote.tags == null) return local.tags.length === 0;
+  return sameTags(local.tags, remote.tags);
+}
+
+async function pull(): Promise<{ etag: string; sessions: PomodoroSession[]; tags: TagEntry[] | null }> {
   console.info("[sync] pull", SYNC_API);
   const res = await fetch(SYNC_API, {
     method: "GET",
@@ -66,11 +84,11 @@ async function pull(): Promise<{ etag: string; sessions: PomodoroSession[] }> {
   });
   if (!res.ok) throw new Error(`sync pull failed (${res.status})`);
   const etag = quotedEtag(res.headers.get("ETag"));
-  return { etag, sessions: parseSessions(await res.json()) };
+  return { etag, ...parsePayload(await res.json()) };
 }
 
 async function push(
-  sessions: PomodoroSession[],
+  state: SyncState,
   etag: string,
 ): Promise<"ok" | "conflict" | "stripped"> {
   const res = await fetch(SYNC_API, {
@@ -79,18 +97,21 @@ async function push(
       "Content-Type": "application/json",
       "If-Match": etag,
     },
-    body: JSON.stringify({ sessions }),
+    body: JSON.stringify({ sessions: state.sessions, tags: canonTags(state.tags) }),
   });
   if (res.status === 412) return "conflict";
   if (!res.ok) throw new Error(`sync push failed (${res.status})`);
-  const stored = parseSessions(await res.json());
-  console.info("[sync] push", { sessions: sessions.length });
-  return tagsKept(sessions, stored) ? "ok" : "stripped";
+  const stored = parsePayload(await res.json());
+  console.info("[sync] push", { sessions: state.sessions.length, tags: state.tags.length });
+  return kept(state, stored) ? "ok" : "stripped";
 }
 
-function tagsKept(sent: PomodoroSession[], stored: PomodoroSession[]): boolean {
-  const byId = new Map(stored.map((session) => [session.id, session.tag ?? ""]));
-  return sent.every((session) => (session.tag ?? "") === (byId.get(session.id) ?? ""));
+function kept(sent: SyncState, stored: { sessions: PomodoroSession[]; tags: TagEntry[] | null }): boolean {
+  const byId = new Map(stored.sessions.map((session) => [session.id, session.tag ?? ""]));
+  const sessionsOk = sent.sessions.every((session) => (session.tag ?? "") === (byId.get(session.id) ?? ""));
+  if (!sessionsOk) return false;
+  if (stored.tags == null) return sent.tags.length === 0;
+  return sameTags(sent.tags, stored.tags);
 }
 
 function quotedEtag(etag: string | null): string {
@@ -100,11 +121,48 @@ function quotedEtag(etag: string | null): string {
   return value;
 }
 
-function parseSessions(value: unknown): PomodoroSession[] {
+function parsePayload(value: unknown): { sessions: PomodoroSession[]; tags: TagEntry[] | null } {
   if (!value || typeof value !== "object" || !Array.isArray((value as { sessions?: unknown }).sessions)) {
     throw new Error("sync payload has no sessions");
   }
-  return mergeSessions((value as { sessions: PomodoroSession[] }).sessions, []);
+  const record = value as { sessions: PomodoroSession[]; tags?: unknown };
+  const tags = Object.prototype.hasOwnProperty.call(record, "tags") ? parseTags(record.tags) : null;
+  return { sessions: mergeSessions(record.sessions, []), tags };
+}
+
+function parseTags(value: unknown): TagEntry[] {
+  if (!Array.isArray(value)) throw new Error("sync payload tags are invalid");
+  const tags: TagEntry[] = [];
+  for (const item of value) {
+    if (!item || typeof item !== "object") throw new Error("sync payload tags are invalid");
+    const record = item as { name?: unknown; at?: unknown; off?: unknown };
+    if (typeof record.name !== "string" || record.name.length === 0 || record.name.length > 16) {
+      throw new Error("sync payload tags are invalid");
+    }
+    if (typeof record.at !== "number" || !Number.isInteger(record.at) || record.at < 1) {
+      throw new Error("sync payload tags are invalid");
+    }
+    tags.push(record.off === true ? { name: record.name, at: record.at, off: true } : { name: record.name, at: record.at });
+  }
+  return mergeTags([], tags);
+}
+
+function canonTags(tags: TagEntry[]): TagEntry[] {
+  return [...tags].sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
+}
+
+function sameTags(a: TagEntry[], b: TagEntry[]): boolean {
+  const left = canonTags(a);
+  const right = canonTags(b);
+  if (left.length !== right.length) return false;
+  return left.every((item, index) => {
+    const other = right[index];
+    return item.name === other?.name && item.at === other.at && Boolean(item.off) === Boolean(other.off);
+  });
+}
+
+function sameState(a: SyncState, b: SyncState): boolean {
+  return sameSessions(a.sessions, b.sessions) && sameTags(a.tags, b.tags);
 }
 
 function sessionOf(session: PomodoroSession): PomodoroSession {

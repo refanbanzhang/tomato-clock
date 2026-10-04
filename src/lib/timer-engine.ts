@@ -75,6 +75,10 @@ export function loadTimerState(
     }
 
     if (parsed.mode === "paused") {
+      // 还没开始走的旧时长（比如存成了 30 分钟）不要继续占着表盘。
+      if (parsed.totalSeconds !== totalSeconds && parsed.remainingSeconds >= parsed.totalSeconds - 1) {
+        return createInitialTimerState(updatedAt, totalSeconds);
+      }
       return {
         mode: "paused",
         remainingSeconds: parsed.remainingSeconds,

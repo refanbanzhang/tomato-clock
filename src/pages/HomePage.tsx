@@ -5,8 +5,8 @@ import TagPick from "@/components/TagPick";
 import Toast from "@/components/Toast";
 import ConfigPage from "@/pages/ConfigPage";
 import { useAudio, useKeyboardShortcut, useNotification } from "@/components/hooks";
-import { addSession, addTag, loadState, removeTag, saveState, selectTag, setSessionTag, unionTags } from "@/lib/store";
-import { scheduleSync } from "@/lib/sync";
+import { addSession, addTag, loadState, removeTag, saveState, selectTag, setSessionTag, tagNames, unionTags } from "@/lib/store";
+import { scheduleSync, type SyncState } from "@/lib/sync";
 import { useWallClock } from "@/lib/use-clock";
 import { FOCUS_TIMER_KEY } from "@/lib/timer-engine";
 import { asset } from "@/lib/asset";
@@ -31,22 +31,24 @@ export default function HomePage() {
     setAppState(next);
   }, []);
 
-  const applySessions = useCallback((sessions: PomodoroSession[]) => {
+  const applyRemote = useCallback((next: SyncState) => {
     const current = appStateRef.current;
-    const tags = unionTags(current?.tags ?? [], sessions);
-    const currentTag =
-      current?.currentTag && tags.includes(current.currentTag) ? current.currentTag : undefined;
-    commit({ sessions, tags, currentTag });
+    const names = tagNames(next.tags);
+    const currentTag = current?.currentTag && names.includes(current.currentTag) ? current.currentTag : undefined;
+    commit({ sessions: next.sessions, tags: next.tags, currentTag });
   }, [commit]);
 
   const runSync = useCallback(() => {
-    return scheduleSync(() => appStateRef.current?.sessions ?? [], applySessions).then(
+    return scheduleSync(() => {
+      const current = appStateRef.current;
+      return { sessions: current?.sessions ?? [], tags: current?.tags ?? [] };
+    }, applyRemote).then(
       () => undefined,
       (error: unknown) => {
         console.warn("[sync] failed", error);
       },
     );
-  }, [applySessions]);
+  }, [applyRemote]);
 
   const onFocusDone = useCallback(
     (plannedSeconds: number, tag?: string) => {
@@ -132,6 +134,12 @@ export default function HomePage() {
         clock.pause();
         return;
       }
+      const tag = clock.timer.tag || appStateRef.current.currentTag;
+      if (!tag) {
+        setToast({ message: "先选一个标签" });
+        return;
+      }
+      if (!clock.timer.tag) clock.setTag(tag);
       clock.resume();
     },
     [requestPermission],
@@ -146,12 +154,16 @@ export default function HomePage() {
     return (
       <>
         <ConfigPage
-          tags={appState.tags}
+          tags={tagNames(appState.tags)}
           sessions={appState.sessions}
-          onAdd={(name) => commit(addTag(appStateRef.current, name))}
+          onAdd={(name) => {
+            commit(addTag(appStateRef.current, name));
+            void runSync();
+          }}
           onRemove={(tag) => {
             try {
               commit(removeTag(appStateRef.current, tag));
+              void runSync();
             } catch (error) {
               setToast({ message: error instanceof Error ? error.message : "删不掉" });
             }
@@ -181,10 +193,13 @@ export default function HomePage() {
           onAction={() => press(focus)}
         >
           <TagPick
-            tags={appState.tags}
-            current={appState.currentTag}
-            locked={focus.timer.mode === "idle" ? undefined : focus.timer.tag || "未分类"}
-            onSelect={(tag) => commit(selectTag(appStateRef.current, tag))}
+            tags={tagNames(appState.tags)}
+            current={focus.timer.mode === "paused" ? focus.timer.tag || appState.currentTag : appState.currentTag}
+            locked={focus.timer.mode === "focusing" ? focus.timer.tag || "未分类" : undefined}
+            onSelect={(tag) => {
+              commit(selectTag(appStateRef.current, tag));
+              if (focus.timer.mode === "paused") focus.setTag(tag);
+            }}
             onConfig={() => go("config")}
           />
         </ClockScreen>
@@ -198,7 +213,7 @@ export default function HomePage() {
       </div>
       <SideBoard
         sessions={appState.sessions}
-        tags={appState.tags}
+        tags={tagNames(appState.tags)}
         onRetag={(id, tag) => {
           try {
             commit(setSessionTag(appStateRef.current, id, tag));

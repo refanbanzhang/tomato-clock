@@ -63,6 +63,7 @@ select {
 }
 
 .logs {
+  width: 100%;
   margin-top: 18px;
   max-height: 220px;
   overflow: auto;
@@ -76,28 +77,35 @@ select {
 }
 
 .log-list {
+  display: grid;
+  grid-template-columns: max-content 140px;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  column-gap: 16px;
+  row-gap: 8px;
   margin: 0;
   padding: 0;
 }
 
 .log {
-  display: flex;
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
   margin: 0;
-  padding: 6px 0;
+  padding: 0;
   list-style: none;
 }
 
 .log-when {
   font-size: 14px;
-  line-height: 18px;
+  line-height: 32px;
 }
 
 .log-tag {
+  width: 100%;
   height: 32px;
-  max-width: 140px;
   border: 1px solid #d0d7de;
   border-radius: 6px;
   background: #f6f8fa;
@@ -169,10 +177,19 @@ select {
   background: #2da44e;
 }
 
+.acts {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(270px, 86%);
+  margin-top: 36px;
+  gap: 10px;
+}
+
 .go {
-  width: min(210px, 70%);
+  width: 100%;
   height: 40px;
-  margin: 24px 0 0;
+  margin: 0;
   border: 1px solid rgba(31, 35, 40, 0.15);
   border-radius: 6px;
   background: #1f883d;
@@ -211,9 +228,9 @@ select {
 }
 
 .pick {
+  width: 100%;
   height: 32px;
-  min-width: 140px;
-  margin-top: 8px;
+  margin: 0;
   border: 1px solid #d0d7de;
   border-radius: 6px;
   background: #f6f8fa;
@@ -223,7 +240,7 @@ select {
 }
 
 .link {
-  margin-top: 8px;
+  margin: 0;
   border: 0;
   background: transparent;
   color: #0969da;
@@ -341,7 +358,8 @@ select {
 }
 
 .tag-in {
-  width: 180px;
+  flex: 1;
+  min-width: 0;
   height: 32px;
   padding: 0 12px;
   border: 1px solid #d0d7de;
@@ -358,6 +376,7 @@ select {
 }
 
 .tag-ok {
+  flex: none;
   height: 32px;
   padding: 0 12px;
   border: 1px solid rgba(31, 35, 40, 0.15);
@@ -373,7 +392,7 @@ select {
 }
 
 .tag-now {
-  margin: 8px 0 0;
+  margin: 0;
   height: 28px;
   padding: 0 12px;
   border: 1px solid #54aeff66;

@@ -118,6 +118,16 @@ export function useWallClock(
     startTick();
   }, [startTick]);
 
+  const setTag = useCallback((tag: string) => {
+    const name = tag.trim();
+    if (!name) throw new Error("先选一个标签");
+    const prev = clockRef.current;
+    if (prev.mode !== "paused") return;
+    const next = { ...prev, tag: name, updatedAt: Date.now() };
+    clockRef.current = next;
+    setTimer(next);
+  }, []);
+
   const abandon = useCallback(() => {
     stop();
     const next = createInitialTimerState(Date.now(), totalSeconds);
@@ -154,5 +164,5 @@ export function useWallClock(
 
   useEffect(() => () => stop(), [stop]);
 
-  return { timer, start, pause, resume, abandon };
+  return { timer, start, pause, resume, abandon, setTag };
 }

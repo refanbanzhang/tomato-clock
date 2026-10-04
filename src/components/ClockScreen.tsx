@@ -50,10 +50,12 @@ export default function ClockScreen({
       >
         <div className="bar-fill" style={{ width: fill }} />
       </div>
-      {children}
-      <button className={actionClass} type="button" aria-label={actionLabel} onClick={onAction}>
-        {action}
-      </button>
+      <div className="acts">
+        {children}
+        <button className={actionClass} type="button" aria-label={actionLabel} onClick={onAction}>
+          {action}
+        </button>
+      </div>
       <div className="tail" />
     </>
   );

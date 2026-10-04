@@ -1,4 +1,4 @@
-import { AppState, PomodoroSession } from "./types";
+import { AppState, PomodoroSession, TagEntry } from "./types";
 
 const TAG_MAX = 16;
 
@@ -47,20 +47,56 @@ function readTag(value: unknown): string | undefined {
   }
 }
 
-export function unionTags(tags: string[], sessions: PomodoroSession[]): string[] {
-  const next = [...tags];
-  for (const session of sessions) {
-    if (session.tag && !next.includes(session.tag)) next.push(session.tag);
-  }
-  return next;
+export function tagNames(tags: TagEntry[]): string[] {
+  return tags
+    .filter((item) => !item.off)
+    .sort((a, b) => a.at - b.at || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0))
+    .map((item) => item.name);
 }
 
-function tagList(value: unknown): string[] {
+export function unionTags(tags: TagEntry[], sessions: PomodoroSession[]): TagEntry[] {
+  const byName = new Map(tags.map((item) => [item.name, item]));
+  for (const session of sessions) {
+    if (!session.tag) continue;
+    const at = session.tagAt ?? 1;
+    const prev = byName.get(session.tag);
+    if (prev && prev.at >= at) continue;
+    byName.set(session.tag, { name: session.tag, at });
+  }
+  return [...byName.values()];
+}
+
+export function mergeTags(local: TagEntry[], remote: TagEntry[]): TagEntry[] {
+  const byName = new Map<string, TagEntry>();
+  for (const item of [...remote, ...local]) {
+    const prev = byName.get(item.name);
+    if (!prev || item.at > prev.at) byName.set(item.name, item);
+  }
+  return [...byName.values()];
+}
+
+function readTagEntry(value: unknown, index: number): TagEntry | undefined {
+  if (typeof value === "string") {
+    const name = readTag(value);
+    return name ? { name, at: index + 1 } : undefined;
+  }
+  if (!value || typeof value !== "object") return undefined;
+  const record = value as { name?: unknown; at?: unknown; off?: unknown };
+  const name = readTag(record.name);
+  if (!name) return undefined;
+  const at = readTagAt(record.at) ?? 1;
+  return record.off === true ? { name, at, off: true } : { name, at };
+}
+
+function tagList(value: unknown): TagEntry[] {
   if (!Array.isArray(value)) return [];
-  const tags: string[] = [];
-  for (const item of value) {
-    const tag = readTag(item);
-    if (tag && !tags.includes(tag)) tags.push(tag);
+  const tags: TagEntry[] = [];
+  for (let index = 0; index < value.length; index += 1) {
+    const entry = readTagEntry(value[index], index);
+    if (!entry) continue;
+    const prev = tags.findIndex((item) => item.name === entry.name);
+    if (prev < 0) tags.push(entry);
+    else if (entry.at > tags[prev].at) tags[prev] = entry;
   }
   return tags;
 }
@@ -96,11 +132,12 @@ function parseStoredState(raw: string): AppState {
   }
   const sessions = keepSessions(parsed.sessions).map(normalizeSession);
   const tags = unionTags(tagList(parsed.tags), sessions);
+  const names = tagNames(tags);
   const currentTag = readTag(parsed.currentTag);
   return {
     sessions,
     tags,
-    currentTag: currentTag && tags.includes(currentTag) ? currentTag : undefined,
+    currentTag: currentTag && names.includes(currentTag) ? currentTag : undefined,
   };
 }
 
@@ -128,18 +165,24 @@ export function addSession(state: AppState, session: PomodoroSession): AppState 
 
 export function addTag(state: AppState, name: string): AppState {
   const tag = cleanTag(name);
-  if (state.tags.includes(tag)) return { ...state, currentTag: tag };
-  return { ...state, tags: [...state.tags, tag], currentTag: tag };
+  const existing = state.tags.find((item) => item.name === tag);
+  if (existing && !existing.off) return { ...state, currentTag: tag };
+  if (!existing && state.tags.length >= 100) throw new Error("标签太多了");
+  const next = { name: tag, at: Date.now() };
+  const tags = existing
+    ? state.tags.map((item) => (item.name === tag ? next : item))
+    : [...state.tags, next];
+  return { ...state, tags, currentTag: tag };
 }
 
 export function selectTag(state: AppState, name: string): AppState {
-  if (!state.tags.includes(name)) throw new Error("标签不存在");
+  if (!tagNames(state.tags).includes(name)) throw new Error("标签不存在");
   return { ...state, currentTag: name };
 }
 
 export function setSessionTag(state: AppState, id: string, name: string): AppState {
   const tag = name ? cleanTag(name) : undefined;
-  if (tag && !state.tags.includes(tag)) throw new Error("标签不存在");
+  if (tag && !tagNames(state.tags).includes(tag)) throw new Error("标签不存在");
   let found = false;
   const sessions = state.sessions.map((session) => {
     if (session.id !== id) return session;
@@ -157,12 +200,13 @@ export function setSessionTag(state: AppState, id: string, name: string): AppSta
 }
 
 export function removeTag(state: AppState, name: string): AppState {
+  if (!state.tags.some((item) => item.name === name && !item.off)) throw new Error("标签不存在");
   if (state.sessions.some((session) => session.tag === name)) {
     throw new Error("这个标签已有记录");
   }
   return {
     ...state,
-    tags: state.tags.filter((tag) => tag !== name),
+    tags: state.tags.map((item) => (item.name === name ? { name, at: Date.now(), off: true } : item)),
     currentTag: state.currentTag === name ? undefined : state.currentTag,
   };
 }
