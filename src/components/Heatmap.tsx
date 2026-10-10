@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import SessionList from "@/components/SessionList";
 import { buildHeatmap, type HeatDay } from "@/lib/heatmap";
-import { GOAL_HOURS, hoursByTag } from "@/lib/stats";
+import { GOAL_HOURS, hoursByTag, isSameDay } from "@/lib/stats";
 import type { PomodoroSession } from "@/lib/types";
 import "@/heatmap.css";
 
 interface HeatmapProps {
   sessions: PomodoroSession[];
   tags: string[];
+  onRetag: (id: string, tag: string) => void;
 }
 
 function hourLabel(hours: number): string {
@@ -14,12 +16,16 @@ function hourLabel(hours: number): string {
   return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
 }
 
-function dayText(day: HeatDay): string {
-  const date = day.date.toLocaleDateString("zh-CN", {
+function dateLabel(day: HeatDay): string {
+  return day.date.toLocaleDateString("zh-CN", {
     year: "numeric",
     month: "long",
     day: "numeric",
   });
+}
+
+function dayText(day: HeatDay): string {
+  const date = dateLabel(day);
   if (day.future) return date;
   return `${date}，${day.minutes} 分钟`;
 }
@@ -78,12 +84,22 @@ function Goal({ tag, hours }: { tag: string; hours: number }) {
   );
 }
 
-export default function Heatmap({ sessions, tags }: HeatmapProps) {
+function daySessions(sessions: PomodoroSession[], day: HeatDay): PomodoroSession[] {
+  return sessions.filter((session) => {
+    const end = new Date(session.endDate);
+    return !Number.isNaN(end.getTime()) && isSameDay(end, day.date);
+  });
+}
+
+export default function Heatmap({ sessions, tags, onRetag }: HeatmapProps) {
   const weeks = useMemo(() => buildHeatmap(sessions), [sessions]);
   const months = useMemo(() => monthMarks(weeks), [weeks]);
   const goals = useMemo(() => hoursByTag(sessions, tags), [sessions, tags]);
   const [tip, setTip] = useState<Tip | null>(null);
+  const [openKey, setOpenKey] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const openDay = weeks.flat().find((day) => day.key === openKey) ?? null;
+  const openSessions = openDay ? daySessions(sessions, openDay) : [];
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -93,6 +109,12 @@ export default function Heatmap({ sessions, tags }: HeatmapProps) {
 
   function showTip(day: HeatDay, el: HTMLElement) {
     setTip(placeTip(el, dayText(day)));
+  }
+
+  function pickDay(day: HeatDay) {
+    if (day.future) return;
+    setTip(null);
+    setOpenKey((key) => (key === day.key ? null : day.key));
   }
 
   return (
@@ -130,11 +152,15 @@ export default function Heatmap({ sessions, tags }: HeatmapProps) {
                 </span>
               ))}
             </div>
-            <div className="heat-cells" role="img" aria-label="过去一年的专注记录">
+            <div className="heat-cells" role="group" aria-label="过去一年的专注记录">
               {weeks.flat().map((day) => (
-                <span
+                <button
                   key={day.key}
-                  className={`heat-cell heat-${day.level}`}
+                  type="button"
+                  className={`heat-cell heat-${day.level}${openKey === day.key ? " heat-on" : ""}`}
+                  aria-label={dayText(day)}
+                  aria-pressed={openKey === day.key}
+                  disabled={day.future}
                   onPointerEnter={(event) => {
                     if (event.pointerType === "touch") return;
                     showTip(day, event.currentTarget);
@@ -143,7 +169,7 @@ export default function Heatmap({ sessions, tags }: HeatmapProps) {
                     if (event.pointerType === "touch") return;
                     setTip(null);
                   }}
-                  onClick={(event) => showTip(day, event.currentTarget)}
+                  onClick={() => pickDay(day)}
                 />
               ))}
             </div>
@@ -158,6 +184,13 @@ export default function Heatmap({ sessions, tags }: HeatmapProps) {
         <span>多</span>
       </p>
       </div>
+      {openDay && (
+        openSessions.length > 0 ? (
+          <SessionList sessions={openSessions} tags={tags} onRetag={onRetag} />
+        ) : (
+          <p className="day-empty">{dateLabel(openDay)}没有记录</p>
+        )
+      )}
     </section>
   );
 }

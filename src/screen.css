@@ -12,6 +12,12 @@ select {
   font-family: inherit;
 }
 
+select:focus-visible,
+.heat-on {
+  outline: 2px solid #0969da;
+  outline-offset: 2px;
+}
+
 .stage {
   height: 100dvh;
   display: flex;
@@ -63,9 +69,11 @@ select {
 }
 
 .logs {
+  box-sizing: border-box;
   width: 100%;
   margin-top: 18px;
   max-height: 220px;
+  padding: 6px;
   overflow: auto;
 }
 
