@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import ClockScreen from "@/components/ClockScreen";
 import SideBoard from "@/components/SideBoard";
 import TagPick from "@/components/TagPick";
@@ -176,40 +176,48 @@ export default function HomePage() {
     );
   }
 
+  const live = liveFill(focus.timer);
+  const phoneStyle = live
+    ? ({ "--fill": `${Math.min(1, Math.max(0, live.ratio)) * 100}%` } as CSSProperties)
+    : undefined;
+
   return (
     <div className="stage">
-      <div className="phone">
-        <button className="btn nav" type="button" onClick={() => go("config")}>
-          配置
-        </button>
-        <ClockScreen
-          title={TITLE}
-          cat={asset("art/cat-timer.webp")}
-          seconds={focus.timer.remainingSeconds}
-          total={focus.timer.totalSeconds}
-          action={actionText(focus.timer.mode)}
-          actionLabel={actionLabel(focus.timer.mode, "专注")}
-          actionClass={actionClass(focus.timer.mode, Boolean(appState.currentTag))}
-          onAction={() => press(focus)}
-        >
-          <TagPick
-            tags={tagNames(appState.tags)}
-            current={focus.timer.mode === "paused" ? focus.timer.tag || appState.currentTag : appState.currentTag}
-            locked={focus.timer.mode === "focusing" ? focus.timer.tag || "未分类" : undefined}
-            onSelect={(tag) => {
-              commit(selectTag(appStateRef.current, tag));
-              if (focus.timer.mode === "paused") focus.setTag(tag);
-            }}
-            onConfig={() => go("config")}
-          />
-        </ClockScreen>
-        {toast && (
-          <Toast
-            message={toast.message}
-            sub={toast.sub}
-            onDismiss={() => setToast(null)}
-          />
-        )}
+      <div className="phone" style={phoneStyle}>
+        {live && <PhoneWater running={live.running} />}
+        <div className="phone-body">
+          <button className="btn nav" type="button" onClick={() => go("config")}>
+            配置
+          </button>
+          <ClockScreen
+            title={TITLE}
+            cat={asset("art/cat-timer.webp")}
+            seconds={focus.timer.remainingSeconds}
+            total={focus.timer.totalSeconds}
+            action={actionText(focus.timer.mode)}
+            actionLabel={actionLabel(focus.timer.mode, "专注")}
+            actionClass={actionClass(focus.timer.mode, Boolean(appState.currentTag))}
+            onAction={() => press(focus)}
+          >
+            <TagPick
+              tags={tagNames(appState.tags)}
+              current={focus.timer.mode === "paused" ? focus.timer.tag || appState.currentTag : appState.currentTag}
+              locked={focus.timer.mode === "focusing" ? focus.timer.tag || "未分类" : undefined}
+              onSelect={(tag) => {
+                commit(selectTag(appStateRef.current, tag));
+                if (focus.timer.mode === "paused") focus.setTag(tag);
+              }}
+              onConfig={() => go("config")}
+            />
+          </ClockScreen>
+          {toast && (
+            <Toast
+              message={toast.message}
+              sub={toast.sub}
+              onDismiss={() => setToast(null)}
+            />
+          )}
+        </div>
       </div>
       <SideBoard
         sessions={appState.sessions}
@@ -225,6 +233,25 @@ export default function HomePage() {
       />
     </div>
   );
+}
+
+function PhoneWater({ running }: { running: boolean }) {
+  return (
+    <div className={`phone-liquid${running ? "" : " phone-liquid-hold"}`} aria-hidden="true">
+      <span className="liquid-bubble liquid-bubble-one" />
+      <span className="liquid-bubble liquid-bubble-two" />
+      <span className="liquid-bubble liquid-bubble-three" />
+      <span className="liquid-shine" />
+    </div>
+  );
+}
+
+function liveFill(timer: { mode: "idle" | "focusing" | "paused"; remainingSeconds: number; totalSeconds: number }): { ratio: number; running: boolean } | null {
+  if (timer.mode === "idle") return null;
+  const ratio = timer.totalSeconds > 0
+    ? (timer.totalSeconds - Math.max(0, timer.remainingSeconds)) / timer.totalSeconds
+    : 0;
+  return { ratio, running: timer.mode === "focusing" };
 }
 
 function actionText(mode: "idle" | "focusing" | "paused"): string {

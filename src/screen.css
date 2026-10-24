@@ -137,6 +137,164 @@ select:focus-visible,
   overflow: hidden;
 }
 
+.phone-body {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.phone-liquid {
+  position: absolute;
+  z-index: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--fill);
+  overflow: hidden;
+  border-radius: 50% 50% 0 0 / 8px 8px 0 0;
+  background:
+    radial-gradient(ellipse at 18% 92%, rgba(126, 211, 247, 0.34), transparent 54%),
+    radial-gradient(ellipse at 78% 38%, rgba(206, 241, 255, 0.2), transparent 48%),
+    linear-gradient(180deg, rgba(177, 226, 249, 0.28), rgba(72, 170, 221, 0.54) 38%, rgba(29, 121, 184, 0.78));
+  pointer-events: none;
+  transition: height 1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.phone-liquid::before {
+  content: "";
+  position: absolute;
+  left: -18%;
+  top: -11px;
+  width: 136%;
+  height: 27px;
+  border-radius: 48% 52% 46% 54% / 58% 48% 52% 42%;
+  background:
+    radial-gradient(ellipse at 28% 45%, rgba(255, 255, 255, 0.48), transparent 18%),
+    linear-gradient(180deg, rgba(239, 251, 255, 0.84), rgba(123, 201, 238, 0.4));
+  filter: blur(0.5px);
+  transform: rotate(-1.2deg);
+  animation: liquid-surface 7s ease-in-out infinite alternate;
+}
+
+.phone-liquid::after {
+  content: "";
+  position: absolute;
+  left: -10%;
+  top: 1px;
+  width: 120%;
+  height: 13px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.42), rgba(167, 223, 248, 0.08));
+  filter: blur(1.5px);
+  transform: rotate(1deg);
+  opacity: 0.75;
+  animation: liquid-surface-back 9s ease-in-out infinite alternate;
+}
+
+.liquid-shine {
+  position: absolute;
+  left: -35%;
+  top: 8%;
+  width: 170%;
+  height: 42%;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at 35% 40%, rgba(255, 255, 255, 0.23), transparent 23%),
+    radial-gradient(ellipse at 70% 62%, rgba(220, 247, 255, 0.14), transparent 28%);
+  filter: blur(17px);
+  transform: rotate(-5deg);
+  opacity: 0.8;
+  animation: liquid-shine 11s ease-in-out infinite alternate;
+}
+
+.liquid-bubble {
+  position: absolute;
+  bottom: -8px;
+  width: 4px;
+  height: 4px;
+  border: 1px solid rgba(233, 249, 255, 0.58);
+  border-radius: 50%;
+  box-shadow: 0 0 7px rgba(221, 247, 255, 0.46);
+  animation: liquid-bubble 7s ease-in infinite;
+}
+
+.liquid-bubble-one {
+  left: 22%;
+  animation-delay: -2.4s;
+}
+
+.liquid-bubble-two {
+  left: 66%;
+  width: 3px;
+  height: 3px;
+  animation-delay: -5.1s;
+}
+
+.liquid-bubble-three {
+  left: 82%;
+  width: 5px;
+  height: 5px;
+  animation-delay: -0.8s;
+}
+
+.phone-liquid-hold::before,
+.phone-liquid-hold::after,
+.phone-liquid-hold .liquid-shine,
+.phone-liquid-hold .liquid-bubble {
+  animation-play-state: paused;
+}
+
+@keyframes liquid-surface {
+  to {
+    transform: rotate(1.2deg) translate(2.5%, 1px) scaleY(0.9);
+  }
+}
+
+@keyframes liquid-surface-back {
+  to {
+    transform: rotate(-1.5deg) translate(-3%, 2px) scaleY(0.88);
+  }
+}
+
+@keyframes liquid-shine {
+  to {
+    transform: rotate(-5deg) translate(7%, 5%);
+    opacity: 0.45;
+  }
+}
+
+@keyframes liquid-bubble {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.7);
+  }
+  18% {
+    opacity: 0.72;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(9px, -180px) scale(1.16);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .phone-liquid {
+    transition: none;
+  }
+
+  .phone-liquid::before,
+  .phone-liquid::after,
+  .liquid-shine,
+  .liquid-bubble {
+    animation: none;
+  }
+}
+
 .title {
   margin: clamp(32px, 10vh, 90px) 0 0;
   width: min(270px, 100%);
