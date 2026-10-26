@@ -1,0 +1,34 @@
+[     330ms] [TABLE] [Object, Object, Object] @ http://localhost:3003/node_modules/.vite/deps/@ssv-lab_web-report.js?v=dde7da17:3460
+[     331ms] [TABLE] [Object, Object] @ http://localhost:3003/node_modules/.vite/deps/@ssv-lab_web-report.js?v=dde7da17:3513
+[     331ms] [LOG] Reporter Config:  {rum: null, dt: null} @ http://localhost:3003/node_modules/.vite/deps/@ssv-lab_web-report.js?v=dde7da17:3513
+[     331ms] [LOG] set config {uin: } @ http://localhost:3003/node_modules/.vite/deps/@ssv-lab_web-report.js?v=dde7da17:3518
+[     333ms] [WARNING] [Vue Router warn]: No match found for location with path "/member/list" @ http://localhost:3003/node_modules/.vite/deps/vue-router.js?v=34c49721:43
+[     336ms] [LOG] requestInterceptors {transitional: Object, adapter: Array(2), transformRequest: Array(1), transformResponse: Array(1), timeout: 10000} {authenticationScheme: , timeout: 10000, withCredentials: true, headers: Object, transform: Object} @ http://localhost:3003/src/utils/request/index.ts:31
+[     353ms] [LOG] responseInterceptors {data: Object, status: 200, statusText: OK, headers: Fo, config: Object} @ http://localhost:3003/src/utils/request/index.ts:38
+[     354ms] [WARNING] [@ssv-lab/axios-plus]: 公钥设置成功  @ http://localhost:3003/node_modules/.vite/deps/@ssv-lab_axios-plus.js?v=f917daeb:5920
+[   75772ms] [ERROR] WebSocket connection to 'ws://localhost:3003/?token=raRIJyK9l3Cw' failed:  @ http://localhost:3003/@vite/client:268
+[   75774ms] [LOG] [vite] server connection lost. polling for restart... @ http://localhost:3003/@vite/client:287
+[   76792ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3003/:0
+[   77795ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3003/:0
+[   78798ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3003/:0
+[   79800ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3003/:0
+[   80803ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3003/:0
+[   81806ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3003/:0
+[   82809ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3003/:0
+[   83813ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3003/:0
+[   84816ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3003/:0
+[   85820ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3003/:0
+[   86823ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3003/:0
+[   87826ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3003/:0
+[   88830ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3003/:0
+[   89833ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3003/:0
+[   90836ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3003/:0
+[   91841ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3003/:0
+[   92844ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3003/:0
+[   95691ms] [TABLE] [Object, Object, Object] @ http://localhost:3003/node_modules/.vite/deps/@ssv-lab_web-report.js?v=1b027e44:3460
+[   95691ms] [TABLE] [Object, Object] @ http://localhost:3003/node_modules/.vite/deps/@ssv-lab_web-report.js?v=1b027e44:3513
+[   95691ms] [LOG] Reporter Config:  {rum: null, dt: null} @ http://localhost:3003/node_modules/.vite/deps/@ssv-lab_web-report.js?v=1b027e44:3513
+[   95691ms] [LOG] set config {uin: } @ http://localhost:3003/node_modules/.vite/deps/@ssv-lab_web-report.js?v=1b027e44:3518
+[   95696ms] [LOG] requestInterceptors {transitional: Object, adapter: Array(2), transformRequest: Array(1), transformResponse: Array(1), timeout: 10000} {authenticationScheme: , timeout: 10000, withCredentials: true, headers: Object, transform: Object} @ http://localhost:3003/src/utils/request/index.ts:31
+[   95705ms] [LOG] responseInterceptors {data: Object, status: 200, statusText: OK, headers: Fo, config: Object} @ http://localhost:3003/src/utils/request/index.ts:38
+[   95705ms] [WARNING] [@ssv-lab/axios-plus]: 公钥设置成功  @ http://localhost:3003/node_modules/.vite/deps/@ssv-lab_axios-plus.js?v=330a4b8c:5920

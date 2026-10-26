@@ -1,4 +1,5 @@
 import Heatmap from "@/components/Heatmap";
+import NightBtn from "@/components/NightBtn";
 import { countToday } from "@/lib/stats";
 import type { PomodoroSession } from "@/lib/types";
 
@@ -15,6 +16,7 @@ export default function SideBoard({ sessions, tags, onRetag, onBack }: SideBoard
   return (
     <div className="stage">
       <div className="nav">
+        <NightBtn />
         <button className="btn" type="button" onClick={onBack}>
           返回
         </button>

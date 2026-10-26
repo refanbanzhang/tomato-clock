@@ -1,0 +1,7 @@
+[  225814ms] [TABLE] [Object, Object, Object] @ http://localhost:3002/node_modules/.vite/deps/@ssv-lab_web-report.js?v=a933bbd2:3460
+[  225814ms] [TABLE] [Object, Object] @ http://localhost:3002/node_modules/.vite/deps/@ssv-lab_web-report.js?v=a933bbd2:3513
+[  225814ms] [LOG] Reporter Config:  {rum: null, dt: null} @ http://localhost:3002/node_modules/.vite/deps/@ssv-lab_web-report.js?v=a933bbd2:3513
+[  225814ms] [LOG] set config {uin: } @ http://localhost:3002/node_modules/.vite/deps/@ssv-lab_web-report.js?v=a933bbd2:3518
+[  225816ms] [LOG] requestInterceptors {transitional: Object, adapter: Array(2), transformRequest: Array(1), transformResponse: Array(1), timeout: 10000} {authenticationScheme: , timeout: 10000, withCredentials: true, headers: Object, transform: Object} @ http://localhost:3002/src/utils/request/index.ts:31
+[  225821ms] [LOG] responseInterceptors {data: Object, status: 200, statusText: OK, headers: Fo, config: Object} @ http://localhost:3002/src/utils/request/index.ts:38
+[  225821ms] [WARNING] [@ssv-lab/axios-plus]: 公钥设置成功  @ http://localhost:3002/node_modules/.vite/deps/@ssv-lab_axios-plus.js?v=3bd3c821:5920

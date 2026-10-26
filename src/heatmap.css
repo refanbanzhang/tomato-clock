@@ -1,20 +1,33 @@
 .heat {
   --cell: 12px;
   --gap: 6px;
-  --canvas: #ffffff;
-  --fg: #1f2328;
-  --muted: #656d76;
   --c0: #ebedf0;
   --c1: #9be9a8;
   --c2: #40c463;
   --c3: #30a14e;
   --c4: #216e39;
+  --track: #ebedf0;
+  --bar: #2da44e;
+  --pop: #24292f;
+  --pop-fg: #fff;
   margin-top: 22px;
   width: max-content;
   max-width: 100%;
   color: var(--fg);
   font-size: 12px;
   line-height: 1.5;
+}
+
+html[data-theme="dark"] .heat {
+  --c0: #161b22;
+  --c1: #0e4429;
+  --c2: #006d32;
+  --c3: #26a641;
+  --c4: #39d353;
+  --track: #21262d;
+  --bar: #3fb950;
+  --pop: #e6edf3;
+  --pop-fg: #0d1117;
 }
 
 .goals {
@@ -55,14 +68,14 @@
 .goal-track {
   height: 8px;
   border-radius: 6px;
-  background: #ebedf0;
+  background: var(--track);
   overflow: hidden;
 }
 
 .goal-fill {
   height: 100%;
   border-radius: 6px;
-  background: #2da44e;
+  background: var(--bar);
 }
 
 .heat-box {
@@ -156,11 +169,11 @@ button.heat-cell:disabled {
   z-index: 20;
   margin: 0;
   padding: 6px 10px;
-  color: #fff;
+  color: var(--pop-fg);
   font-size: 12px;
   line-height: 1.5;
   white-space: nowrap;
-  background: #24292f;
+  background: var(--pop);
   border-radius: 6px;
   pointer-events: none;
   transform: translate(-50%, calc(-100% - 8px));

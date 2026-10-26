@@ -1,0 +1,15 @@
+- generic [ref=e46]:
+  - generic [ref=e47]:
+    - paragraph [ref=e49]: 25:00
+    - generic [ref=e50]:
+      - combobox "标签" [ref=e51]:
+        - option "选择标签" [selected]
+        - option "视频"
+        - option "老马低保"
+        - option "医学"
+        - option "英语"
+      - button "开始专注" [ref=e52] [cursor=pointer]: 开始
+  - generic [ref=e54]:
+    - button "日间" [pressed] [ref=e55] [cursor=pointer]
+    - button "统计" [ref=e56] [cursor=pointer]
+    - button "配置" [ref=e57] [cursor=pointer]

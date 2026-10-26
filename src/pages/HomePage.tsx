@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import ClockScreen from "@/components/ClockScreen";
+import NightBtn from "@/components/NightBtn";
 import SideBoard from "@/components/SideBoard";
 import TagPick from "@/components/TagPick";
 import Toast from "@/components/Toast";
@@ -239,6 +240,7 @@ export default function HomePage() {
           )}
         </div>
         <div className="nav">
+          <NightBtn />
           <button className="btn" type="button" onClick={() => go("stats")}>
             统计
           </button>

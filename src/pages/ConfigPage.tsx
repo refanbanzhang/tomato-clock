@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import NightBtn from "@/components/NightBtn";
 import type { PomodoroSession } from "@/lib/types";
 
 interface ConfigPageProps {
@@ -35,6 +36,7 @@ export default function ConfigPage({
   return (
     <div className="stage">
       <div className="nav">
+        <NightBtn />
         <button className="btn" type="button" onClick={onBack}>
           返回
         </button>

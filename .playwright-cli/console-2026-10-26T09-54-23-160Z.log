@@ -1,0 +1,35 @@
+[      96ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=f9c420dc:20102
+[     124ms] [LOG] [notify] registering service worker at: /sw.js @ http://localhost:3000/src/components/hooks.ts:40
+[     124ms] [LOG] [notify] registering service worker at: /sw.js @ http://localhost:3000/src/components/hooks.ts:40
+[     124ms] [INFO] [sync] pull https://tomato-sync.nevergiveuppiano.workers.dev @ http://localhost:3000/src/lib/sync.ts:54
+[     522ms] [INFO] [sync] pull https://tomato-sync.nevergiveuppiano.workers.dev @ http://localhost:3000/src/lib/sync.ts:54
+[   48970ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=f9c420dc:20102
+[   49007ms] [LOG] [notify] registering service worker at: /sw.js @ http://localhost:3000/src/components/hooks.ts:40
+[   49008ms] [LOG] [notify] registering service worker at: /sw.js @ http://localhost:3000/src/components/hooks.ts:40
+[   49008ms] [INFO] [sync] pull https://tomato-sync.nevergiveuppiano.workers.dev @ http://localhost:3000/src/lib/sync.ts:54
+[   49125ms] [INFO] [sync] pull https://tomato-sync.nevergiveuppiano.workers.dev @ http://localhost:3000/src/lib/sync.ts:54
+[  639465ms] [ERROR] WebSocket connection to 'ws://localhost:3000/?token=lVoE6CFTzmIx' failed:  @ http://localhost:3000/@vite/client:801
+[  639468ms] [LOG] [vite] server connection lost. Polling for restart... @ http://localhost:3000/@vite/client:963
+[  639565ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=f9c420dc:20102
+[  639600ms] [LOG] [notify] registering service worker at: /sw.js @ http://localhost:3000/src/components/hooks.ts:40
+[  639602ms] [LOG] [notify] registering service worker at: /sw.js @ http://localhost:3000/src/components/hooks.ts:40
+[  639602ms] [INFO] [sync] pull https://tomato-sync.nevergiveuppiano.workers.dev @ http://localhost:3000/src/lib/sync.ts:54
+[  641128ms] [INFO] [sync] pull https://tomato-sync.nevergiveuppiano.workers.dev @ http://localhost:3000/src/lib/sync.ts:54
+[ 1246842ms] [LOG] [vite] server connection lost. Polling for restart... @ http://localhost:3000/@vite/client:963
+[ 1246871ms] [ERROR] WebSocket connection to 'ws://localhost:3000/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/@vite/client:1034
+[ 1247877ms] [ERROR] WebSocket connection to 'ws://localhost:3000/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/@vite/client:1034
+[ 1248881ms] [ERROR] WebSocket connection to 'ws://localhost:3000/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/@vite/client:1034
+[ 1249885ms] [ERROR] WebSocket connection to 'ws://localhost:3000/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/@vite/client:1034
+[ 1250892ms] [ERROR] WebSocket connection to 'ws://localhost:3000/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/@vite/client:1034
+[ 1251900ms] [ERROR] WebSocket connection to 'ws://localhost:3000/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/@vite/client:1034
+[ 1252915ms] [ERROR] WebSocket connection to 'ws://localhost:3000/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/@vite/client:1034
+[ 1253936ms] [ERROR] WebSocket connection to 'ws://localhost:3000/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/@vite/client:1034
+[ 1254971ms] [ERROR] WebSocket connection to 'ws://localhost:3000/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/@vite/client:1034
+[ 1256032ms] [ERROR] WebSocket connection to 'ws://localhost:3000/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/@vite/client:1034
+[ 1257161ms] [ERROR] WebSocket connection to 'ws://localhost:3000/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/@vite/client:1034
+[ 1258270ms] [ERROR] WebSocket connection to 'ws://localhost:3000/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/@vite/client:1034
+[ 1259821ms] [ERROR] WebSocket connection to 'ws://localhost:3000/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/@vite/client:1034
+[ 1261814ms] [ERROR] WebSocket connection to 'ws://localhost:3000/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/@vite/client:1034
+[ 1264990ms] [ERROR] WebSocket connection to 'ws://localhost:3000/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/@vite/client:1034
+[ 1270560ms] [ERROR] WebSocket connection to 'ws://localhost:3000/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/@vite/client:1034
+[ 1276401ms] [ERROR] WebSocket connection to 'ws://localhost:3000/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/@vite/client:1034

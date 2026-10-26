@@ -1,0 +1,27 @@
+- generic [ref=e18]:
+  - generic [ref=e19]:
+    - button "日间" [pressed] [ref=e20] [cursor=pointer]
+    - button "返回" [ref=e21] [cursor=pointer]
+  - region "配置" [ref=e22]:
+    - heading "配置" [level=1] [ref=e23]
+    - heading "标签" [level=2] [ref=e24]
+    - generic [ref=e25]:
+      - textbox "新标签" [ref=e26]
+      - button "添加" [ref=e27] [cursor=pointer]
+    - list [ref=e28]:
+      - listitem [ref=e29]:
+        - generic [ref=e30]: 视频
+        - generic [ref=e31]: 0 次
+        - button "删除" [ref=e32] [cursor=pointer]
+      - listitem [ref=e33]:
+        - generic [ref=e34]: 老马低保
+        - generic [ref=e35]: 0 次
+        - button "删除" [ref=e36] [cursor=pointer]
+      - listitem [ref=e37]:
+        - generic [ref=e38]: 医学
+        - generic [ref=e39]: 3 次
+        - button "删除" [disabled] [ref=e40]
+      - listitem [ref=e41]:
+        - generic [ref=e42]: 英语
+        - generic [ref=e43]: 35 次
+        - button "删除" [disabled] [ref=e44]
