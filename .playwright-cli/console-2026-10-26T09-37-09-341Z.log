@@ -1,0 +1,7 @@
+[      73ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=f9c420dc:20102
+[      81ms] [LOG] [notify] registering service worker at: /sw.js @ http://localhost:3000/src/components/hooks.ts:40
+[      82ms] [LOG] [notify] registering service worker at: /sw.js @ http://localhost:3000/src/components/hooks.ts:40
+[      83ms] [INFO] [sync] pull https://tomato-sync.nevergiveuppiano.workers.dev @ http://localhost:3000/src/lib/sync.ts:54
+[     958ms] [INFO] [sync] pull https://tomato-sync.nevergiveuppiano.workers.dev @ http://localhost:3000/src/lib/sync.ts:54
+[   67564ms] [INFO] [sync] pull https://tomato-sync.nevergiveuppiano.workers.dev @ http://localhost:3000/src/lib/sync.ts:54
+[   68267ms] [INFO] [sync] pull https://tomato-sync.nevergiveuppiano.workers.dev @ http://localhost:3000/src/lib/sync.ts:54

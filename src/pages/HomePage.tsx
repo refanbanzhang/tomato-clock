@@ -12,14 +12,16 @@ import { FOCUS_TIMER_KEY } from "@/lib/timer-engine";
 import { asset } from "@/lib/asset";
 import { AppState, FOCUS_SECONDS, PomodoroSession } from "@/lib/types";
 
-const TITLE = "番茄时钟";
+type Page = "home" | "config" | "stats";
 
-function readPage(): "home" | "config" {
-  return window.location.hash === "#/config" ? "config" : "home";
+function readPage(): Page {
+  if (window.location.hash === "#/config") return "config";
+  if (window.location.hash === "#/stats") return "stats";
+  return "home";
 }
 
 export default function HomePage() {
-  const [page, setPage] = useState<"home" | "config">(readPage);
+  const [page, setPage] = useState<Page>(readPage);
   const [appState, setAppState] = useState<AppState>(() => loadState());
   const [toast, setToast] = useState<{ message: string; sub?: string } | null>(null);
   const appStateRef = useRef(appState);
@@ -81,8 +83,8 @@ export default function HomePage() {
 
   const focus = useWallClock(FOCUS_TIMER_KEY, FOCUS_SECONDS, onFocusDone);
 
-  const go = useCallback((next: "home" | "config") => {
-    const hash = next === "config" ? "#/config" : "";
+  const go = useCallback((next: Page) => {
+    const hash = next === "home" ? "" : `#/${next}`;
     const nextUrl = window.location.pathname + window.location.search + hash;
     const current = window.location.pathname + window.location.search + window.location.hash;
     if (current !== nextUrl) history.pushState(null, "", nextUrl);
@@ -150,6 +152,29 @@ export default function HomePage() {
   }, [focus, press]);
   useKeyboardShortcut(" ", handleSpace, page === "home");
 
+  const retag = (id: string, tag: string) => {
+    try {
+      commit(setSessionTag(appStateRef.current, id, tag));
+      void runSync();
+    } catch (error) {
+      setToast({ message: error instanceof Error ? error.message : "改不了分类" });
+    }
+  };
+
+  if (page === "stats") {
+    return (
+      <>
+        <SideBoard
+          sessions={appState.sessions}
+          tags={tagNames(appState.tags)}
+          onRetag={retag}
+          onBack={() => go("home")}
+        />
+        {toast && <Toast message={toast.message} sub={toast.sub} onDismiss={() => setToast(null)} />}
+      </>
+    );
+  }
+
   if (page === "config") {
     return (
       <>
@@ -182,18 +207,13 @@ export default function HomePage() {
     : undefined;
 
   return (
-    <div className="stage">
+    <div className="stage stage-full">
       <div className="phone" style={phoneStyle}>
         {live && <PhoneWater running={live.running} />}
         <div className="phone-body">
-          <button className="btn nav" type="button" onClick={() => go("config")}>
-            配置
-          </button>
           <ClockScreen
-            title={TITLE}
             cat={asset("art/cat-timer.webp")}
             seconds={focus.timer.remainingSeconds}
-            total={focus.timer.totalSeconds}
             action={actionText(focus.timer.mode)}
             actionLabel={actionLabel(focus.timer.mode, "专注")}
             actionClass={actionClass(focus.timer.mode, Boolean(appState.currentTag))}
@@ -218,19 +238,15 @@ export default function HomePage() {
             />
           )}
         </div>
+        <div className="nav">
+          <button className="btn" type="button" onClick={() => go("stats")}>
+            统计
+          </button>
+          <button className="btn" type="button" onClick={() => go("config")}>
+            配置
+          </button>
+        </div>
       </div>
-      <SideBoard
-        sessions={appState.sessions}
-        tags={tagNames(appState.tags)}
-        onRetag={(id, tag) => {
-          try {
-            commit(setSessionTag(appStateRef.current, id, tag));
-            void runSync();
-          } catch (error) {
-            setToast({ message: error instanceof Error ? error.message : "改不了分类" });
-          }
-        }}
-      />
     </div>
   );
 }

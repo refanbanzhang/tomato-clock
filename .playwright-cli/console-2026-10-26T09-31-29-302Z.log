@@ -1,0 +1,7 @@
+[      75ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3002/node_modules/.vite/deps/react-dom_client.js?v=f9c420dc:20102
+[      97ms] [LOG] [notify] registering service worker at: /sw.js @ http://localhost:3002/src/components/hooks.ts:40
+[      97ms] [LOG] [notify] registering service worker at: /sw.js @ http://localhost:3002/src/components/hooks.ts:40
+[      98ms] [INFO] [sync] pull https://tomato-sync.nevergiveuppiano.workers.dev @ http://localhost:3002/src/lib/sync.ts:54
+[     484ms] [INFO] [sync] pull https://tomato-sync.nevergiveuppiano.workers.dev @ http://localhost:3002/src/lib/sync.ts:54
+[   22401ms] [LOG] [vite] server connection lost. Polling for restart... @ http://localhost:3002/@vite/client:963
+[  262419ms] [ERROR] WebSocket connection to 'ws://localhost:3002/' failed: WebSocket opening handshake timed out @ http://localhost:3002/@vite/client:1034

@@ -34,13 +34,13 @@ export default function ConfigPage({
 
   return (
     <div className="stage">
+      <div className="nav">
+        <button className="btn" type="button" onClick={onBack}>
+          返回
+        </button>
+      </div>
       <section className="cfg" aria-label="配置">
-        <div className="cfg-top">
-          <h1 className="cfg-title">配置</h1>
-          <button className="btn" type="button" onClick={onBack}>
-            返回
-          </button>
-        </div>
+        <h1 className="cfg-title">配置</h1>
         <h2 className="cfg-h">标签</h2>
         <form className="cfg-add" onSubmit={add}>
           <input

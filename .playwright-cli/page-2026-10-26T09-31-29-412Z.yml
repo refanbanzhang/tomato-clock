@@ -1,0 +1,9 @@
+- region "配置" [ref=e4]:
+  - generic [ref=e5]:
+    - heading "配置" [level=1] [ref=e6]
+    - button "返回" [ref=e7] [cursor=pointer]
+  - heading "标签" [level=2] [ref=e8]
+  - generic [ref=e9]:
+    - textbox "新标签" [ref=e10]
+    - button "添加" [ref=e11] [cursor=pointer]
+  - paragraph [ref=e12]: 还没有标签

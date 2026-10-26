@@ -1,0 +1,8 @@
+- generic [ref=e4]:
+  - generic [ref=e5]:
+    - paragraph [ref=e7]: 25:00
+    - button "去配置里添加标签" [ref=e9] [cursor=pointer]
+  - generic [ref=e11]:
+    - button "开始专注" [ref=e12] [cursor=pointer]: 开始
+    - button "统计" [ref=e13] [cursor=pointer]
+    - button "配置" [ref=e14] [cursor=pointer]
